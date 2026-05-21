@@ -1,0 +1,123 @@
+version: '3.9'
+
+services:
+
+  # ─── Base de datos ─────────────────────────────────────────────────────────
+  mongo:
+    image: mongo:7
+    container_name: mongo
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - backend_net
+
+  # ─── Microservicios backend ─────────────────────────────────────────────────
+  vehiculos:
+    build: ./backend/vehiculos
+    container_name: vehiculos
+    restart: unless-stopped
+    environment:
+      - PORT=3001
+      - MONGO_URI=mongodb://mongo:27017/db_vehiculos
+    depends_on:
+      - mongo
+    networks:
+      - backend_net
+
+  rutas:
+    build: ./backend/rutas
+    container_name: rutas
+    restart: unless-stopped
+    environment:
+      - PORT=3002
+      - MONGO_URI=mongodb://mongo:27017/db_rutas
+    depends_on:
+      - mongo
+    networks:
+      - backend_net
+
+  ubicacion:
+    build: ./backend/ubicacion
+    container_name: ubicacion
+    restart: unless-stopped
+    environment:
+      - PORT=3003
+      - MONGO_URI=mongodb://mongo:27017/db_ubicacion
+      - RUTAS_SERVICE_URL=http://rutas:3002
+    depends_on:
+      - mongo
+      - rutas
+    networks:
+      - backend_net
+
+  seguimiento:
+    build: ./backend/seguimiento
+    container_name: seguimiento
+    restart: unless-stopped
+    environment:
+      - PORT=3004
+      - MONGO_URI=mongodb://mongo:27017/db_seguimiento
+      - UBICACION_SERVICE_URL=http://ubicacion:3003
+      - VEHICULOS_SERVICE_URL=http://vehiculos:3001
+    depends_on:
+      - mongo
+      - ubicacion
+      - vehiculos
+    networks:
+      - backend_net
+
+  analitica:
+    build: ./backend/analitica
+    container_name: analitica
+    restart: unless-stopped
+    environment:
+      - PORT=3005
+      - MONGO_URI=mongodb://mongo:27017/db_analitica
+      - UBICACION_SERVICE_URL=http://ubicacion:3003
+      - VEHICULOS_SERVICE_URL=http://vehiculos:3001
+    depends_on:
+      - mongo
+      - ubicacion
+      - vehiculos
+    networks:
+      - backend_net
+
+  notificaciones:
+    build: ./backend/notificaciones
+    container_name: notificaciones
+    restart: unless-stopped
+    environment:
+      - PORT=3006
+      - MONGO_URI=mongodb://mongo:27017/db_notificaciones
+    depends_on:
+      - mongo
+    networks:
+      - backend_net
+
+  # ─── Reverse proxy + frontend estático ────────────────────────────────────
+  proxy:
+    build:
+      context: .
+      dockerfile: proxy/Dockerfile
+    container_name: proxy
+    restart: unless-stopped
+    ports:
+      - "8108:8108"
+    depends_on:
+      - vehiculos
+      - rutas
+      - ubicacion
+      - seguimiento
+      - analitica
+      - notificaciones
+    networks:
+      - backend_net
+
+# ─── Volúmenes y redes ────────────────────────────────────────────────────────
+volumes:
+  mongo_data:
+
+networks:
+  backend_net:
+    driver: bridge

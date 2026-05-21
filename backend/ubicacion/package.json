@@ -1,0 +1,17 @@
+{
+  "name": "servicio-ubicacion",
+  "version": "1.0.0",
+  "description": "Microservicio ubicacion — Sistema de paqueteria",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "mongoose": "^8.4.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.3"
+  }
+}
