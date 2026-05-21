@@ -88,6 +88,8 @@ El sistema queda disponible en `http://terminal.itolab.lat:8108`.
 
 ### Verificar health de cada servicio (desde el host)
 
+> En desarrollo local reemplaza `terminal.itolab.lat` por `localhost`.
+
 ```bash
 curl http://terminal.itolab.lat:8108/api/vehiculos/health
 curl http://terminal.itolab.lat:8108/api/rutas/health
