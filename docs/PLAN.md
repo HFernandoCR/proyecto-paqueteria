@@ -14,14 +14,12 @@
 | Equipo | 6B  |
 | Puerto asignado en el servidor | `8108` |
 | Servidor terminal | `https://terminal.itolab.lat` |
-| Repositorio | `https://gitlab.itolab.lat` (pendiente de crear) |
+| Repositorio | `https://gitlab.itolab.lat` |
 | Fecha de hoy | Miércoles 20 de mayo de 2026 |
 | Fecha de entrega | Martes 26 de mayo de 2026 |
 | Días efectivos | 6   |
 
 **Hector cubre ambas materias** (Servicios Web + Toma de Decisiones), por lo que es responsable del módulo de analítica y dashboard BI que cumple los requisitos de la segunda materia.
-
-> Confirmar con el profesor de DSPTD que el alcance del dashboard (KPIs + gráficas Recharts + reporte de anomalías) es suficiente para esa materia, antes de empezar a programar Analítica. Si exige análisis multidimensional, OLAP o ETL formal, el alcance del servicio crece.
 
 ---
 
@@ -114,6 +112,7 @@ proyecto-paqueteria/
 ├── docker-compose.yml          # orquestación de todo
 ├── .gitignore                  # node, dist, .env
 ├── README.md                   # arquitectura, setup, convenciones
+├── CONTRIBUTING.md             # guía de contribución
 ├── docs/
 │   ├── PLAN.md                 # este documento
 │   ├── arquitectura.md         # diagramas y descripción
