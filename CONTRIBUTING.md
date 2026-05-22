@@ -21,24 +21,26 @@ Este documento define **cómo trabajamos**. Léelo completo una vez antes de tom
 
 ## Flujo para cada issue (SIEMPRE en este orden)
 
-### Paso 1 — Toma tu issue y créale rama
+### Paso 1 — Toma tu issue y créale rama y MR
 
-Entra a tu issue asignada en GitLab. Cada issue ya tiene escrito al final el
-nombre exacto de su rama (ej: `feature/5-crud-vehiculos`).
+Entra a tu issue asignada en GitLab. El flujo preferido es crear la rama
+**y** el MR directamente desde la issue:
 
-**Crea la rama desde la propia issue** con el botón *Crear solicitud de fusión*
-→ flecha → **Crear rama**. GitLab la nombra y la liga a la issue automáticamente.
-Luego la traes a tu máquina:
+1. Haz clic en **Crear solicitud de fusión**. GitLab crea un MR en borrador
+   (*Draft*), nombra la rama con el formato correcto (`feature/5-crud-vehiculos`)
+   y añade `Closes #5` automáticamente en la descripción.
+2. Si solo quieres la rama por ahora (sin MR todavía), usa la flecha del mismo
+   botón → **Crear rama**.
+3. Jala la rama a tu máquina:
 
 ```bash
-git checkout main
-git pull origin main
 git fetch origin
 git checkout feature/5-crud-vehiculos
 ```
 
-> Alternativa: crearla a mano con `git checkout -b feature/5-crud-vehiculos`
-> partiendo siempre de `main` actualizado.
+> **Nota:** crear la rama a mano con `git checkout -b feature/5-crud-vehiculos`
+> sigue siendo válido si ya lo hiciste antes de leer esto, pero el flujo
+> preferido es siempre desde la issue.
 
 ### Paso 2 — Trabaja con commits pequeños y frecuentes
 
@@ -68,15 +70,17 @@ git merge main          # resuelve conflictos aquí, en tu rama
 git push
 ```
 
-### Paso 4 — Abre el Merge Request
+### Paso 4 — Marca el MR como listo y pide revisión
 
-En GitLab, abre un MR de tu rama hacia `main`. En la **descripción** escribe:
+El MR ya existe desde el Paso 1 (en estado *Draft*). Cuando el código esté
+terminado:
 
-```
-Closes #5
-```
+1. Entra al MR en GitLab.
+2. Haz clic en **Marcar como listo** (quita el prefijo *Draft:* del título).
+3. Asigna un revisor del equipo y avísale.
 
-Eso cierra la issue automáticamente cuando se mergea.
+El `Closes #N` ya está en la descripción porque GitLab lo añadió
+automáticamente al crear el MR desde la issue.
 
 ### Paso 5 — Espera aprobación
 
