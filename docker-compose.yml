@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
 
   # ─── Base de datos ─────────────────────────────────────────────────────────
@@ -11,6 +9,12 @@ services:
       - mongo_data:/data/db
     networks:
       - backend_net
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   # ─── Microservicios backend ─────────────────────────────────────────────────
   vehiculos:
@@ -21,9 +25,16 @@ services:
       - PORT=3001
       - MONGO_URI=mongodb://mongo:27017/db_vehiculos
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
     networks:
       - backend_net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   rutas:
     build: ./backend/rutas
@@ -33,9 +44,16 @@ services:
       - PORT=3002
       - MONGO_URI=mongodb://mongo:27017/db_rutas
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
     networks:
       - backend_net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3002/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   ubicacion:
     build: ./backend/ubicacion
@@ -46,10 +64,18 @@ services:
       - MONGO_URI=mongodb://mongo:27017/db_ubicacion
       - RUTAS_SERVICE_URL=http://rutas:3002
     depends_on:
-      - mongo
-      - rutas
+      mongo:
+        condition: service_healthy
+      rutas:
+        condition: service_healthy
     networks:
       - backend_net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3003/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   seguimiento:
     build: ./backend/seguimiento
@@ -61,11 +87,20 @@ services:
       - UBICACION_SERVICE_URL=http://ubicacion:3003
       - VEHICULOS_SERVICE_URL=http://vehiculos:3001
     depends_on:
-      - mongo
-      - ubicacion
-      - vehiculos
+      mongo:
+        condition: service_healthy
+      ubicacion:
+        condition: service_healthy
+      vehiculos:
+        condition: service_healthy
     networks:
       - backend_net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3004/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   analitica:
     build: ./backend/analitica
@@ -77,11 +112,20 @@ services:
       - UBICACION_SERVICE_URL=http://ubicacion:3003
       - VEHICULOS_SERVICE_URL=http://vehiculos:3001
     depends_on:
-      - mongo
-      - ubicacion
-      - vehiculos
+      mongo:
+        condition: service_healthy
+      ubicacion:
+        condition: service_healthy
+      vehiculos:
+        condition: service_healthy
     networks:
       - backend_net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3005/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   notificaciones:
     build: ./backend/notificaciones
@@ -91,9 +135,16 @@ services:
       - PORT=3006
       - MONGO_URI=mongodb://mongo:27017/db_notificaciones
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
     networks:
       - backend_net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3006/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   # ─── Reverse proxy + frontend estático ────────────────────────────────────
   proxy:
@@ -105,12 +156,18 @@ services:
     ports:
       - "8108:8108"
     depends_on:
-      - vehiculos
-      - rutas
-      - ubicacion
-      - seguimiento
-      - analitica
-      - notificaciones
+      vehiculos:
+        condition: service_healthy
+      rutas:
+        condition: service_healthy
+      ubicacion:
+        condition: service_healthy
+      seguimiento:
+        condition: service_healthy
+      analitica:
+        condition: service_healthy
+      notificaciones:
+        condition: service_healthy
     networks:
       - backend_net
 
