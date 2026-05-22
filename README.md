@@ -9,7 +9,7 @@ Materias: Servicios Web + Toma de Decisiones
 
 ```
           Usuario (navegador externo)
-          terminal.itolab.lat:8108
+          equipo6b.itolab.lat
                       |
                       v
         +--------------------------+
@@ -84,19 +84,19 @@ docker compose ps
 docker compose logs <nombre-servicio>
 ```
 
-El sistema queda disponible en `http://terminal.itolab.lat:8108`.
+El sistema queda disponible en `http://equipo6b.itolab.lat`.
 
 ### Verificar health de cada servicio (desde el host)
 
-> En desarrollo local reemplaza `terminal.itolab.lat` por `localhost`.
+> En desarrollo local reemplaza `equipo6b.itolab.lat` por `localhost:8108`.
 
 ```bash
-curl http://terminal.itolab.lat:8108/api/vehiculos/health
-curl http://terminal.itolab.lat:8108/api/rutas/health
-curl http://terminal.itolab.lat:8108/api/ubicacion/health
-curl http://terminal.itolab.lat:8108/api/seguimiento/health
-curl http://terminal.itolab.lat:8108/api/analitica/health
-curl http://terminal.itolab.lat:8108/api/notificaciones/health
+curl http://equipo6b.itolab.lat/api/vehiculos/health
+curl http://equipo6b.itolab.lat/api/rutas/health
+curl http://equipo6b.itolab.lat/api/ubicacion/health
+curl http://equipo6b.itolab.lat/api/seguimiento/health
+curl http://equipo6b.itolab.lat/api/analitica/health
+curl http://equipo6b.itolab.lat/api/notificaciones/health
 ```
 
 Todos deben responder `{"status":"ok","service":"<nombre>"}`.

@@ -9,7 +9,7 @@ Documento de referencia técnica del Equipo 6B.
 
 ```
                 Usuario (navegador externo)
-                terminal.itolab.lat:8108
+                equipo6b.itolab.lat
                             |
                             v
               +--------------------------+
