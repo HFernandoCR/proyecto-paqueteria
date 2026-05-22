@@ -28,6 +28,12 @@ services:
       - mongo
     networks:
       - backend_net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3001/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   rutas:
     build: ./backend/rutas
@@ -40,6 +46,12 @@ services:
       - mongo
     networks:
       - backend_net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3002/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   ubicacion:
     build: ./backend/ubicacion
@@ -54,6 +66,12 @@ services:
       - rutas
     networks:
       - backend_net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3003/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   seguimiento:
     build: ./backend/seguimiento
@@ -70,6 +88,12 @@ services:
       - vehiculos
     networks:
       - backend_net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3004/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   analitica:
     build: ./backend/analitica
@@ -86,6 +110,12 @@ services:
       - vehiculos
     networks:
       - backend_net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3005/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   notificaciones:
     build: ./backend/notificaciones
@@ -98,6 +128,12 @@ services:
       - mongo
     networks:
       - backend_net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3006/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   # ─── Reverse proxy + frontend estático ────────────────────────────────────
   proxy:
