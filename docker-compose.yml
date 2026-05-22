@@ -25,7 +25,8 @@ services:
       - PORT=3001
       - MONGO_URI=mongodb://mongo:27017/db_vehiculos
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
     networks:
       - backend_net
     healthcheck:
@@ -43,7 +44,8 @@ services:
       - PORT=3002
       - MONGO_URI=mongodb://mongo:27017/db_rutas
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
     networks:
       - backend_net
     healthcheck:
@@ -62,8 +64,10 @@ services:
       - MONGO_URI=mongodb://mongo:27017/db_ubicacion
       - RUTAS_SERVICE_URL=http://rutas:3002
     depends_on:
-      - mongo
-      - rutas
+      mongo:
+        condition: service_healthy
+      rutas:
+        condition: service_healthy
     networks:
       - backend_net
     healthcheck:
@@ -83,9 +87,12 @@ services:
       - UBICACION_SERVICE_URL=http://ubicacion:3003
       - VEHICULOS_SERVICE_URL=http://vehiculos:3001
     depends_on:
-      - mongo
-      - ubicacion
-      - vehiculos
+      mongo:
+        condition: service_healthy
+      ubicacion:
+        condition: service_healthy
+      vehiculos:
+        condition: service_healthy
     networks:
       - backend_net
     healthcheck:
@@ -105,9 +112,12 @@ services:
       - UBICACION_SERVICE_URL=http://ubicacion:3003
       - VEHICULOS_SERVICE_URL=http://vehiculos:3001
     depends_on:
-      - mongo
-      - ubicacion
-      - vehiculos
+      mongo:
+        condition: service_healthy
+      ubicacion:
+        condition: service_healthy
+      vehiculos:
+        condition: service_healthy
     networks:
       - backend_net
     healthcheck:
@@ -125,7 +135,8 @@ services:
       - PORT=3006
       - MONGO_URI=mongodb://mongo:27017/db_notificaciones
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
     networks:
       - backend_net
     healthcheck:
@@ -145,12 +156,18 @@ services:
     ports:
       - "8108:8108"
     depends_on:
-      - vehiculos
-      - rutas
-      - ubicacion
-      - seguimiento
-      - analitica
-      - notificaciones
+      vehiculos:
+        condition: service_healthy
+      rutas:
+        condition: service_healthy
+      ubicacion:
+        condition: service_healthy
+      seguimiento:
+        condition: service_healthy
+      analitica:
+        condition: service_healthy
+      notificaciones:
+        condition: service_healthy
     networks:
       - backend_net
 
