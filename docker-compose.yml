@@ -170,6 +170,12 @@ services:
         condition: service_healthy
     networks:
       - backend_net
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8108/"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
 # ─── Volúmenes y redes ────────────────────────────────────────────────────────
 volumes:
