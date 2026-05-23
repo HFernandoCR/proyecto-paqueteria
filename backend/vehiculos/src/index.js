@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const vehiculosRouter = require('./routes/vehiculos');
+const vehiculosRouter  = require('./routes/vehiculos');
+const operadoresRouter = require('./routes/operadores');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -12,6 +13,7 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'vehiculos' });
 });
 
+app.use('/operadores', operadoresRouter);
 app.use('/', vehiculosRouter);
 
 mongoose
