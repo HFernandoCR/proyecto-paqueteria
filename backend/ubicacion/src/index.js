@@ -13,8 +13,10 @@ mongoose
   .catch((err) => console.error('[ubicacion] Error MongoDB:', err.message));
 
 const ubicacionRoutes = require('./routes/ubicacionRoutes');
+const simuladorRoutes = require('./routes/simuladorRoutes');
 
 app.use('/ubicaciones', ubicacionRoutes);
+app.use('/simulador', simuladorRoutes);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'ubicacion' });
