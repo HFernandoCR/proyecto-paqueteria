@@ -2,7 +2,7 @@ const UBICACION = process.env.UBICACION_SERVICE_URL || 'http://ubicacion:3003';
 const VEHICULOS = process.env.VEHICULOS_SERVICE_URL || 'http://vehiculos:3001';
 
 async function fetchVehiculos() {
-  const res = await fetch(`${VEHICULOS}/vehiculos`);
+  const res = await fetch(`${VEHICULOS}/`);
   if (!res.ok) throw new Error(`vehiculos → ${res.status}`);
   return res.json();
 }
