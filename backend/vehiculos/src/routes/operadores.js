@@ -47,4 +47,17 @@ router.put('/:id', async (req, res) => {
   } catch (err) { handleError(res, err); }
 });
 
+// PATCH /:id — actualización parcial
+router.patch('/:id', async (req, res) => {
+  try {
+    const operador = await Operador.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { new: true, runValidators: true }
+    );
+    if (!operador) return res.status(404).json({ error: 'Operador no encontrado' });
+    res.json(operador);
+  } catch (err) { handleError(res, err); }
+});
+
 module.exports = router;
