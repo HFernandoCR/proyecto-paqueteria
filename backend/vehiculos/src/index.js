@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const vehiculosRouter = require('./routes/vehiculos');
+const vehiculosRouter  = require('./routes/vehiculos');
+const operadoresRouter = require('./routes/operadores');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -13,6 +14,7 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/', vehiculosRouter);
+app.use('/operadores', operadoresRouter);
 
 mongoose
   .connect(MONGO_URI)
