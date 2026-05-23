@@ -1,5 +1,5 @@
 const express = require('express');
-const { fetchVehiculos, fetchHistorial } = require('../helpers/http');
+const { fetchVehiculos, fetchHistorial, fetchRuta } = require('../helpers/http');
 const { calcularDistanciaKm } = require('../helpers/geo');
 
 const router = express.Router();
@@ -76,6 +76,36 @@ router.get('/entregas-por-dia', async (req, res) => {
     res.json({ datos });
   } catch (err) {
     res.status(503).json({ error: 'No se pudo calcular entregas por día', detalle: err.message });
+  }
+});
+
+router.get('/tiempo-por-ruta', async (req, res) => {
+  try {
+    const vehiculos = await fetchVehiculos();
+    const porRuta = {};
+    for (const v of vehiculos) {
+      if (!v.rutaAsignadaId) continue;
+      const historial = await fetchHistorial(v._id);
+      if (historial.length < 2) continue;
+      const sorted = [...historial].sort(
+        (a, b) => new Date(a.timestamp) - new Date(b.timestamp)
+      );
+      const minutos =
+        (new Date(sorted[sorted.length - 1].timestamp) - new Date(sorted[0].timestamp)) / 60000;
+      const id = String(v.rutaAsignadaId);
+      if (!porRuta[id]) porRuta[id] = [];
+      porRuta[id].push(minutos);
+    }
+    const datos = [];
+    for (const [rutaId, tiempos] of Object.entries(porRuta)) {
+      const ruta = await fetchRuta(rutaId);
+      const nombre = ruta?.nombre || `Ruta ${rutaId}`;
+      const promedio = tiempos.reduce((a, b) => a + b, 0) / tiempos.length;
+      datos.push({ rutaId, nombre, tiempoPromedioMin: Math.round(promedio) });
+    }
+    res.json({ datos });
+  } catch (err) {
+    res.status(503).json({ error: 'No se pudo calcular tiempo por ruta', detalle: err.message });
   }
 });
 
