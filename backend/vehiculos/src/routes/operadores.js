@@ -60,4 +60,13 @@ router.patch('/:id', async (req, res) => {
   } catch (err) { handleError(res, err); }
 });
 
+// DELETE /:id — eliminar operador
+router.delete('/:id', async (req, res) => {
+  try {
+    const operador = await Operador.findByIdAndDelete(req.params.id);
+    if (!operador) return res.status(404).json({ error: 'Operador no encontrado' });
+    res.json({ mensaje: 'Operador eliminado', id: req.params.id });
+  } catch (err) { handleError(res, err); }
+});
+
 module.exports = router;
