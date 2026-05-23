@@ -13,8 +13,8 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'vehiculos' });
 });
 
-app.use('/', vehiculosRouter);
 app.use('/operadores', operadoresRouter);
+app.use('/', vehiculosRouter);
 
 mongoose
   .connect(MONGO_URI)
