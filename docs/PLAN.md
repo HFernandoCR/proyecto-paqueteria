@@ -13,7 +13,7 @@
 | Materias | Servicios Web + Toma de Decisiones |
 | Equipo | 6B  |
 | Puerto asignado en el servidor | `8108` |
-| Servidor terminal | `https://terminal.itolab.lat` |
+| URL pública | `http://equipo6b.itolab.lat` |
 | Repositorio | `https://gitlab.itolab.lat` |
 | Fecha de hoy | Miércoles 20 de mayo de 2026 |
 | Fecha de entrega | Martes 26 de mayo de 2026 |
@@ -40,7 +40,7 @@
 
 ```
                 Usuario (navegador externo)
-                terminal.itolab.lat:8108
+                equipo6b.itolab.lat
                             |
                             v
               +--------------------------+
@@ -504,7 +504,7 @@ Cada integrante redacta la sección del PDF correspondiente a su trabajo. Hector
 | 7   | Push inicial: README + `docker-compose.yml` + estructura + `nginx.conf` | Hector | Pendiente |
 | 8   | Agregar a los 5 como Maintainers | Hector | Pendiente |
 | 9   | Junta de 30 min con equipo: presentar plan refinado | Hector + Eric | Pendiente |
-| 10  | Todos clonan en `terminal.itolab.lat` y configuran git | Equipo | Pendiente |
+| 10  | Todos clonan en `equipo6b.itolab.lat` y configuran git | Equipo | Pendiente |
 | 11  | Cada quien arranca su feature branch del Sprint 1 | Equipo | Pendiente |
 
 ---
