@@ -34,4 +34,17 @@ router.get('/:id', async (req, res) => {
   } catch (err) { handleError(res, err); }
 });
 
+// PUT /:id — reemplazo completo
+router.put('/:id', async (req, res) => {
+  try {
+    const operador = await Operador.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { overwrite: true, new: true, runValidators: true }
+    );
+    if (!operador) return res.status(404).json({ error: 'Operador no encontrado' });
+    res.json(operador);
+  } catch (err) { handleError(res, err); }
+});
+
 module.exports = router;
