@@ -12,6 +12,10 @@ mongoose
   .then(() => console.log('[ubicacion] MongoDB conectado: ' + MONGO_URI))
   .catch((err) => console.error('[ubicacion] Error MongoDB:', err.message));
 
+const ubicacionRoutes = require('./routes/ubicacionRoutes');
+
+app.use('/ubicaciones', ubicacionRoutes);
+
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'ubicacion' });
 });
