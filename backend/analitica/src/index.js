@@ -1,5 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const kpiRouter = require('./routes/kpi');
+const reportesRouter = require('./routes/reportes');
 
 const app = express();
 const PORT = process.env.PORT || 3005;
@@ -15,6 +17,9 @@ mongoose
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'analitica' });
 });
+
+app.use('/kpi', kpiRouter);
+app.use('/reportes', reportesRouter);
 
 app.listen(PORT, () => {
   console.log('[analitica] Servidor escuchando en puerto ' + PORT);
