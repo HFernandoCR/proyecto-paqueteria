@@ -1,0 +1,28 @@
+const express = require('express');
+const Operador = require('../models/Operador');
+
+const router = express.Router();
+
+function handleError(res, err) {
+  if (err.name === 'ValidationError') return res.status(400).json({ error: err.message });
+  if (err.name === 'CastError')       return res.status(400).json({ error: 'ID inválido' });
+  return res.status(500).json({ error: 'Error interno del servidor' });
+}
+
+// POST / — crear operador
+router.post('/', async (req, res) => {
+  try {
+    const operador = await new Operador(req.body).save();
+    res.status(201).json(operador);
+  } catch (err) { handleError(res, err); }
+});
+
+// GET / — listar operadores
+router.get('/', async (req, res) => {
+  try {
+    const operadores = await Operador.find();
+    res.json(operadores);
+  } catch (err) { handleError(res, err); }
+});
+
+module.exports = router;
