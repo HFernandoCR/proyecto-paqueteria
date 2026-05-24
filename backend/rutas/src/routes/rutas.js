@@ -35,8 +35,19 @@ router.get('/', async (req, res) => {
   }
 });
 
-// TODO: reemplazar con implementación real en el siguiente commit
-async function syncVehiculo() { return false; }
+async function syncVehiculo(vehiculoId, rutaId) {
+  try {
+    const response = await fetch(`${VEHICULOS_SERVICE_URL}/${vehiculoId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rutaAsignadaId: rutaId }),
+      signal: AbortSignal.timeout(2000)
+    });
+    return response.ok;
+  } catch (_) {
+    return false;
+  }
+}
 
 // POST /:id/asignar — vincular ruta con vehículo (bidireccional)
 router.post('/:id/asignar', async (req, res) => {
