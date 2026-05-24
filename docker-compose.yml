@@ -26,6 +26,7 @@ services:
     environment:
       - PORT=3001
       - MONGO_URI=mongodb://mongo:27017/db_vehiculos
+      - RUTAS_SERVICE_URL=http://rutas:3002
     depends_on:
       mongo:
         condition: service_healthy
