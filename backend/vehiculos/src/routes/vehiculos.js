@@ -64,7 +64,11 @@ router.get('/:id', async (req, res) => {
   try {
     const vehiculo = await Vehiculo.findById(req.params.id);
     if (!vehiculo) return res.status(404).json({ error: 'Vehículo no encontrado' });
-    res.json(vehiculo);
+
+    const vehiculoObj = vehiculo.toObject();
+    vehiculoObj.rutaInfo = await fetchRutaInfo(vehiculo.rutaAsignadaId);
+
+    res.json(vehiculoObj);
   } catch (err) {
     handleError(res, err);
   }
