@@ -20,6 +20,25 @@ function handleError(res, err) {
   return res.status(500).json({ error: 'Error interno del servidor' });
 }
 
+async function fetchRutaInfo(rutaAsignadaId) {
+  if (!rutaAsignadaId) return null;
+  try {
+    const response = await fetch(`${process.env.RUTAS_SERVICE_URL}/${rutaAsignadaId}`, {
+      signal: AbortSignal.timeout(2000)
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    return {
+      nombre: data.nombre,
+      distanciaKm: data.distanciaKm
+    };
+  } catch (err) {
+    // Si Rutas no responde o da timeout, retornamos null
+    return null;
+  }
+}
+
+
 // POST / — crear vehículo
 router.post('/', async (req, res) => {
   try {
@@ -45,7 +64,11 @@ router.get('/:id', async (req, res) => {
   try {
     const vehiculo = await Vehiculo.findById(req.params.id);
     if (!vehiculo) return res.status(404).json({ error: 'Vehículo no encontrado' });
-    res.json(vehiculo);
+
+    const vehiculoObj = vehiculo.toObject();
+    vehiculoObj.rutaInfo = await fetchRutaInfo(vehiculo.rutaAsignadaId);
+
+    res.json(vehiculoObj);
   } catch (err) {
     handleError(res, err);
   }
