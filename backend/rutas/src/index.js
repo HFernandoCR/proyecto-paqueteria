@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const rutasRouter = require('./routes/rutas');
 
 const app = express();
 const PORT = process.env.PORT || 3002;
@@ -12,9 +13,12 @@ mongoose
   .then(() => console.log('[rutas] MongoDB conectado: ' + MONGO_URI))
   .catch((err) => console.error('[rutas] Error MongoDB:', err.message));
 
+// /health registrado antes del router para que GET /:id no lo intercepte
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'rutas' });
 });
+
+app.use('/', rutasRouter);
 
 app.listen(PORT, () => {
   console.log('[rutas] Servidor escuchando en puerto ' + PORT);
