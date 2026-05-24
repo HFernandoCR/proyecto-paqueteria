@@ -1,8 +1,57 @@
 const HistorialUbicacion = require('../models/HistorialUbicacion');
 
-// Mapa en memoria para almacenar los intervalos de simulación activos
-// llave: vehiculoId, valor: { intervalId, lat, lng }
 const activeSimulations = new Map();
+
+const RUTAS_URL = process.env.RUTAS_SERVICE_URL || 'http://rutas:3002';
+const NOTIFICACIONES_URL = process.env.NOTIFICACIONES_SERVICE_URL || 'http://notificaciones:3006';
+
+// Math Helpers
+function toRad(value) { return value * Math.PI / 180; }
+function toDeg(value) { return value * 180 / Math.PI; }
+
+function calcDist(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Radio de la Tierra en km
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Distancia en km
+}
+
+function calcBearing(lat1, lon1, lat2, lon2) {
+  const y = Math.sin(toRad(lon2 - lon1)) * Math.cos(toRad(lat2));
+  const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) -
+    Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(toRad(lon2 - lon1));
+  const bearing = Math.atan2(y, x);
+  return (toDeg(bearing) + 360) % 360;
+}
+
+function moveTowards(lat1, lon1, lat2, lon2, distanceToMove) {
+  const dist = calcDist(lat1, lon1, lat2, lon2);
+  if (dist <= distanceToMove) return { lat: lat2, lng: lon2, reached: true };
+  const ratio = distanceToMove / dist;
+  const lat = lat1 + (lat2 - lat1) * ratio;
+  const lng = lon1 + (lon2 - lon1) * ratio;
+  return { lat, lng, reached: false };
+}
+
+async function notificarLlegada(vehiculoId) {
+  try {
+    await fetch(`${NOTIFICACIONES_URL}/notificaciones`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        vehiculoId,
+        tipo: 'llegada',
+        mensaje: `El vehículo ha llegado a su destino`
+      })
+    });
+  } catch (err) {
+    console.error(`[simulador] Error notificando llegada de ${vehiculoId}:`, err.message);
+  }
+}
 
 // POST /simulador/start/:vehiculoId
 exports.start = async (req, res) => {
@@ -12,51 +61,78 @@ exports.start = async (req, res) => {
     return res.status(400).json({ message: 'El simulador ya está activo para este vehículo' });
   }
 
-  // Coordenadas iniciales dentro del rango Oaxaca (16.8–17.2, −97.0 a −96.5)
-  const LAT_MIN = 16.8, LAT_MAX = 17.2;
-  const LNG_MIN = -97.0, LNG_MAX = -96.5;
-  let currentLat = 17.0732;
-  let currentLng = -96.7266;
+  try {
+    // 1. Obtener la ruta asignada consultando al microservicio de Rutas
+    const rutasRes = await fetch(`${RUTAS_URL}/rutas`);
+    if (!rutasRes.ok) throw new Error('No se pudo conectar al servicio de Rutas');
+    
+    const rutas = await rutasRes.json();
+    const rutaAsignada = rutas.find(r => String(r.vehiculoAsignado) === String(vehiculoId));
 
-  // Intentar obtener la última ubicación conocida para continuar desde ahí
-  // Solo se reutiliza si sigue dentro del rango Oaxaca
-  const ultimaUbicacion = await HistorialUbicacion.findOne({ vehiculoId }).sort({ timestamp: -1 });
-  if (
-    ultimaUbicacion &&
-    ultimaUbicacion.lat >= LAT_MIN && ultimaUbicacion.lat <= LAT_MAX &&
-    ultimaUbicacion.lng >= LNG_MIN && ultimaUbicacion.lng <= LNG_MAX
-  ) {
-    currentLat = ultimaUbicacion.lat;
-    currentLng = ultimaUbicacion.lng;
-  }
-
-  // Iniciar job cada 3 segundos
-  const intervalId = setInterval(async () => {
-    // Modo Placebo: Simular movimiento aleatorio muy pequeño
-    // (Aprox. +/- 0.0005 grados en lat/lng)
-    currentLat += (Math.random() - 0.5) * 0.001;
-    currentLng += (Math.random() - 0.5) * 0.001;
-
-    const nuevaUbicacion = new HistorialUbicacion({
-      vehiculoId,
-      lat: currentLat,
-      lng: currentLng,
-      velocidadKmh: Math.floor(Math.random() * 20) + 40, // velocidad aleatoria entre 40 y 60
-      bearing: Math.floor(Math.random() * 360) // dirección aleatoria
-    });
-
-    try {
-      await nuevaUbicacion.save();
-      console.log(`[simulador] Vehículo ${vehiculoId} movido a ${currentLat}, ${currentLng}`);
-    } catch (err) {
-      console.error(`[simulador] Error guardando ubicación de ${vehiculoId}:`, err.message);
+    if (!rutaAsignada || !rutaAsignada.waypoints || rutaAsignada.waypoints.length < 2) {
+      return res.status(400).json({ message: 'El vehículo no tiene una ruta asignada válida con waypoints' });
     }
-  }, 3000);
 
-  // Guardar en el mapa de simulaciones
-  activeSimulations.set(vehiculoId, { intervalId, lat: currentLat, lng: currentLng });
+    const waypoints = rutaAsignada.waypoints;
+    let currentLat = waypoints[0].lat;
+    let currentLng = waypoints[0].lng;
+    let nextWaypointIndex = 1;
 
-  res.json({ message: 'Simulador iniciado en modo placebo', vehiculoId });
+    // Si ya existe historial, continuar desde la última ubicación conocida
+    const ultimaUbicacion = await HistorialUbicacion.findOne({ vehiculoId }).sort({ timestamp: -1 });
+    if (ultimaUbicacion) {
+      currentLat = ultimaUbicacion.lat;
+      currentLng = ultimaUbicacion.lng;
+    }
+
+    const velocidadKmh = 60; // Simularemos una velocidad constante de 60 km/h
+    const intervalSecs = 3;
+    const distancePerTick = (velocidadKmh / 3600) * intervalSecs; // Distancia en km recorrida en 3 seg (aprox 0.05 km)
+
+    // Iniciar job cada 3 segundos
+    const intervalId = setInterval(async () => {
+      const target = waypoints[nextWaypointIndex];
+      
+      const bearing = calcBearing(currentLat, currentLng, target.lat, target.lng);
+      const move = moveTowards(currentLat, currentLng, target.lat, target.lng, distancePerTick);
+      
+      currentLat = move.lat;
+      currentLng = move.lng;
+
+      const nuevaUbicacion = new HistorialUbicacion({
+        vehiculoId,
+        lat: currentLat,
+        lng: currentLng,
+        velocidadKmh,
+        bearing
+      });
+
+      try {
+        await nuevaUbicacion.save();
+        console.log(`[simulador] Vehículo ${vehiculoId} en ${currentLat.toFixed(5)}, ${currentLng.toFixed(5)} -> Hacia waypoint ${nextWaypointIndex}`);
+        
+        if (move.reached) {
+          nextWaypointIndex++;
+          if (nextWaypointIndex >= waypoints.length) {
+            console.log(`[simulador] Vehículo ${vehiculoId} ha llegado a su destino.`);
+            clearInterval(intervalId);
+            activeSimulations.delete(vehiculoId);
+            await notificarLlegada(vehiculoId);
+          }
+        }
+      } catch (err) {
+        console.error(`[simulador] Error guardando ubicación de ${vehiculoId}:`, err.message);
+      }
+    }, intervalSecs * 1000);
+
+    // Guardar en el mapa de simulaciones
+    activeSimulations.set(vehiculoId, { intervalId, lat: currentLat, lng: currentLng });
+
+    res.json({ message: 'Simulador real iniciado con ruta', vehiculoId, puntosA_Recorrer: waypoints.length });
+
+  } catch (error) {
+    res.status(500).json({ message: 'Error al iniciar simulación', error: error.message });
+  }
 };
 
 // POST /simulador/stop/:vehiculoId
@@ -71,14 +147,14 @@ exports.stop = (req, res) => {
   clearInterval(simData.intervalId);
   activeSimulations.delete(vehiculoId);
 
-  res.json({ message: 'Simulador detenido', vehiculoId });
+  res.json({ message: 'Simulador detenido manualmente', vehiculoId });
 };
 
 // GET /simulador/status
 exports.getStatus = (req, res) => {
-  const activos = Array.from(activeSimulations.keys()).map((vehiculoId) => ({
-    vehiculoId,
-    intervaloMs: 3000
-  }));
-  res.json({ activos, total: activos.length });
+  const activeIds = Array.from(activeSimulations.keys());
+  res.json({ 
+    activeCount: activeIds.length,
+    activeSimulations: activeIds 
+  });
 };
