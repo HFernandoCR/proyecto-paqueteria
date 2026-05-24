@@ -33,4 +33,56 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /:id — obtener ruta por ID
+router.get('/:id', async (req, res) => {
+  try {
+    const ruta = await Ruta.findById(req.params.id);
+    if (!ruta) return res.status(404).json({ error: 'Ruta no encontrada' });
+    res.json(ruta);
+  } catch (err) {
+    handleError(res, err);
+  }
+});
+
+// PUT /:id — reemplazo completo
+router.put('/:id', async (req, res) => {
+  try {
+    const ruta = await Ruta.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { overwrite: true, new: true, runValidators: true }
+    );
+    if (!ruta) return res.status(404).json({ error: 'Ruta no encontrada' });
+    res.json(ruta);
+  } catch (err) {
+    handleError(res, err);
+  }
+});
+
+// PATCH /:id — actualización parcial
+router.patch('/:id', async (req, res) => {
+  try {
+    const ruta = await Ruta.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { new: true, runValidators: true }
+    );
+    if (!ruta) return res.status(404).json({ error: 'Ruta no encontrada' });
+    res.json(ruta);
+  } catch (err) {
+    handleError(res, err);
+  }
+});
+
+// DELETE /:id — eliminar ruta
+router.delete('/:id', async (req, res) => {
+  try {
+    const ruta = await Ruta.findByIdAndDelete(req.params.id);
+    if (!ruta) return res.status(404).json({ error: 'Ruta no encontrada' });
+    res.json({ mensaje: 'Ruta eliminada', id: req.params.id });
+  } catch (err) {
+    handleError(res, err);
+  }
+});
+
 module.exports = router;
