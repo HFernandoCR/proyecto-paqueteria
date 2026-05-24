@@ -12,13 +12,20 @@ exports.start = async (req, res) => {
     return res.status(400).json({ message: 'El simulador ya está activo para este vehículo' });
   }
 
-  // Coordenadas iniciales base (ej. centro de CDMX o cualquier punto)
-  let currentLat = 19.432608;
-  let currentLng = -99.133209;
+  // Coordenadas iniciales dentro del rango Oaxaca (16.8–17.2, −97.0 a −96.5)
+  const LAT_MIN = 16.8, LAT_MAX = 17.2;
+  const LNG_MIN = -97.0, LNG_MAX = -96.5;
+  let currentLat = 17.0732;
+  let currentLng = -96.7266;
 
   // Intentar obtener la última ubicación conocida para continuar desde ahí
+  // Solo se reutiliza si sigue dentro del rango Oaxaca
   const ultimaUbicacion = await HistorialUbicacion.findOne({ vehiculoId }).sort({ timestamp: -1 });
-  if (ultimaUbicacion) {
+  if (
+    ultimaUbicacion &&
+    ultimaUbicacion.lat >= LAT_MIN && ultimaUbicacion.lat <= LAT_MAX &&
+    ultimaUbicacion.lng >= LNG_MIN && ultimaUbicacion.lng <= LNG_MAX
+  ) {
     currentLat = ultimaUbicacion.lat;
     currentLng = ultimaUbicacion.lng;
   }
@@ -69,9 +76,9 @@ exports.stop = (req, res) => {
 
 // GET /simulador/status
 exports.getStatus = (req, res) => {
-  const activeIds = Array.from(activeSimulations.keys());
-  res.json({ 
-    activeCount: activeIds.length,
-    activeSimulations: activeIds 
-  });
+  const activos = Array.from(activeSimulations.keys()).map((vehiculoId) => ({
+    vehiculoId,
+    intervaloMs: 3000
+  }));
+  res.json({ activos, total: activos.length });
 };
