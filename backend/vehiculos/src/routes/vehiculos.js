@@ -4,6 +4,9 @@ const Vehiculo = require('../models/Vehiculo');
 
 const router = express.Router();
 
+const ESTADOS_VALIDOS = Vehiculo.schema.path('estadoActual').enumValues;
+// → ['disponible', 'en_ruta', 'detenido', 'entregando', 'mantenimiento']
+
 function handleError(res, err) {
   if (err.code === 11000) {
     return res.status(400).json({ error: 'La placa ya existe' });
@@ -56,6 +59,30 @@ router.put('/:id', async (req, res) => {
       req.body,
       { overwrite: true, new: true, runValidators: true }
     );
+    if (!vehiculo) return res.status(404).json({ error: 'Vehículo no encontrado' });
+    res.json(vehiculo);
+  } catch (err) {
+    handleError(res, err);
+  }
+});
+
+// PATCH /:id/estado — cambiar estado del vehículo
+router.patch('/:id/estado', async (req, res) => {
+  try {
+    const { estadoActual } = req.body;
+
+    if (!estadoActual || !ESTADOS_VALIDOS.includes(estadoActual)) {
+      return res.status(400).json({
+        error: `Estado inválido. Valores permitidos: ${ESTADOS_VALIDOS.join(', ')}`,
+      });
+    }
+
+    const vehiculo = await Vehiculo.findByIdAndUpdate(
+      req.params.id,
+      { $set: { estadoActual } },
+      { new: true, runValidators: true }
+    );
+
     if (!vehiculo) return res.status(404).json({ error: 'Vehículo no encontrado' });
     res.json(vehiculo);
   } catch (err) {
