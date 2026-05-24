@@ -1,7 +1,9 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const Ruta = require('../models/Ruta');
 
 const router = express.Router();
+const VEHICULOS_SERVICE_URL = process.env.VEHICULOS_SERVICE_URL || 'http://vehiculos:3001';
 
 function handleError(res, err) {
   if (err.name === 'ValidationError') {
@@ -28,6 +30,57 @@ router.get('/', async (req, res) => {
   try {
     const rutas = await Ruta.find();
     res.json(rutas);
+  } catch (err) {
+    handleError(res, err);
+  }
+});
+
+async function syncVehiculo(vehiculoId, rutaId) {
+  try {
+    const response = await fetch(`${VEHICULOS_SERVICE_URL}/${vehiculoId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rutaAsignadaId: rutaId }),
+      signal: AbortSignal.timeout(2000)
+    });
+    return response.ok;
+  } catch (_) {
+    return false;
+  }
+}
+
+// POST /:id/asignar — vincular ruta con vehículo (bidireccional)
+router.post('/:id/asignar', async (req, res) => {
+  try {
+    const { vehiculoId } = req.body;
+
+    if (!vehiculoId) {
+      return res.status(400).json({ error: 'vehiculoId es requerido' });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(vehiculoId)) {
+      return res.status(400).json({ error: 'vehiculoId no es un ObjectId válido' });
+    }
+
+    const ruta = await Ruta.findByIdAndUpdate(
+      req.params.id,
+      { $set: { vehiculoAsignado: vehiculoId } },
+      { new: true, runValidators: true }
+    );
+
+    if (!ruta) return res.status(404).json({ error: 'Ruta no encontrada' });
+
+    const sincronizado = await syncVehiculo(vehiculoId, ruta._id);
+
+    if (!sincronizado) {
+      return res.status(200).json({
+        ruta,
+        vehiculoSincronizado: false,
+        warning: 'Ruta asignada pero no se pudo sincronizar con Vehiculos'
+      });
+    }
+
+    return res.status(200).json({ ruta, vehiculoSincronizado: true });
   } catch (err) {
     handleError(res, err);
   }
