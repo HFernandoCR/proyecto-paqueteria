@@ -2,8 +2,8 @@ const HistorialUbicacion = require('../models/HistorialUbicacion');
 
 const activeSimulations = new Map();
 
-const RUTAS_URL = process.env.RUTAS_SERVICE_URL || 'http://rutas:3002';
-const NOTIFICACIONES_URL = process.env.NOTIFICACIONES_SERVICE_URL || 'http://notificaciones:3006';
+const RUTAS_URL = process.env.RUTAS_SERVICE_URL || 'http://localhost:3002';
+const NOTIFICACIONES_URL = process.env.NOTIFICACIONES_SERVICE_URL || 'http://localhost:3006';
 
 // Math Helpers
 function toRad(value) { return value * Math.PI / 180; }
