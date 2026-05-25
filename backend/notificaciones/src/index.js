@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const notificacionesRouter = require('./routes/notificaciones');
 
 const app = express();
 const PORT = process.env.PORT || 3006;
@@ -15,6 +16,8 @@ mongoose
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'notificaciones' });
 });
+
+app.use('/', notificacionesRouter);
 
 app.listen(PORT, () => {
   console.log('[notificaciones] Servidor escuchando en puerto ' + PORT);
