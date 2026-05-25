@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const seguimientoRoutes = require('./routes/seguimientoRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3004;
@@ -15,6 +16,9 @@ mongoose
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'seguimiento' });
 });
+
+// Rutas de seguimiento
+app.use('/', seguimientoRoutes);
 
 app.listen(PORT, () => {
   console.log('[seguimiento] Servidor escuchando en puerto ' + PORT);
