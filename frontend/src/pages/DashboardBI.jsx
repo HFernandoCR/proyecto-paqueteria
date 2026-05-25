@@ -213,6 +213,9 @@ export function DashboardBI() {
         ))}
       </div>
 
+      {/* ── Fila: BarChart km + LineChart entregas ── */}
+      <div style={s.chartGrid2}>
+
       {/* ── BarChart: Km recorridos por vehículo ── */}
       <div style={s.chartSection}>
         <div style={s.chartHeader}>
@@ -255,6 +258,57 @@ export function DashboardBI() {
           )}
         </div>
       </div>
+
+      {/* ── LineChart: Entregas por día ── */}
+      <div style={s.chartSection}>
+        <div style={s.chartHeader}>
+          <h3 style={s.chartTitle}>📈 Entregas por Día</h3>
+          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+            ● entregas realizadas
+          </span>
+        </div>
+
+        <div style={s.chartBox}>
+          {isLoading ? (
+            <div style={s.spinner}>Cargando datos…</div>
+          ) : entregasPorDia.length === 0 ? (
+            <div style={s.empty}>Sin historial de entregas disponible</div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={entregasPorDia}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2d3148" />
+                <XAxis
+                  dataKey="fecha"
+                  stroke="#64748b"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  stroke="#64748b"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <Tooltip
+                  {...tooltipStyle}
+                  formatter={(v) => [`${v}`, 'Entregas']}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="entregas"
+                  stroke="#10b981"
+                  strokeWidth={3}
+                  dot={{ r: 4, fill: '#10b981' }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </div>
+
+      </div>{/* fin grid 2 columnas */}
     </div>
   )
 }
