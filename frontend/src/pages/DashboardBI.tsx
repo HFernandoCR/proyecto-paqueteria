@@ -202,7 +202,7 @@ const s = {
     fontSize: '0.78rem',
     color: C.muted,
   },
-}
+} as const
 
 /* Tooltip compartido para todos los charts */
 const TT = {
@@ -223,11 +223,11 @@ const TT = {
 /* ------------------------------------------------------------------ */
 export function DashboardBI() {
   const [isLoading, setIsLoading] = useState(true)
-  const [stats, setStats] = useState(null)
-  const [kmPorVehiculo, setKmPorVehiculo] = useState([])
-  const [entregasPorDia, setEntregasPorDia] = useState([])
-  const [tiempoPorRuta, setTiempoPorRuta] = useState([])
-  const [anomalias, setAnomalias] = useState([])
+  const [stats, setStats] = useState<any>(null)
+  const [kmPorVehiculo, setKmPorVehiculo] = useState<any[]>([])
+  const [entregasPorDia, setEntregasPorDia] = useState<any[]>([])
+  const [tiempoPorRuta, setTiempoPorRuta] = useState<any[]>([])
+  const [anomalias, setAnomalias] = useState<any[]>([])
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -447,7 +447,7 @@ export function DashboardBI() {
                 </tr>
               </thead>
               <tbody>
-                {anomalias.map((a, i) => (
+                {anomalias.map((a: any, i: number) => (
                   <tr key={`${a.vehiculoId}-${i}`}>
                     <td style={{ ...s.td, fontWeight: 700, fontFamily: 'monospace', letterSpacing: '0.05em' }}>
                       {a.placa}
