@@ -13,117 +13,213 @@ import {
 import axios from 'axios'
 
 /* ------------------------------------------------------------------ */
-/*  Estilos en línea reutilizables                                      */
+/*  Design tokens — paleta única                                        */
+/* ------------------------------------------------------------------ */
+const C = {
+  bg:      '#0b0e18',  // fondo de página
+  surface: '#111827',  // fondo de tarjeta/panel
+  border:  '#1d2740',  // borde general
+  text:    '#dde3f0',  // texto principal
+  muted:   '#5b6887',  // texto secundario
+  accent:  '#4f72ff',  // único color de marca
+  accent2: '#7c9dff',  // variante clara del accent (gráfica tiempo)
+  danger:  '#e05252',  // solo para alertas reales
+  grid:    '#192033',  // líneas de cuadrícula en gráficas
+}
+
+/* ------------------------------------------------------------------ */
+/*  Estilos reutilizables                                               */
 /* ------------------------------------------------------------------ */
 const s = {
   page: {
-    padding: '1.5rem',
+    padding: '1.75rem 2rem',
     display: 'flex',
     flexDirection: 'column',
     gap: '1.5rem',
-    background: '#0f1117',
+    background: C.bg,
     minHeight: '100vh',
-    fontFamily: "'Segoe UI', sans-serif",
-    color: '#f1f5f9',
+    fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
+    fontSize: '0.875rem',
+    color: C.text,
     boxSizing: 'border-box',
   },
-  /* Header */
-  header: { display: 'flex', flexDirection: 'column', gap: '0.25rem' },
-  h2: { margin: 0, fontSize: '1.5rem', fontWeight: 700, color: '#f1f5f9' },
-  sub: { margin: 0, fontSize: '0.875rem', color: '#94a3b8' },
-  /* Grid de 4 tarjetas */
+  /* ── Header ── */
+  header: {
+    paddingBottom: '1.25rem',
+    borderBottom: `1px solid ${C.border}`,
+  },
+  h2: {
+    margin: 0,
+    fontSize: '1.25rem',
+    fontWeight: 700,
+    color: C.text,
+    letterSpacing: '-0.01em',
+  },
+  sub: {
+    margin: '0.25rem 0 0',
+    fontSize: '0.8rem',
+    color: C.muted,
+    letterSpacing: '0.01em',
+  },
+  /* ── KPI grid ── */
   kpiGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))',
     gap: '1rem',
   },
   kpiCard: {
-    background: '#1e2130',
-    borderRadius: '12px',
-    padding: '1.25rem',
-    border: '1px solid #2d3148',
+    background: C.surface,
+    borderRadius: '8px',
+    padding: '1rem 1.25rem',
+    border: `1px solid ${C.border}`,
+    borderLeft: `4px solid ${C.accent}`,
     display: 'flex',
     flexDirection: 'column',
-    gap: '0.5rem',
+    gap: '0.35rem',
   },
-  kpiLabel: { fontSize: '0.8rem', color: '#94a3b8', margin: 0 },
-  kpiValue: { fontSize: '2rem', fontWeight: 700, margin: 0 },
-  kpiSub: { fontSize: '0.75rem', margin: 0 },
-  /* Sección de gráfica */
-  chartSection: {
-    background: '#1e2130',
-    borderRadius: '12px',
-    padding: '1.5rem',
-    border: '1px solid #2d3148',
+  kpiCardDanger: {
+    background: C.surface,
+    borderRadius: '8px',
+    padding: '1rem 1.25rem',
+    border: `1px solid ${C.border}`,
+    borderLeft: `4px solid ${C.danger}`,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.35rem',
   },
-  chartHeader: {
+  kpiLabel: {
+    margin: 0,
+    fontSize: '0.7rem',
+    fontWeight: 600,
+    letterSpacing: '0.06em',
+    textTransform: 'uppercase',
+    color: C.muted,
+  },
+  kpiValue: {
+    margin: 0,
+    fontSize: '1.75rem',
+    fontWeight: 700,
+    color: C.text,
+    lineHeight: 1.1,
+  },
+  kpiSub: {
+    margin: 0,
+    fontSize: '0.75rem',
+    color: C.muted,
+  },
+  /* ── Paneles de gráfica ── */
+  panel: {
+    background: C.surface,
+    borderRadius: '8px',
+    padding: '1.25rem 1.5rem',
+    border: `1px solid ${C.border}`,
+  },
+  panelHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: '1.25rem',
   },
-  chartTitle: { margin: 0, fontSize: '1rem', fontWeight: 600 },
-  chartGrid2: {
+  panelTitle: {
+    margin: 0,
+    fontSize: '0.875rem',
+    fontWeight: 600,
+    color: C.text,
+    letterSpacing: '0.01em',
+  },
+  legend: {
+    fontSize: '0.75rem',
+    color: C.muted,
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.4rem',
+  },
+  legendDot: {
+    width: '8px',
+    height: '8px',
+    borderRadius: '50%',
+    display: 'inline-block',
+    flexShrink: 0,
+  },
+  chartBox: { height: '300px' },
+  grid2: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
-    gap: '1.5rem',
+    gap: '1.25rem',
   },
-  chartBox: { height: '260px' },
-  /* Spinner */
+  /* ── Estados vacíos / carga ── */
   spinner: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     height: '100%',
-    color: '#94a3b8',
-    fontSize: '0.875rem',
+    color: C.muted,
+    fontSize: '0.8rem',
   },
-  /* Tabla */
-  table: { width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' },
+  empty: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100%',
+    color: C.muted,
+    fontSize: '0.8rem',
+    border: `1px dashed ${C.border}`,
+    borderRadius: '6px',
+  },
+  /* ── Tabla ── */
+  table: {
+    width: '100%',
+    borderCollapse: 'collapse',
+    fontSize: '0.8rem',
+  },
   th: {
     textAlign: 'left',
     padding: '0.5rem 0.75rem',
-    color: '#94a3b8',
-    fontSize: '0.75rem',
+    color: C.muted,
+    fontSize: '0.7rem',
     fontWeight: 600,
-    borderBottom: '1px solid #2d3148',
+    letterSpacing: '0.05em',
+    textTransform: 'uppercase',
+    borderBottom: `1px solid ${C.border}`,
   },
-  td: { padding: '0.65rem 0.75rem', borderBottom: '1px solid #2d3148' },
+  td: {
+    padding: '0.6rem 0.75rem',
+    borderBottom: `1px solid ${C.border}`,
+    color: C.text,
+  },
   badgeDanger: {
     display: 'inline-block',
-    background: 'rgba(239,68,68,0.15)',
-    color: '#ef4444',
-    borderRadius: '20px',
-    padding: '0.2rem 0.65rem',
-    fontSize: '0.72rem',
+    background: 'rgba(224,82,82,0.12)',
+    color: C.danger,
+    borderRadius: '4px',
+    padding: '0.15rem 0.55rem',
+    fontSize: '0.7rem',
     fontWeight: 600,
+    letterSpacing: '0.03em',
   },
-  empty: {
-    textAlign: 'center',
-    padding: '2rem',
-    color: '#64748b',
-    fontSize: '0.875rem',
-    border: '1px dashed #2d3148',
-    borderRadius: '8px',
+  alertSub: {
+    margin: '0 0 1rem',
+    fontSize: '0.78rem',
+    color: C.muted,
   },
 }
 
-/* colores de acento para cada KPI */
-const KPI_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444']
-
-/* tooltip personalizado de recharts */
-const tooltipStyle = {
+/* Tooltip compartido para todos los charts */
+const TT = {
   contentStyle: {
-    background: '#1e2130',
-    border: '1px solid #2d3148',
-    borderRadius: '8px',
-    color: '#f1f5f9',
+    background: '#0d1221',
+    border: `1px solid ${C.border}`,
+    borderRadius: '6px',
+    fontSize: '0.8rem',
+    color: C.text,
+    padding: '0.5rem 0.75rem',
   },
-  labelStyle: { color: '#f1f5f9', fontWeight: 700 },
+  labelStyle: { color: C.text, fontWeight: 600, marginBottom: '0.2rem' },
+  cursor: { fill: 'rgba(79,114,255,0.05)' },
 }
 
 /* ------------------------------------------------------------------ */
-/*  Componente principal                                                 */
+/*  Componente                                                           */
 /* ------------------------------------------------------------------ */
 export function DashboardBI() {
   const [isLoading, setIsLoading] = useState(true)
@@ -161,52 +257,54 @@ export function DashboardBI() {
     fetchAll()
   }, [])
 
-  /* ── KPI cards config ── */
   const kpis = [
     {
       label: 'Vehículos Activos',
       value: stats ? `${stats.vehiculosActivos}` : '—',
       sub: stats ? `de ${stats.vehiculosTotal} registrados` : '',
+      danger: false,
     },
     {
       label: 'Km Recorridos Hoy',
       value: stats ? `${stats.kmRecorridosHoy}` : '—',
       sub: 'km totales del día',
+      danger: false,
     },
     {
       label: 'Entregas Hoy',
       value: stats ? `${stats.entregasHoy}` : '—',
       sub: 'paquetes entregados',
+      danger: false,
     },
     {
       label: 'Vehículos Detenidos',
       value: stats ? `${stats.vehiculosDetenidos}` : '—',
       sub:
         stats && stats.vehiculosDetenidos > 0
-          ? '⚠ requieren atención'
-          : '✅ sin incidencias',
+          ? 'Requieren atención'
+          : 'Sin incidencias',
+      danger: true,
     },
   ]
 
   return (
     <div style={s.page}>
+
       {/* ── Header ── */}
       <div style={s.header}>
-        <h2 style={s.h2}>📊 Dashboard BI</h2>
-        <p style={s.sub}>
-          Indicadores clave de rendimiento · Toma de Decisiones
-        </p>
+        <h2 style={s.h2}>Dashboard BI</h2>
+        <p style={s.sub}>Métricas operativas · actualizado al cargar</p>
       </div>
 
       {/* ── Tarjetas KPI ── */}
       <div style={s.kpiGrid}>
-        {kpis.map((kpi, i) => (
-          <div key={kpi.label} style={s.kpiCard}>
+        {kpis.map((kpi) => (
+          <div key={kpi.label} style={kpi.danger ? s.kpiCardDanger : s.kpiCard}>
             <p style={s.kpiLabel}>{kpi.label}</p>
-            <p style={{ ...s.kpiValue, color: KPI_COLORS[i] }}>
-              {isLoading ? '…' : kpi.value}
+            <p style={{ ...s.kpiValue, color: kpi.danger ? C.danger : C.text }}>
+              {isLoading ? '—' : kpi.value}
             </p>
-            <p style={{ ...s.kpiSub, color: KPI_COLORS[i] + 'cc' }}>
+            <p style={{ ...s.kpiSub, color: kpi.danger && stats?.vehiculosDetenidos > 0 ? C.danger : C.muted }}>
               {kpi.sub}
             </p>
           </div>
@@ -214,128 +312,128 @@ export function DashboardBI() {
       </div>
 
       {/* ── Fila: BarChart km + LineChart entregas ── */}
-      <div style={s.chartGrid2}>
+      <div style={s.grid2}>
 
-      {/* ── BarChart: Km recorridos por vehículo ── */}
-      <div style={s.chartSection}>
-        <div style={s.chartHeader}>
-          <h3 style={s.chartTitle}>📦 Km Recorridos por Vehículo</h3>
-          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-            ● km totales hoy
-          </span>
+        {/* BarChart: Km por vehículo */}
+        <div style={s.panel}>
+          <div style={s.panelHeader}>
+            <h3 style={s.panelTitle}>Km Recorridos por Vehículo</h3>
+            <span style={s.legend}>
+              <span style={{ ...s.legendDot, background: C.accent }} />
+              km totales hoy
+            </span>
+          </div>
+          <div style={s.chartBox}>
+            {isLoading ? (
+              <div style={s.spinner}>Cargando…</div>
+            ) : kmPorVehiculo.length === 0 ? (
+              <div style={s.empty}>Sin datos de trayecto disponibles</div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={kmPorVehiculo} barSize={28}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={C.grid} vertical={false} />
+                  <XAxis
+                    dataKey="placa"
+                    stroke={C.muted}
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    stroke={C.muted}
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                    unit=" km"
+                  />
+                  <Tooltip
+                    {...TT}
+                    formatter={(v) => [`${v} km`, 'Km totales']}
+                  />
+                  <Bar dataKey="kmTotal" fill={C.accent} radius={[3, 3, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
         </div>
 
-        <div style={s.chartBox}>
-          {isLoading ? (
-            <div style={s.spinner}>Cargando datos…</div>
-          ) : kmPorVehiculo.length === 0 ? (
-            <div style={s.empty}>Sin datos de trayecto disponibles</div>
-          ) : (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={kmPorVehiculo}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2d3148" />
-                <XAxis
-                  dataKey="placa"
-                  stroke="#64748b"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  stroke="#64748b"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                  unit=" km"
-                />
-                <Tooltip
-                  {...tooltipStyle}
-                  formatter={(v) => [`${v} km`, 'Km totales']}
-                />
-                <Bar dataKey="kmTotal" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
+        {/* LineChart: Entregas por día */}
+        <div style={s.panel}>
+          <div style={s.panelHeader}>
+            <h3 style={s.panelTitle}>Entregas por Día</h3>
+            <span style={s.legend}>
+              <span style={{ ...s.legendDot, background: C.accent }} />
+              entregas realizadas
+            </span>
+          </div>
+          <div style={s.chartBox}>
+            {isLoading ? (
+              <div style={s.spinner}>Cargando…</div>
+            ) : entregasPorDia.length === 0 ? (
+              <div style={s.empty}>Sin historial de entregas disponible</div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={entregasPorDia}>
+                  <CartesianGrid strokeDasharray="3 3" stroke={C.grid} vertical={false} />
+                  <XAxis
+                    dataKey="fecha"
+                    stroke={C.muted}
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    stroke={C.muted}
+                    fontSize={11}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <Tooltip
+                    {...TT}
+                    formatter={(v) => [`${v}`, 'Entregas']}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="entregas"
+                    stroke={C.accent}
+                    strokeWidth={2.5}
+                    dot={{ r: 3, fill: C.accent, strokeWidth: 0 }}
+                    activeDot={{ r: 5, strokeWidth: 0 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* ── LineChart: Entregas por día ── */}
-      <div style={s.chartSection}>
-        <div style={s.chartHeader}>
-          <h3 style={s.chartTitle}>📈 Entregas por Día</h3>
-          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
-            ● entregas realizadas
-          </span>
-        </div>
+      </div>{/* fin grid 2 cols */}
 
-        <div style={s.chartBox}>
-          {isLoading ? (
-            <div style={s.spinner}>Cargando datos…</div>
-          ) : entregasPorDia.length === 0 ? (
-            <div style={s.empty}>Sin historial de entregas disponible</div>
-          ) : (
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={entregasPorDia}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2d3148" />
-                <XAxis
-                  dataKey="fecha"
-                  stroke="#64748b"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  stroke="#64748b"
-                  fontSize={12}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <Tooltip
-                  {...tooltipStyle}
-                  formatter={(v) => [`${v}`, 'Entregas']}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="entregas"
-                  stroke="#10b981"
-                  strokeWidth={3}
-                  dot={{ r: 4, fill: '#10b981' }}
-                  activeDot={{ r: 6 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-      </div>
-
-      </div>{/* fin grid 2 columnas */}
-
-      {/* ── Tabla de anomalías ── */}
-      <div style={s.chartSection}>
-        <div style={s.chartHeader}>
-          <h3 style={s.chartTitle}>🚨 Vehículos con Anomalía</h3>
+      {/* ── Tabla de alertas ── */}
+      <div style={s.panel}>
+        <div style={s.panelHeader}>
+          <h3 style={s.panelTitle}>Alertas de Vehículos</h3>
           <span
             style={{
-              fontSize: '0.78rem',
-              background: 'rgba(239,68,68,0.12)',
-              color: '#ef4444',
-              borderRadius: '20px',
-              padding: '0.2rem 0.7rem',
-              fontWeight: 600,
+              fontSize: '0.7rem',
+              fontWeight: 700,
+              letterSpacing: '0.04em',
+              background: 'rgba(224,82,82,0.1)',
+              color: C.danger,
+              borderRadius: '4px',
+              padding: '0.2rem 0.6rem',
             }}
           >
-            {anomalias.length} activas
+            {anomalias.length} {anomalias.length === 1 ? 'activa' : 'activas'}
           </span>
         </div>
-        <p style={{ ...s.kpiSub, color: '#64748b', marginBottom: '1rem' }}>
+        <p style={s.alertSub}>
           Vehículos detenidos en ruta activa por más de 15 minutos
         </p>
-
         {isLoading ? (
-          <div style={s.spinner}>Cargando datos…</div>
+          <div style={{ ...s.spinner, height: '80px' }}>Cargando…</div>
         ) : anomalias.length === 0 ? (
-          <div style={s.empty}>
-            ✅ Operación normal — sin anomalías reportadas
+          <div style={{ ...s.empty, height: '80px' }}>
+            Operación normal — sin alertas
           </div>
         ) : (
           <div style={{ overflowX: 'auto' }}>
@@ -351,24 +449,17 @@ export function DashboardBI() {
               <tbody>
                 {anomalias.map((a, i) => (
                   <tr key={`${a.vehiculoId}-${i}`}>
-                    <td style={{ ...s.td, fontWeight: 700, fontFamily: 'monospace' }}>
+                    <td style={{ ...s.td, fontWeight: 700, fontFamily: 'monospace', letterSpacing: '0.05em' }}>
                       {a.placa}
                     </td>
-                    <td
-                      style={{
-                        ...s.td,
-                        fontFamily: 'monospace',
-                        fontSize: '0.78rem',
-                        color: '#94a3b8',
-                      }}
-                    >
+                    <td style={{ ...s.td, fontFamily: 'monospace', fontSize: '0.75rem', color: C.muted }}>
                       {a.vehiculoId}
                     </td>
-                    <td style={{ ...s.td, color: '#ef4444', fontWeight: 700 }}>
+                    <td style={{ ...s.td, color: C.danger, fontWeight: 700 }}>
                       {a.minutosDetenido} min
                     </td>
                     <td style={s.td}>
-                      <span style={s.badgeDanger}>⚠ Detenido</span>
+                      <span style={s.badgeDanger}>Detenido</span>
                     </td>
                   </tr>
                 ))}
@@ -378,28 +469,28 @@ export function DashboardBI() {
         )}
       </div>
 
-      {/* ── BarChart horizontal: tiempo promedio por ruta ── */}
-      <div style={s.chartSection}>
-        <div style={s.chartHeader}>
-          <h3 style={s.chartTitle}>⏱ Tiempo Promedio por Ruta (min)</h3>
-          <span style={{ fontSize: '0.8rem', color: '#f59e0b' }}>
-            ● minutos promedio
+      {/* ── BarChart horizontal: tiempo por ruta ── */}
+      <div style={s.panel}>
+        <div style={s.panelHeader}>
+          <h3 style={s.panelTitle}>Tiempo Promedio por Ruta</h3>
+          <span style={s.legend}>
+            <span style={{ ...s.legendDot, background: C.accent2 }} />
+            minutos promedio
           </span>
         </div>
-
         <div style={s.chartBox}>
           {isLoading ? (
-            <div style={s.spinner}>Cargando datos…</div>
+            <div style={s.spinner}>Cargando…</div>
           ) : tiempoPorRuta.length === 0 ? (
             <div style={s.empty}>Sin datos de rutas disponibles</div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart layout="vertical" data={tiempoPorRuta}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#2d3148" />
+              <BarChart layout="vertical" data={tiempoPorRuta} barSize={18}>
+                <CartesianGrid strokeDasharray="3 3" stroke={C.grid} horizontal={false} />
                 <XAxis
                   type="number"
-                  stroke="#64748b"
-                  fontSize={12}
+                  stroke={C.muted}
+                  fontSize={11}
                   tickLine={false}
                   axisLine={false}
                   unit=" min"
@@ -408,25 +499,26 @@ export function DashboardBI() {
                   type="category"
                   dataKey="nombre"
                   width={130}
-                  stroke="#64748b"
+                  stroke={C.muted}
                   fontSize={11}
                   tickLine={false}
                   axisLine={false}
                 />
                 <Tooltip
-                  {...tooltipStyle}
+                  {...TT}
                   formatter={(v) => [`${v} min`, 'Tiempo promedio']}
                 />
                 <Bar
                   dataKey="tiempoPromedioMin"
-                  fill="#f59e0b"
-                  radius={[0, 4, 4, 0]}
+                  fill={C.accent2}
+                  radius={[0, 3, 3, 0]}
                 />
               </BarChart>
             </ResponsiveContainer>
           )}
         </div>
       </div>
+
     </div>
   )
 }

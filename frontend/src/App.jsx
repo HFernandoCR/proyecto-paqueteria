@@ -10,34 +10,35 @@ const navStyle = {
   display: 'flex',
   alignItems: 'center',
   gap: '1.5rem',
-  padding: '0.85rem 2rem',
-  background: '#1e2130',
-  borderBottom: '1px solid #2d3148',
-  fontFamily: "'Segoe UI', sans-serif",
+  padding: '0.75rem 2rem',
+  background: '#111827',
+  borderBottom: '1px solid #1d2740',
+  fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
+  fontSize: '0.875rem',
 };
 
 const logoStyle = {
   fontWeight: 700,
-  fontSize: '1.1rem',
-  color: '#f1f5f9',
+  fontSize: '0.95rem',
+  color: '#dde3f0',
   textDecoration: 'none',
   marginRight: 'auto',
+  letterSpacing: '-0.01em',
 };
 
 const linkStyle = {
-  color: '#94a3b8',
+  color: '#5b6887',
   textDecoration: 'none',
-  fontSize: '0.9rem',
+  fontSize: '0.875rem',
   fontWeight: 500,
-  padding: '0.4rem 0.75rem',
-  borderRadius: '6px',
-  transition: 'background 0.15s, color 0.15s',
+  padding: '0.35rem 0.65rem',
+  borderRadius: '5px',
 };
 
 const activeLinkStyle = {
   ...linkStyle,
-  background: 'rgba(59,130,246,0.15)',
-  color: '#3b82f6',
+  background: 'rgba(79,114,255,0.12)',
+  color: '#4f72ff',
 };
 
 /* ------------------------------------------------------------------ */
@@ -80,7 +81,7 @@ function App() {
       {/* Barra de navegación superior */}
       <nav style={navStyle}>
         <NavLink to="/" style={logoStyle}>
-          🚛 LogiTrack
+          LogiTrack
         </NavLink>
         <NavLink
           to="/"
@@ -93,7 +94,7 @@ function App() {
           to="/dashboard"
           style={({ isActive }) => isActive ? activeLinkStyle : linkStyle}
         >
-          📊 Dashboard BI
+          Dashboard BI
         </NavLink>
       </nav>
 
