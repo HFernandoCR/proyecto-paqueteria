@@ -40,7 +40,23 @@ export function MapContainer() {
     const fetchActiveVehicles = async () => {
       try {
         const res = await axios.get('/api/seguimiento/activos')
-        setVehicles(res.data || [])
+        // La API devuelve [{vehiculo: {...}, ubicacionActual: {lat,lng,...}|null}].
+        // Solo mostramos vehículos con coordenadas conocidas.
+        const items: any[] = res.data || []
+        const mapped = items
+          .filter((item) => item.ubicacionActual?.lat != null && item.ubicacionActual?.lng != null)
+          .map((item) => ({
+            _id:          item.vehiculo._id,
+            placa:        item.vehiculo.placa,
+            modelo:       item.vehiculo.modelo,
+            estadoActual: item.vehiculo.estadoActual,
+            lat:          item.ubicacionActual.lat,
+            lng:          item.ubicacionActual.lng,
+            velocidadKmh: item.ubicacionActual.velocidadKmh ?? 0,
+            bearing:      item.ubicacionActual.bearing ?? 0,
+            timestamp:    item.ubicacionActual.timestamp ?? new Date().toISOString(),
+          }))
+        setVehicles(mapped)
       } catch (err) {
         console.error("Error loading active tracking vehicles:", err)
       } finally {
