@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Plus, Search, Filter, Pencil, Trash2, Truck, AlertTriangle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { VehiculoModal } from '@/components/modals/VehiculoModal'

@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react'
 import { Plus, Search, Filter, Pencil, Trash2, Phone, IdCard, User, AlertTriangle } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { ConfirmModal } from '@/components/modals/ConfirmModal'
@@ -65,7 +66,7 @@ export function Operadores() {
   }
 
   const filteredOperadores = operadores.filter((op) => {
-    const matchesSearch = 
+    const matchesSearch =
       op.nombreCompleto.toLowerCase().includes(searchTerm.toLowerCase()) ||
       op.numeroLicencia.toLowerCase().includes(searchTerm.toLowerCase()) ||
       op.telefono.includes(searchTerm)
@@ -213,7 +214,7 @@ export function Operadores() {
           <AlertTriangle className="h-12 w-12 text-destructive mb-4" />
           <h3 className="text-lg font-medium text-foreground mb-1">Error de conexión</h3>
           <p className="text-sm text-muted-foreground max-w-md mb-4">{error}</p>
-          <button 
+          <button
             onClick={fetchOperadores}
             className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
           >
@@ -302,7 +303,7 @@ export function Operadores() {
         onSave={handleSaveOperador}
         operador={selectedOperador}
       />
-      
+
       <ConfirmModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}
