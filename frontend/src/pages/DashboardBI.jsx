@@ -288,12 +288,12 @@ export function DashboardBI() {
   ]
 
   return (
-    <div style={s.page}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
       {/* ── Header ── */}
       <div style={s.header}>
-        <h2 style={s.h2}>Dashboard BI</h2>
-        <p style={s.sub}>Métricas operativas · actualizado al cargar</p>
+        <h2 className="text-2xl font-bold text-foreground">Dashboard BI</h2>
+        <p className="text-muted-foreground">Indicadores clave · Toma de Decisiones</p>
       </div>
 
       {/* ── Tarjetas KPI ── */}
