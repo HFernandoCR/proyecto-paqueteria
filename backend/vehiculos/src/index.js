@@ -14,7 +14,7 @@ app.get('/health', (req, res) => {
 });
 
 app.use('/operadores', operadoresRouter);
-app.use('/', vehiculosRouter);
+app.use('/vehiculos', vehiculosRouter);
 
 mongoose
   .connect(MONGO_URI)

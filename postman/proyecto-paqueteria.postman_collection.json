@@ -1,0 +1,94 @@
+{
+	"info": {
+		"name": "Proyecto Paquetería API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Vehículos",
+			"item": [
+				{
+					"name": "Listar Vehículos",
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8108/api/vehiculos/vehiculos", "host": ["http://localhost"], "port": "8108", "path": ["api", "vehiculos", "vehiculos"] } }
+				},
+				{
+					"name": "Crear Vehículo",
+					"request": { "method": "POST", "url": { "raw": "http://localhost:8108/api/vehiculos/vehiculos", "host": ["http://localhost"], "port": "8108", "path": ["api", "vehiculos", "vehiculos"] }, "body": { "mode": "raw", "raw": "{\"placa\":\"ABC-123\",\"modelo\":\"Ford Transit\",\"capacidadKg\":1500,\"estadoActual\":\"disponible\"}", "options": { "raw": { "language": "json" } } } }
+				},
+				{
+					"name": "Listar Operadores",
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8108/api/vehiculos/operadores", "host": ["http://localhost"], "port": "8108", "path": ["api", "vehiculos", "operadores"] } }
+				},
+				{
+					"name": "Crear Operador",
+					"request": { "method": "POST", "url": { "raw": "http://localhost:8108/api/vehiculos/operadores", "host": ["http://localhost"], "port": "8108", "path": ["api", "vehiculos", "operadores"] }, "body": { "mode": "raw", "raw": "{\"nombre\":\"Juan Perez\",\"licencia\":\"LIC-12345\",\"telefono\":\"555-1234\"}", "options": { "raw": { "language": "json" } } } }
+				}
+			]
+		},
+		{
+			"name": "Rutas",
+			"item": [
+				{
+					"name": "Listar Rutas",
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8108/api/rutas/rutas", "host": ["http://localhost"], "port": "8108", "path": ["api", "rutas", "rutas"] } }
+				},
+				{
+					"name": "Crear Ruta",
+					"request": { "method": "POST", "url": { "raw": "http://localhost:8108/api/rutas/rutas", "host": ["http://localhost"], "port": "8108", "path": ["api", "rutas", "rutas"] }, "body": { "mode": "raw", "raw": "{\"nombre\":\"Ruta de Prueba Zócalo - Bellas Artes\",\"vehiculoAsignado\":\"SUSTITUIR_POR_ID_VEHICULO\",\"waypoints\":[{\"lat\":19.432608,\"lng\":-99.133209},{\"lat\":19.433990,\"lng\":-99.138400},{\"lat\":19.435200,\"lng\":-99.141200}]}", "options": { "raw": { "language": "json" } } } }
+				}
+			]
+		},
+		{
+			"name": "Ubicación",
+			"item": [
+				{
+					"name": "Iniciar Simulador",
+					"request": { "method": "POST", "url": { "raw": "http://localhost:8108/api/ubicacion/simulador/start/:id", "host": ["http://localhost"], "port": "8108", "path": ["api", "ubicacion", "simulador", "start", ":id"], "variable": [{"key": "id", "value": "SUSTITUIR_POR_ID_VEHICULO"}] } }
+				},
+				{
+					"name": "Detener Simulador",
+					"request": { "method": "POST", "url": { "raw": "http://localhost:8108/api/ubicacion/simulador/stop/:id", "host": ["http://localhost"], "port": "8108", "path": ["api", "ubicacion", "simulador", "stop", ":id"], "variable": [{"key": "id", "value": "SUSTITUIR_POR_ID_VEHICULO"}] } }
+				},
+				{
+					"name": "Historial Vehículo",
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8108/api/ubicacion/ubicaciones/historial/:id", "host": ["http://localhost"], "port": "8108", "path": ["api", "ubicacion", "ubicaciones", "historial", ":id"], "variable": [{"key": "id", "value": "SUSTITUIR_POR_ID_VEHICULO"}] } }
+				}
+			]
+		},
+		{
+			"name": "Seguimiento",
+			"item": [
+				{
+					"name": "Vehículos Activos",
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8108/api/seguimiento/seguimiento/activos", "host": ["http://localhost"], "port": "8108", "path": ["api", "seguimiento", "seguimiento", "activos"] } }
+				},
+				{
+					"name": "Estado Tiempo Real",
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8108/api/seguimiento/seguimiento/:id", "host": ["http://localhost"], "port": "8108", "path": ["api", "seguimiento", "seguimiento", ":id"], "variable": [{"key": "id", "value": "SUSTITUIR_POR_ID_VEHICULO"}] } }
+				}
+			]
+		},
+		{
+			"name": "Analítica",
+			"item": [
+				{
+					"name": "Resumen KPIs",
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8108/api/analitica/kpi/resumen", "host": ["http://localhost"], "port": "8108", "path": ["api", "analitica", "kpi", "resumen"] } }
+				},
+				{
+					"name": "Anomalías",
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8108/api/analitica/reportes/anomalias", "host": ["http://localhost"], "port": "8108", "path": ["api", "analitica", "reportes", "anomalias"] } }
+				}
+			]
+		},
+		{
+			"name": "Notificaciones",
+			"item": [
+				{
+					"name": "Listar Notificaciones",
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8108/api/notificaciones/notificaciones", "host": ["http://localhost"], "port": "8108", "path": ["api", "notificaciones", "notificaciones"] } }
+				}
+			]
+		}
+	]
+}

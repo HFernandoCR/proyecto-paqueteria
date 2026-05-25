@@ -1,5 +1,5 @@
 const UBICACION = process.env.UBICACION_SERVICE_URL || 'http://ubicacion:3003';
-const VEHICULOS = process.env.VEHICULOS_SERVICE_URL || 'http://vehiculos:3001';
+const VEHICULOS = (process.env.VEHICULOS_SERVICE_URL || 'http://vehiculos:3001') + '/vehiculos';
 
 async function fetchVehiculo(vehiculoId) {
   const res = await fetch(`${VEHICULOS}/${vehiculoId}`);
