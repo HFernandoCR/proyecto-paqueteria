@@ -5,6 +5,7 @@ import { Vehiculos } from './pages/Vehiculos'
 import { Operadores } from './pages/Operadores'
 import { Rutas } from './pages/Rutas'
 import { Reportes } from './pages/Reportes'
+import { DashboardBI } from './pages/DashboardBI'
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="operadores" element={<Operadores />} />
         <Route path="rutas" element={<Rutas />} />
         <Route path="reportes" element={<Reportes />} />
+        <Route path="dashboard" element={<DashboardBI />} />
       </Route>
     </Routes>
   )

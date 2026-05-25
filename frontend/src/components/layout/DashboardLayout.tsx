@@ -1,10 +1,11 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import { 
-  LayoutDashboard, 
-  Truck, 
-  Users, 
-  Route, 
+import {
+  LayoutDashboard,
+  Truck,
+  Users,
+  Route,
   BarChart3,
+  PieChart,
   Bell,
   Settings,
   LogOut,
@@ -20,6 +21,7 @@ const navigation = [
   { name: 'Operadores', href: '/operadores', icon: Users },
   { name: 'Rutas', href: '/rutas', icon: Route },
   { name: 'Reportes', href: '/reportes', icon: BarChart3 },
+  { name: 'Dashboard BI', href: '/dashboard', icon: PieChart },
 ]
 
 export function DashboardLayout() {
