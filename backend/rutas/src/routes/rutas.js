@@ -37,7 +37,7 @@ router.get('/', async (req, res) => {
 
 async function syncVehiculo(vehiculoId, rutaId) {
   try {
-    const response = await fetch(`${VEHICULOS_SERVICE_URL}/${vehiculoId}`, {
+    const response = await fetch(`${VEHICULOS_SERVICE_URL}/vehiculos/${vehiculoId}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ rutaAsignadaId: rutaId }),
