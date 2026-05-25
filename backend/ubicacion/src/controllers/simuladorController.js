@@ -118,6 +118,15 @@ exports.start = async (req, res) => {
             clearInterval(intervalId);
             activeSimulations.delete(vehiculoId);
             await notificarLlegada(vehiculoId);
+            try {
+              await fetch(`${process.env.VEHICULOS_SERVICE_URL || 'http://vehiculos:3001'}/vehiculos/${vehiculoId}/estado`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ estadoActual: 'detenido' })
+              });
+            } catch (err) {
+              console.error(`[simulador] Error cambiando estado a detenido:`, err.message);
+            }
           }
         }
       } catch (err) {
@@ -127,6 +136,16 @@ exports.start = async (req, res) => {
 
     // Guardar en el mapa de simulaciones
     activeSimulations.set(vehiculoId, { intervalId, lat: currentLat, lng: currentLng });
+
+    try {
+      await fetch(`${process.env.VEHICULOS_SERVICE_URL || 'http://vehiculos:3001'}/vehiculos/${vehiculoId}/estado`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ estadoActual: 'en_ruta' })
+      });
+    } catch (err) {
+      console.error(`[simulador] Error cambiando estado a en_ruta:`, err.message);
+    }
 
     res.json({ message: 'Simulador real iniciado con ruta', vehiculoId, puntosA_Recorrer: waypoints.length });
 
@@ -146,6 +165,16 @@ exports.stop = (req, res) => {
   const simData = activeSimulations.get(vehiculoId);
   clearInterval(simData.intervalId);
   activeSimulations.delete(vehiculoId);
+
+  try {
+    fetch(`${process.env.VEHICULOS_SERVICE_URL || 'http://vehiculos:3001'}/vehiculos/${vehiculoId}/estado`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ estadoActual: 'detenido' })
+    }).catch(err => console.error(`[simulador] Error cambiando estado a detenido en stop:`, err.message));
+  } catch (err) {
+    // Ignorar si el fetch síncrono falla por algo raro
+  }
 
   res.json({ message: 'Simulador detenido manualmente', vehiculoId });
 };
