@@ -1,0 +1,217 @@
+import { useState, useEffect } from 'react'
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+} from 'recharts'
+import axios from 'axios'
+
+/* ------------------------------------------------------------------ */
+/*  Estilos en línea reutilizables                                      */
+/* ------------------------------------------------------------------ */
+const s = {
+  page: {
+    padding: '1.5rem',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.5rem',
+    background: '#0f1117',
+    minHeight: '100vh',
+    fontFamily: "'Segoe UI', sans-serif",
+    color: '#f1f5f9',
+    boxSizing: 'border-box',
+  },
+  /* Header */
+  header: { display: 'flex', flexDirection: 'column', gap: '0.25rem' },
+  h2: { margin: 0, fontSize: '1.5rem', fontWeight: 700, color: '#f1f5f9' },
+  sub: { margin: 0, fontSize: '0.875rem', color: '#94a3b8' },
+  /* Grid de 4 tarjetas */
+  kpiGrid: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+    gap: '1rem',
+  },
+  kpiCard: {
+    background: '#1e2130',
+    borderRadius: '12px',
+    padding: '1.25rem',
+    border: '1px solid #2d3148',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem',
+  },
+  kpiLabel: { fontSize: '0.8rem', color: '#94a3b8', margin: 0 },
+  kpiValue: { fontSize: '2rem', fontWeight: 700, margin: 0 },
+  kpiSub: { fontSize: '0.75rem', margin: 0 },
+  /* Sección de gráfica */
+  chartSection: {
+    background: '#1e2130',
+    borderRadius: '12px',
+    padding: '1.5rem',
+    border: '1px solid #2d3148',
+  },
+  chartHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '1.25rem',
+  },
+  chartTitle: { margin: 0, fontSize: '1rem', fontWeight: 600 },
+  chartGrid2: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+    gap: '1.5rem',
+  },
+  chartBox: { height: '260px' },
+  /* Spinner */
+  spinner: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100%',
+    color: '#94a3b8',
+    fontSize: '0.875rem',
+  },
+  /* Tabla */
+  table: { width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' },
+  th: {
+    textAlign: 'left',
+    padding: '0.5rem 0.75rem',
+    color: '#94a3b8',
+    fontSize: '0.75rem',
+    fontWeight: 600,
+    borderBottom: '1px solid #2d3148',
+  },
+  td: { padding: '0.65rem 0.75rem', borderBottom: '1px solid #2d3148' },
+  badgeDanger: {
+    display: 'inline-block',
+    background: 'rgba(239,68,68,0.15)',
+    color: '#ef4444',
+    borderRadius: '20px',
+    padding: '0.2rem 0.65rem',
+    fontSize: '0.72rem',
+    fontWeight: 600,
+  },
+  empty: {
+    textAlign: 'center',
+    padding: '2rem',
+    color: '#64748b',
+    fontSize: '0.875rem',
+    border: '1px dashed #2d3148',
+    borderRadius: '8px',
+  },
+}
+
+/* colores de acento para cada KPI */
+const KPI_COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444']
+
+/* tooltip personalizado de recharts */
+const tooltipStyle = {
+  contentStyle: {
+    background: '#1e2130',
+    border: '1px solid #2d3148',
+    borderRadius: '8px',
+    color: '#f1f5f9',
+  },
+  labelStyle: { color: '#f1f5f9', fontWeight: 700 },
+}
+
+/* ------------------------------------------------------------------ */
+/*  Componente principal                                                 */
+/* ------------------------------------------------------------------ */
+export function DashboardBI() {
+  const [isLoading, setIsLoading] = useState(true)
+  const [stats, setStats] = useState(null)
+  const [kmPorVehiculo, setKmPorVehiculo] = useState([])
+  const [entregasPorDia, setEntregasPorDia] = useState([])
+  const [tiempoPorRuta, setTiempoPorRuta] = useState([])
+  const [anomalias, setAnomalias] = useState([])
+
+  useEffect(() => {
+    const fetchAll = async () => {
+      try {
+        const [resumenRes, kmRes, entregasRes, tiempoRes, anomaliasRes] =
+          await Promise.all([
+            axios.get('/api/analitica/kpi/resumen'),
+            axios.get('/api/analitica/kpi/km-por-vehiculo'),
+            axios.get('/api/analitica/kpi/entregas-por-dia'),
+            axios
+              .get('/api/analitica/kpi/tiempo-por-ruta')
+              .catch(() => ({ data: { datos: [] } })),
+            axios.get('/api/analitica/reportes/anomalias'),
+          ])
+
+        setStats(resumenRes.data)
+        setKmPorVehiculo(kmRes.data.datos ?? [])
+        setEntregasPorDia(entregasRes.data.datos ?? [])
+        setTiempoPorRuta(tiempoRes.data.datos ?? [])
+        setAnomalias(anomaliasRes.data.anomalias ?? [])
+      } catch (err) {
+        console.error('Error al cargar datos de analítica:', err)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    fetchAll()
+  }, [])
+
+  /* ── KPI cards config ── */
+  const kpis = [
+    {
+      label: 'Vehículos Activos',
+      value: stats ? `${stats.vehiculosActivos}` : '—',
+      sub: stats ? `de ${stats.vehiculosTotal} registrados` : '',
+    },
+    {
+      label: 'Km Recorridos Hoy',
+      value: stats ? `${stats.kmRecorridosHoy}` : '—',
+      sub: 'km totales del día',
+    },
+    {
+      label: 'Entregas Hoy',
+      value: stats ? `${stats.entregasHoy}` : '—',
+      sub: 'paquetes entregados',
+    },
+    {
+      label: 'Vehículos Detenidos',
+      value: stats ? `${stats.vehiculosDetenidos}` : '—',
+      sub:
+        stats && stats.vehiculosDetenidos > 0
+          ? '⚠ requieren atención'
+          : '✅ sin incidencias',
+    },
+  ]
+
+  return (
+    <div style={s.page}>
+      {/* ── Header ── */}
+      <div style={s.header}>
+        <h2 style={s.h2}>📊 Dashboard BI</h2>
+        <p style={s.sub}>
+          Indicadores clave de rendimiento · Toma de Decisiones
+        </p>
+      </div>
+
+      {/* ── Tarjetas KPI ── */}
+      <div style={s.kpiGrid}>
+        {kpis.map((kpi, i) => (
+          <div key={kpi.label} style={s.kpiCard}>
+            <p style={s.kpiLabel}>{kpi.label}</p>
+            <p style={{ ...s.kpiValue, color: KPI_COLORS[i] }}>
+              {isLoading ? '…' : kpi.value}
+            </p>
+            <p style={{ ...s.kpiSub, color: KPI_COLORS[i] + 'cc' }}>
+              {kpi.sub}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
