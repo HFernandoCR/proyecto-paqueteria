@@ -212,6 +212,49 @@ export function DashboardBI() {
           </div>
         ))}
       </div>
+
+      {/* ── BarChart: Km recorridos por vehículo ── */}
+      <div style={s.chartSection}>
+        <div style={s.chartHeader}>
+          <h3 style={s.chartTitle}>📦 Km Recorridos por Vehículo</h3>
+          <span style={{ fontSize: '0.8rem', color: '#94a3b8' }}>
+            ● km totales hoy
+          </span>
+        </div>
+
+        <div style={s.chartBox}>
+          {isLoading ? (
+            <div style={s.spinner}>Cargando datos…</div>
+          ) : kmPorVehiculo.length === 0 ? (
+            <div style={s.empty}>Sin datos de trayecto disponibles</div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={kmPorVehiculo}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2d3148" />
+                <XAxis
+                  dataKey="placa"
+                  stroke="#64748b"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  stroke="#64748b"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  unit=" km"
+                />
+                <Tooltip
+                  {...tooltipStyle}
+                  formatter={(v) => [`${v} km`, 'Km totales']}
+                />
+                <Bar dataKey="kmTotal" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
