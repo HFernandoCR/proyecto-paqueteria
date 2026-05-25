@@ -309,6 +309,56 @@ export function DashboardBI() {
       </div>
 
       </div>{/* fin grid 2 columnas */}
+
+      {/* ── BarChart horizontal: tiempo promedio por ruta ── */}
+      <div style={s.chartSection}>
+        <div style={s.chartHeader}>
+          <h3 style={s.chartTitle}>⏱ Tiempo Promedio por Ruta (min)</h3>
+          <span style={{ fontSize: '0.8rem', color: '#f59e0b' }}>
+            ● minutos promedio
+          </span>
+        </div>
+
+        <div style={s.chartBox}>
+          {isLoading ? (
+            <div style={s.spinner}>Cargando datos…</div>
+          ) : tiempoPorRuta.length === 0 ? (
+            <div style={s.empty}>Sin datos de rutas disponibles</div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart layout="vertical" data={tiempoPorRuta}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#2d3148" />
+                <XAxis
+                  type="number"
+                  stroke="#64748b"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  unit=" min"
+                />
+                <YAxis
+                  type="category"
+                  dataKey="nombre"
+                  width={130}
+                  stroke="#64748b"
+                  fontSize={11}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <Tooltip
+                  {...tooltipStyle}
+                  formatter={(v) => [`${v} min`, 'Tiempo promedio']}
+                />
+                <Bar
+                  dataKey="tiempoPromedioMin"
+                  fill="#f59e0b"
+                  radius={[0, 4, 4, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
