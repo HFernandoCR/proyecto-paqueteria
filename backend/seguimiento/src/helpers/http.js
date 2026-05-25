@@ -21,7 +21,19 @@ async function fetchUbicacionActual(vehiculoId) {
   }
 }
 
+async function fetchHistorial(vehiculoId) {
+  try {
+    const res = await fetch(`${UBICACION}/ubicaciones/historial/${vehiculoId}`);
+    if (!res.ok) return [];
+    return res.json();
+  } catch (error) {
+    console.error(`[http] Error consultando historial de ${vehiculoId}:`, error.message);
+    return [];
+  }
+}
+
 module.exports = {
   fetchVehiculo,
-  fetchUbicacionActual
+  fetchUbicacionActual,
+  fetchHistorial
 };

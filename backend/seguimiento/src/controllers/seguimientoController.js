@@ -23,3 +23,24 @@ exports.getEstadoTiempoReal = async (req, res) => {
     res.status(500).json({ error: 'Error interno al consultar el estado en tiempo real' });
   }
 };
+
+exports.getHistorialVehiculo = async (req, res) => {
+  try {
+    const { vehiculoId } = req.params;
+    
+    const vehiculo = await http.fetchVehiculo(vehiculoId);
+    if (!vehiculo) {
+      return res.status(404).json({ error: 'Vehículo no encontrado' });
+    }
+
+    const historial = await http.fetchHistorial(vehiculoId);
+
+    res.json({
+      vehiculo,
+      historial
+    });
+  } catch (error) {
+    console.error('[seguimiento] Error en getHistorialVehiculo:', error.message);
+    res.status(500).json({ error: 'Error interno al consultar el historial' });
+  }
+};
