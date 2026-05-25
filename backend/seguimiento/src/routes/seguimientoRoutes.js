@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const seguimientoController = require('../controllers/seguimientoController');
 
+// GET /activos -> Vehículos en ruta con ubicación
+router.get('/activos', seguimientoController.getVehiculosActivos);
+
 // GET /:vehiculoId/historial -> Obtiene vehículo y su historial de posiciones
 router.get('/:vehiculoId/historial', seguimientoController.getHistorialVehiculo);
 

@@ -44,3 +44,20 @@ exports.getHistorialVehiculo = async (req, res) => {
     res.status(500).json({ error: 'Error interno al consultar el historial' });
   }
 };
+
+exports.getVehiculosActivos = async (req, res) => {
+  try {
+    const vehiculosActivos = await http.fetchVehiculosActivos();
+    
+    // Obtener ubicación de cada uno en paralelo
+    const activosConUbicacion = await Promise.all(vehiculosActivos.map(async (vehiculo) => {
+      const ubicacionActual = await http.fetchUbicacionActual(vehiculo._id);
+      return { vehiculo, ubicacionActual };
+    }));
+
+    res.json(activosConUbicacion);
+  } catch (error) {
+    console.error('[seguimiento] Error en getVehiculosActivos:', error.message);
+    res.status(500).json({ error: 'Error interno al consultar vehículos activos' });
+  }
+};

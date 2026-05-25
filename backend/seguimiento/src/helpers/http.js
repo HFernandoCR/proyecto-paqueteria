@@ -32,8 +32,21 @@ async function fetchHistorial(vehiculoId) {
   }
 }
 
+async function fetchVehiculosActivos() {
+  try {
+    const res = await fetch(`${VEHICULOS}/`);
+    if (!res.ok) return [];
+    const vehiculos = await res.json();
+    return vehiculos.filter(v => v.estadoActual === 'en_ruta' || v.estadoActual === 'entregando');
+  } catch (error) {
+    console.error(`[http] Error consultando lista de vehículos:`, error.message);
+    return [];
+  }
+}
+
 module.exports = {
   fetchVehiculo,
   fetchUbicacionActual,
-  fetchHistorial
+  fetchHistorial,
+  fetchVehiculosActivos
 };
