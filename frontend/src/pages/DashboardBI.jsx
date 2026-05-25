@@ -310,6 +310,74 @@ export function DashboardBI() {
 
       </div>{/* fin grid 2 columnas */}
 
+      {/* ── Tabla de anomalías ── */}
+      <div style={s.chartSection}>
+        <div style={s.chartHeader}>
+          <h3 style={s.chartTitle}>🚨 Vehículos con Anomalía</h3>
+          <span
+            style={{
+              fontSize: '0.78rem',
+              background: 'rgba(239,68,68,0.12)',
+              color: '#ef4444',
+              borderRadius: '20px',
+              padding: '0.2rem 0.7rem',
+              fontWeight: 600,
+            }}
+          >
+            {anomalias.length} activas
+          </span>
+        </div>
+        <p style={{ ...s.kpiSub, color: '#64748b', marginBottom: '1rem' }}>
+          Vehículos detenidos en ruta activa por más de 15 minutos
+        </p>
+
+        {isLoading ? (
+          <div style={s.spinner}>Cargando datos…</div>
+        ) : anomalias.length === 0 ? (
+          <div style={s.empty}>
+            ✅ Operación normal — sin anomalías reportadas
+          </div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={s.table}>
+              <thead>
+                <tr>
+                  <th style={s.th}>Placa</th>
+                  <th style={s.th}>ID Vehículo</th>
+                  <th style={s.th}>Tiempo detenido</th>
+                  <th style={s.th}>Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {anomalias.map((a, i) => (
+                  <tr key={`${a.vehiculoId}-${i}`}>
+                    <td style={{ ...s.td, fontWeight: 700, fontFamily: 'monospace' }}>
+                      {a.placa}
+                    </td>
+                    <td
+                      style={{
+                        ...s.td,
+                        fontFamily: 'monospace',
+                        fontSize: '0.78rem',
+                        color: '#94a3b8',
+                      }}
+                    >
+                      {a.vehiculoId}
+                    </td>
+                    <td style={{ ...s.td, color: '#ef4444', fontWeight: 700 }}>
+                      {a.minutosDetenido} min
+                    </td>
+                    <td style={s.td}>
+                      <span style={s.badgeDanger}>⚠ Detenido</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
       {/* ── BarChart horizontal: tiempo promedio por ruta ── */}
       <div style={s.chartSection}>
         <div style={s.chartHeader}>
