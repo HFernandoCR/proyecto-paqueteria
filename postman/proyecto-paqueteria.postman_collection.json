@@ -73,7 +73,7 @@
 			"item": [
 				{
 					"name": "Resumen KPIs",
-					"request": { "method": "GET", "url": { "raw": "http://localhost:8108/api/analitica/kpis/resumen", "host": ["http://localhost"], "port": "8108", "path": ["api", "analitica", "kpis", "resumen"] } }
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8108/api/analitica/kpi/resumen", "host": ["http://localhost"], "port": "8108", "path": ["api", "analitica", "kpi", "resumen"] } }
 				},
 				{
 					"name": "Anomalías",
