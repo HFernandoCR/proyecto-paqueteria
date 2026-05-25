@@ -43,4 +43,34 @@ router.get('/', async (req, res) => {
   }
 });
 
+// PATCH /:id/leida — marcar como leída
+router.patch('/:id/leida', async (req, res) => {
+  try {
+    const notificacion = await Notificacion.findByIdAndUpdate(
+      req.params.id,
+      { $set: { leida: true } },
+      { new: true, runValidators: true }
+    );
+    if (!notificacion) {
+      return res.status(404).json({ error: 'Notificación no encontrada' });
+    }
+    res.json(notificacion);
+  } catch (err) {
+    handleError(res, err);
+  }
+});
+
+// DELETE /:id — eliminar notificación
+router.delete('/:id', async (req, res) => {
+  try {
+    const notificacion = await Notificacion.findByIdAndDelete(req.params.id);
+    if (!notificacion) {
+      return res.status(404).json({ error: 'Notificación no encontrada' });
+    }
+    res.json({ mensaje: 'Notificación eliminada', id: req.params.id });
+  } catch (err) {
+    handleError(res, err);
+  }
+});
+
 module.exports = router;
