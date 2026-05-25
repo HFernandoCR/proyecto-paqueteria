@@ -11,37 +11,30 @@ async function fetchVehiculo(vehiculoId) {
 }
 
 async function fetchUbicacionActual(vehiculoId) {
-  try {
-    const res = await fetch(`${UBICACION}/ubicaciones/actual/${vehiculoId}`);
-    if (!res.ok) return null;
-    return res.json();
-  } catch (error) {
-    console.error(`[http] Error consultando ubicación actual de ${vehiculoId}:`, error.message);
-    return null;
+  const res = await fetch(`${UBICACION}/ubicaciones/actual/${vehiculoId}`);
+  if (!res.ok) {
+    if (res.status === 404) return null;
+    throw new Error(`Error en servicio ubicacion (actual): ${res.status}`);
   }
+  return res.json();
 }
 
 async function fetchHistorial(vehiculoId) {
-  try {
-    const res = await fetch(`${UBICACION}/ubicaciones/historial/${vehiculoId}`);
-    if (!res.ok) return [];
-    return res.json();
-  } catch (error) {
-    console.error(`[http] Error consultando historial de ${vehiculoId}:`, error.message);
-    return [];
+  const res = await fetch(`${UBICACION}/ubicaciones/historial/${vehiculoId}`);
+  if (!res.ok) {
+    if (res.status === 404) return [];
+    throw new Error(`Error en servicio ubicacion (historial): ${res.status}`);
   }
+  return res.json();
 }
 
 async function fetchVehiculosActivos() {
-  try {
-    const res = await fetch(`${VEHICULOS}/`);
-    if (!res.ok) return [];
-    const vehiculos = await res.json();
-    return vehiculos.filter(v => v.estadoActual === 'en_ruta' || v.estadoActual === 'entregando');
-  } catch (error) {
-    console.error(`[http] Error consultando lista de vehículos:`, error.message);
-    return [];
+  const res = await fetch(`${VEHICULOS}/`);
+  if (!res.ok) {
+    throw new Error(`Error en servicio vehiculos (lista): ${res.status}`);
   }
+  const vehiculos = await res.json();
+  return vehiculos.filter(v => v.estadoActual === 'en_ruta' || v.estadoActual === 'entregando');
 }
 
 module.exports = {
