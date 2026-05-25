@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const seguimientoRoutes = require('./routes/seguimientoRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3004;
@@ -18,6 +19,9 @@ const UBICACION_SERVICE_URL = process.env.UBICACION_SERVICE_URL || 'http://local
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'seguimiento' });
 });
+
+// Rutas de seguimiento
+app.use('/', seguimientoRoutes);
 
 app.get('/activos', async (req, res) => {
   try {
