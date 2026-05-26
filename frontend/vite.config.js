@@ -16,8 +16,7 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:8108',
         changeOrigin: true,
-        // Nginx acepta rutas con y sin trailing slash (rewrite interno en nginx.conf).
-        // No se necesita rewrite aquí desde que se corrigió el proxy en PR #48.
+        autoRewrite: true, // Reescribe Location en 301/302 para evitar CORS cross-origin
       },
     },
   },
