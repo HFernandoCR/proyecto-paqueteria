@@ -89,7 +89,7 @@ export function Rutas() {
       setRutas(mapped)
     } catch (err: any) {
       console.error("Error loading routes:", err)
-      setError("No se pudo conectar al servidor de rutas. Por favor, asegúrate de que el servidor de tu escuela esté encendido.")
+      setError("No se pudo conectar al servidor. Verifica tu conexión e intenta de nuevo.")
     } finally {
       setIsLoading(false)
     }

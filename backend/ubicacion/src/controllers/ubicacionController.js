@@ -18,14 +18,16 @@ exports.getActual = async (req, res) => {
   }
 };
 
-// GET /ubicaciones/historial/:vehiculoId
+// GET /ubicaciones/historial/:vehiculoId[?limit=N]
 exports.getHistorial = async (req, res) => {
   try {
     const { vehiculoId } = req.params;
-    // Buscar todas las ubicaciones, ordenadas de más nueva a más vieja
-    const historial = await HistorialUbicacion.find({ vehiculoId })
-      .sort({ timestamp: -1 });
+    const limit = parseInt(req.query.limit, 10);
 
+    let query = HistorialUbicacion.find({ vehiculoId }).sort({ timestamp: -1 });
+    if (limit > 0) query = query.limit(limit);
+
+    const historial = await query;
     res.json(historial);
   } catch (error) {
     res.status(500).json({ message: 'Error al obtener historial de ubicación', error: error.message });

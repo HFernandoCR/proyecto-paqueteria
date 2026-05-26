@@ -59,7 +59,7 @@ export function Operadores() {
       setOperadores(mapped)
     } catch (err: any) {
       console.error("Error loading operators:", err)
-      setError("No se pudo conectar al servidor de operadores. Por favor, asegúrate de que el servidor de tu escuela esté encendido.")
+      setError("No se pudo conectar al servidor. Verifica tu conexión e intenta de nuevo.")
     } finally {
       setIsLoading(false)
     }

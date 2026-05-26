@@ -17,8 +17,16 @@ interface ActiveVehicle {
   timestamp: string
 }
 
+const estadoColor: Record<string, string> = {
+  en_ruta:      '#10b981', // verde
+  entregando:   '#3b82f6', // azul
+  detenido:     '#ef4444', // rojo
+  disponible:   '#71717a', // gris
+  mantenimiento:'#f59e0b', // amarillo
+}
+
 const createVehicleIcon = (status: string) => {
-  const color = status === 'entregando' ? '#f59e0b' : '#3b82f6';
+  const color = estadoColor[status] ?? '#71717a';
   return L.divIcon({
     html: `
       <div class="relative flex items-center justify-center">
@@ -79,7 +87,7 @@ export function MapContainer() {
           </div>
           <div>
             <h3 className="font-semibold text-foreground">Seguimiento en Vivo</h3>
-            <p className="text-sm text-muted-foreground">Ciudad de México y área metropolitana</p>
+            <p className="text-sm text-muted-foreground">Oaxaca y zona metropolitana</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -100,7 +108,7 @@ export function MapContainer() {
         ) : null}
 
         <LeafletMap 
-          center={[19.4326, -99.1332] as [number, number]} 
+          center={[17.0732, -96.7266] as [number, number]} 
           zoom={11} 
           style={{ height: '100%', width: '100%', zIndex: 1 }}
           zoomControl={true}
@@ -115,16 +123,33 @@ export function MapContainer() {
               position={[v.lat, v.lng] as [number, number]} 
               icon={createVehicleIcon(v.estadoActual)}
             >
-              <Popup>
-                <div className="p-1 space-y-1">
-                  <h4 className="font-bold text-foreground">{v.modelo}</h4>
-                  <p className="text-xs font-mono text-muted-foreground">Placa: {v.placa}</p>
-                  <p className="text-xs text-foreground">
-                    Estado: <span className="font-semibold capitalize">{v.estadoActual.replace('_', ' ')}</span>
+              <Popup className="map-popup" maxWidth={180}>
+                <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '12px', color: '#fafafa' }}>
+                  {/* Placa */}
+                  <p style={{ fontWeight: 700, fontSize: '13px', letterSpacing: '0.06em', marginBottom: '6px' }}>
+                    {v.placa}
                   </p>
-                  {v.velocidadKmh > 0 ? (
-                    <p className="text-xs text-success font-medium">Velocidad: {v.velocidadKmh} km/h</p>
-                  ) : null}
+                  {/* Estado con badge de color */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '4px' }}>
+                    <span style={{
+                      display: 'inline-block',
+                      width: '7px', height: '7px',
+                      borderRadius: '50%',
+                      backgroundColor: estadoColor[v.estadoActual] ?? '#71717a',
+                      flexShrink: 0,
+                    }} />
+                    <span style={{
+                      color: estadoColor[v.estadoActual] ?? '#71717a',
+                      fontWeight: 600,
+                      textTransform: 'capitalize',
+                    }}>
+                      {v.estadoActual.replace('_', ' ')}
+                    </span>
+                  </div>
+                  {/* Velocidad */}
+                  {v.velocidadKmh > 0 && (
+                    <p style={{ color: '#71717a' }}>{v.velocidadKmh} km/h</p>
+                  )}
                 </div>
               </Popup>
             </Marker>
@@ -139,14 +164,21 @@ export function MapContainer() {
             <span className="font-semibold text-foreground">{vehicles.length}</span> vehículos activos en mapa
           </span>
           <div className="flex items-center gap-4 flex-wrap">
-            <span className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-primary" />
-              <span className="text-muted-foreground font-medium">En ruta</span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-warning" />
-              <span className="text-muted-foreground font-medium font-medium">Entregando</span>
-            </span>
+            {([
+              { estado: 'disponible',    label: 'Disponible'    },
+              { estado: 'en_ruta',       label: 'En ruta'       },
+              { estado: 'entregando',    label: 'Entregando'    },
+              { estado: 'detenido',      label: 'Detenido'      },
+              { estado: 'mantenimiento', label: 'Mantenimiento' },
+            ] as const).map(({ estado, label }) => (
+              <span key={estado} className="flex items-center gap-1.5">
+                <span
+                  className="h-2.5 w-2.5 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: estadoColor[estado] }}
+                />
+                <span className="text-muted-foreground font-medium">{label}</span>
+              </span>
+            ))}
           </div>
         </div>
       </div>

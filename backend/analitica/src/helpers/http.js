@@ -7,9 +7,12 @@ async function fetchVehiculos() {
   return res.json();
 }
 
-async function fetchHistorial(vehiculoId) {
+async function fetchHistorial(vehiculoId, limit = 0) {
   try {
-    const res = await fetch(`${UBICACION}/ubicaciones/historial/${vehiculoId}`);
+    const url = limit > 0
+      ? `${UBICACION}/ubicaciones/historial/${vehiculoId}?limit=${limit}`
+      : `${UBICACION}/ubicaciones/historial/${vehiculoId}`;
+    const res = await fetch(url);
     if (!res.ok) return [];
     return res.json();
   } catch (_) {
