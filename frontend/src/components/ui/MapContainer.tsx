@@ -17,6 +17,14 @@ interface ActiveVehicle {
   timestamp: string
 }
 
+const estadoColor: Record<string, string> = {
+  en_ruta:      '#10b981', // verde
+  entregando:   '#3b82f6', // azul
+  detenido:     '#ef4444', // rojo
+  disponible:   '#71717a', // gris
+  mantenimiento:'#f59e0b', // amarillo
+}
+
 const createVehicleIcon = (status: string) => {
   const color = status === 'entregando' ? '#f59e0b' : '#3b82f6';
   return L.divIcon({
@@ -115,16 +123,33 @@ export function MapContainer() {
               position={[v.lat, v.lng] as [number, number]} 
               icon={createVehicleIcon(v.estadoActual)}
             >
-              <Popup>
-                <div className="p-1 space-y-1">
-                  <h4 className="font-bold text-foreground">{v.modelo}</h4>
-                  <p className="text-xs font-mono text-muted-foreground">Placa: {v.placa}</p>
-                  <p className="text-xs text-foreground">
-                    Estado: <span className="font-semibold capitalize">{v.estadoActual.replace('_', ' ')}</span>
+              <Popup className="map-popup" maxWidth={180}>
+                <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '12px', color: '#fafafa' }}>
+                  {/* Placa */}
+                  <p style={{ fontWeight: 700, fontSize: '13px', letterSpacing: '0.06em', marginBottom: '6px' }}>
+                    {v.placa}
                   </p>
-                  {v.velocidadKmh > 0 ? (
-                    <p className="text-xs text-success font-medium">Velocidad: {v.velocidadKmh} km/h</p>
-                  ) : null}
+                  {/* Estado con badge de color */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '4px' }}>
+                    <span style={{
+                      display: 'inline-block',
+                      width: '7px', height: '7px',
+                      borderRadius: '50%',
+                      backgroundColor: estadoColor[v.estadoActual] ?? '#71717a',
+                      flexShrink: 0,
+                    }} />
+                    <span style={{
+                      color: estadoColor[v.estadoActual] ?? '#71717a',
+                      fontWeight: 600,
+                      textTransform: 'capitalize',
+                    }}>
+                      {v.estadoActual.replace('_', ' ')}
+                    </span>
+                  </div>
+                  {/* Velocidad */}
+                  {v.velocidadKmh > 0 && (
+                    <p style={{ color: '#71717a' }}>{v.velocidadKmh} km/h</p>
+                  )}
                 </div>
               </Popup>
             </Marker>
