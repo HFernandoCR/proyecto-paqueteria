@@ -11,6 +11,8 @@ import {
   Line,
 } from 'recharts'
 import axios from 'axios'
+import { KpiCard } from '@/components/ui/KpiCard'
+import { Truck, Navigation, Package, AlertTriangle } from 'lucide-react'
 
 /* ------------------------------------------------------------------ */
 /*  Design tokens — paleta única                                        */
@@ -60,52 +62,6 @@ const s = {
     fontSize: '0.8rem',
     color: C.muted,
     letterSpacing: '0.01em',
-  },
-  /* ── KPI grid ── */
-  kpiGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))',
-    gap: '1rem',
-  },
-  kpiCard: {
-    background: C.surface,
-    borderRadius: '8px',
-    padding: '1rem 1.25rem',
-    border: `1px solid ${C.border}`,
-    borderLeft: `4px solid ${C.accent}`,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.35rem',
-  },
-  kpiCardDanger: {
-    background: C.surface,
-    borderRadius: '8px',
-    padding: '1rem 1.25rem',
-    border: `1px solid ${C.border}`,
-    borderLeft: `4px solid ${C.danger}`,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.35rem',
-  },
-  kpiLabel: {
-    margin: 0,
-    fontSize: '0.7rem',
-    fontWeight: 600,
-    letterSpacing: '0.06em',
-    textTransform: 'uppercase',
-    color: C.muted,
-  },
-  kpiValue: {
-    margin: 0,
-    fontSize: '1.75rem',
-    fontWeight: 700,
-    color: C.text,
-    lineHeight: 1.1,
-  },
-  kpiSub: {
-    margin: 0,
-    fontSize: '0.75rem',
-    color: C.muted,
   },
   /* ── Paneles de gráfica ── */
   panel: {
@@ -257,36 +213,6 @@ export function DashboardBI() {
     fetchAll()
   }, [])
 
-  const kpis = [
-    {
-      label: 'Vehículos Activos',
-      value: stats ? `${stats.vehiculosActivos}` : '—',
-      sub: stats ? `de ${stats.vehiculosTotal} registrados` : '',
-      danger: false,
-    },
-    {
-      label: 'Km Recorridos Hoy',
-      value: stats ? `${stats.kmRecorridosHoy}` : '—',
-      sub: 'km totales del día',
-      danger: false,
-    },
-    {
-      label: 'Entregas Hoy',
-      value: stats ? `${stats.entregasHoy}` : '—',
-      sub: 'paquetes entregados',
-      danger: false,
-    },
-    {
-      label: 'Vehículos Detenidos',
-      value: stats ? `${stats.vehiculosDetenidos}` : '—',
-      sub:
-        stats && stats.vehiculosDetenidos > 0
-          ? 'Requieren atención'
-          : 'Sin incidencias',
-      danger: true,
-    },
-  ]
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
@@ -297,18 +223,35 @@ export function DashboardBI() {
       </div>
 
       {/* ── Tarjetas KPI ── */}
-      <div style={s.kpiGrid}>
-        {kpis.map((kpi) => (
-          <div key={kpi.label} style={kpi.danger ? s.kpiCardDanger : s.kpiCard}>
-            <p style={s.kpiLabel}>{kpi.label}</p>
-            <p style={{ ...s.kpiValue, color: kpi.danger ? C.danger : C.text }}>
-              {isLoading ? '—' : kpi.value}
-            </p>
-            <p style={{ ...s.kpiSub, color: kpi.danger && stats?.vehiculosDetenidos > 0 ? C.danger : C.muted }}>
-              {kpi.sub}
-            </p>
-          </div>
-        ))}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <KpiCard
+          title="Vehículos Activos"
+          value={isLoading ? '—' : String(stats?.vehiculosActivos ?? 0)}
+          subtitle={stats ? `de ${stats.vehiculosTotal} registrados` : 'Cargando...'}
+          icon={Truck}
+          accentColor="primary"
+        />
+        <KpiCard
+          title="Km Recorridos Hoy"
+          value={isLoading ? '—' : String(stats?.kmRecorridosHoy ?? 0)}
+          subtitle="km totales del día"
+          icon={Navigation}
+          accentColor="success"
+        />
+        <KpiCard
+          title="Entregas Hoy"
+          value={isLoading ? '—' : String(stats?.entregasHoy ?? 0)}
+          subtitle="paquetes entregados"
+          icon={Package}
+          accentColor="primary"
+        />
+        <KpiCard
+          title="Vehículos Detenidos"
+          value={isLoading ? '—' : String(stats?.vehiculosDetenidos ?? 0)}
+          subtitle={stats?.vehiculosDetenidos > 0 ? 'Requieren atención' : 'Sin incidencias'}
+          icon={AlertTriangle}
+          accentColor={stats?.vehiculosDetenidos > 0 ? 'destructive' : 'success'}
+        />
       </div>
 
       {/* ── Fila: BarChart km + LineChart entregas ── */}
