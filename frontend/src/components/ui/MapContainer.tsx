@@ -100,7 +100,7 @@ export function MapContainer() {
         ) : null}
 
         <LeafletMap 
-          center={[19.4326, -99.1332] as [number, number]} 
+          center={[17.0732, -96.7266] as [number, number]} 
           zoom={11} 
           style={{ height: '100%', width: '100%', zIndex: 1 }}
           zoomControl={true}
