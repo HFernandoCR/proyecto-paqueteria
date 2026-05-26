@@ -96,7 +96,7 @@ export function RutaModal({ isOpen, onClose, onSave, ruta }: RutaModalProps) {
               type="text"
               value={formData.nombre}
               onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
-              placeholder="Ruta Norte CDMX"
+              placeholder="Ruta Norte Oaxaca"
               required
               className="w-full rounded-lg border border-border bg-secondary/50 px-4 py-2.5 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />

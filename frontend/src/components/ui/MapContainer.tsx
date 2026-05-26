@@ -87,7 +87,7 @@ export function MapContainer() {
           </div>
           <div>
             <h3 className="font-semibold text-foreground">Seguimiento en Vivo</h3>
-            <p className="text-sm text-muted-foreground">Ciudad de México y área metropolitana</p>
+            <p className="text-sm text-muted-foreground">Oaxaca y zona metropolitana</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
