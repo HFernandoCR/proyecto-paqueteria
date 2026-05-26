@@ -16,10 +16,8 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:8108',
         changeOrigin: true,
-        // Nginx redirige /api/<servicio> → /api/<servicio>/ (301).
-        // Añadimos el trailing slash antes de reenviar para evitar
-        // que el navegador siga la redirección cross-origin (CORS error).
-        rewrite: (path) => path.replace(/^(\/api\/[a-z]+)$/, '$1/'),
+        // Nginx acepta rutas con y sin trailing slash (rewrite interno en nginx.conf).
+        // No se necesita rewrite aquí desde que se corrigió el proxy en PR #48.
       },
     },
   },
