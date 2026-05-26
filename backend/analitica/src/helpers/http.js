@@ -1,5 +1,5 @@
 const UBICACION = process.env.UBICACION_SERVICE_URL || 'http://ubicacion:3003';
-const VEHICULOS = (process.env.VEHICULOS_SERVICE_URL || 'http://vehiculos:3001') + '/vehiculos';
+const VEHICULOS = process.env.VEHICULOS_SERVICE_URL || 'http://vehiculos:3001';
 
 async function fetchVehiculos() {
   const res = await fetch(`${VEHICULOS}/`);
@@ -20,7 +20,7 @@ async function fetchHistorial(vehiculoId) {
 async function fetchRuta(rutaId) {
   const RUTAS = process.env.RUTAS_SERVICE_URL || 'http://rutas:3002';
   try {
-    const res = await fetch(`${RUTAS}/rutas/${rutaId}`);
+    const res = await fetch(`${RUTAS}/${rutaId}`);
     if (!res.ok) return null;
     return res.json();
   } catch (_) {
