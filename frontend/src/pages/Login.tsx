@@ -109,7 +109,7 @@ export function Login() {
       
       {/* Disclaimer de pruebas */}
       <div className="fixed bottom-4 text-xs text-muted-foreground/60 text-center w-full pointer-events-none">
-        Proyecto Paquetería - Accesos controlados
+        Sistema de Paquetería
       </div>
     </div>
   );
