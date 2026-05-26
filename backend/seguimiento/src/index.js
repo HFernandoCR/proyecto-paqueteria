@@ -20,8 +20,8 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'seguimiento' });
 });
 
-// Rutas de seguimiento
-app.use('/seguimiento', seguimientoRoutes);
+// Rutas de seguimiento (nginx ya hace strip de /api/seguimiento/)
+app.use('/', seguimientoRoutes);
 
 
 app.listen(PORT, () => {
