@@ -102,13 +102,28 @@ construye y sirve el frontend, y además hace de proxy.
 
 #### Strip de prefijo en nginx
 
-La barra final en `proxy_pass http://vehiculos:3001/;` hace que Nginx **quite**
-el prefijo `/api/vehiculos/` antes de reenviar la petición.
+Cada bloque `location` usa un `rewrite` que elimina el prefijo
+`/api/<servicio>` antes de reenviar la petición al microservicio:
 
-Ejemplo: una petición externa a `GET /api/vehiculos/health` llega al
-contenedor del servicio como `GET /health`, que es exactamente la ruta que
-expone el Express de cada microservicio. Sin esa barra final, el servicio
-recibiría `/api/vehiculos/health` y no encontraría la ruta.
+```nginx
+location /api/vehiculos {
+    rewrite ^/api/vehiculos/?(.*)$ /$1 break;
+    proxy_pass http://vehiculos:3001;
+}
+```
+
+Cómo funciona:
+
+- El `rewrite` captura todo lo que viene después de `/api/vehiculos` y lo
+  reenvía como ruta interna. Así, `GET /api/vehiculos/health` llega al
+  servicio como `GET /health`, que es exactamente la ruta que expone Express.
+- El `/?` hace que el patrón coincida tanto con `/api/vehiculos` (sin barra
+  final) como con `/api/vehiculos/` (con barra final). Sin esto, una petición
+  sin barra final provocaría un redirect `301` de Nginx hacia la URL con barra
+  final, y ese redirect cambia el origen de la petición, generando errores de
+  CORS en el navegador.
+- Todos los routers de Express se montan en `/` (raíz), por eso la petición
+  llega al servicio sin el prefijo de proxy y encuentra la ruta correctamente.
 
 ### Comunicación en tiempo real por polling
 
