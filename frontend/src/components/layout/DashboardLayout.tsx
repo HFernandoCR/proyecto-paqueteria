@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard,
   Truck,
@@ -26,6 +26,12 @@ const navigation = [
 
 export function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(false)
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    localStorage.removeItem('logitrack_auth')
+    navigate('/login')
+  }
   
   return (
     <div className="flex h-screen bg-background">
@@ -75,7 +81,9 @@ export function DashboardLayout() {
             <Settings className="h-5 w-5 flex-shrink-0" />
             {!collapsed && <span>Configuración</span>}
           </button>
-          <button className={cn(
+          <button 
+            onClick={handleLogout}
+            className={cn(
             "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
           )}>
             <LogOut className="h-5 w-5 flex-shrink-0" />
