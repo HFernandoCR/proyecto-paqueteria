@@ -17,7 +17,7 @@ mongoose
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'rutas' });
 });
-app.use('/rutas', rutasRouter);
+app.use('/', rutasRouter);
 
 app.listen(PORT, () => {
   console.log('[rutas] Servidor escuchando en puerto ' + PORT);
