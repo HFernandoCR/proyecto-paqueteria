@@ -26,7 +26,7 @@ const estadoColor: Record<string, string> = {
 }
 
 const createVehicleIcon = (status: string) => {
-  const color = status === 'entregando' ? '#f59e0b' : '#3b82f6';
+  const color = estadoColor[status] ?? '#71717a';
   return L.divIcon({
     html: `
       <div class="relative flex items-center justify-center">
@@ -164,14 +164,21 @@ export function MapContainer() {
             <span className="font-semibold text-foreground">{vehicles.length}</span> vehículos activos en mapa
           </span>
           <div className="flex items-center gap-4 flex-wrap">
-            <span className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-primary" />
-              <span className="text-muted-foreground font-medium">En ruta</span>
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-warning" />
-              <span className="text-muted-foreground font-medium font-medium">Entregando</span>
-            </span>
+            {([
+              { estado: 'disponible',    label: 'Disponible'    },
+              { estado: 'en_ruta',       label: 'En ruta'       },
+              { estado: 'entregando',    label: 'Entregando'    },
+              { estado: 'detenido',      label: 'Detenido'      },
+              { estado: 'mantenimiento', label: 'Mantenimiento' },
+            ] as const).map(({ estado, label }) => (
+              <span key={estado} className="flex items-center gap-1.5">
+                <span
+                  className="h-2.5 w-2.5 rounded-full flex-shrink-0"
+                  style={{ backgroundColor: estadoColor[estado] }}
+                />
+                <span className="text-muted-foreground font-medium">{label}</span>
+              </span>
+            ))}
           </div>
         </div>
       </div>
