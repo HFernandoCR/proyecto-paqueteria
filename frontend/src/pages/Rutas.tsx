@@ -84,7 +84,7 @@ export function Rutas() {
     try {
       setIsLoading(true)
       setError(null)
-      const res = await axios.get('/api/rutas/rutas')
+      const res = await axios.get('/api/rutas')
       const mapped = res.data.map(mapToFrontendRuta)
       setRutas(mapped)
     } catch (err: any) {
@@ -124,7 +124,7 @@ export function Rutas() {
   const handleDeleteConfirm = async () => {
     if (rutaToDelete && rutaToDelete._id) {
       try {
-        await axios.delete(`/api/rutas/rutas/${rutaToDelete._id}`)
+        await axios.delete(`/api/rutas/${rutaToDelete._id}`)
         setRutas(rutas.filter((r) => r._id !== rutaToDelete._id))
         setRutaToDelete(null)
         setIsDeleteModalOpen(false)
@@ -138,12 +138,12 @@ export function Rutas() {
     try {
       if (selectedRuta && selectedRuta._id) {
         const backendData = mapToBackendRuta(data, selectedRuta)
-        const res = await axios.put(`/api/rutas/rutas/${selectedRuta._id}`, backendData)
+        const res = await axios.put(`/api/rutas/${selectedRuta._id}`, backendData)
         const mapped = mapToFrontendRuta(res.data)
         setRutas(rutas.map((r) => r._id === selectedRuta._id ? mapped : r))
       } else {
         const backendData = mapToBackendRuta(data)
-        const res = await axios.post('/api/rutas/rutas', backendData)
+        const res = await axios.post('/api/rutas', backendData)
         const mapped = mapToFrontendRuta(res.data)
         setRutas([...rutas, mapped])
       }
@@ -157,7 +157,7 @@ export function Rutas() {
   const handleSaveWaypoints = async (waypoints: Waypoint[]) => {
     if (selectedRuta && selectedRuta._id) {
       try {
-        const res = await axios.patch(`/api/rutas/rutas/${selectedRuta._id}`, { waypoints })
+        const res = await axios.patch(`/api/rutas/${selectedRuta._id}`, { waypoints })
         const mapped = mapToFrontendRuta(res.data)
         setRutas(rutas.map((r) => r._id === selectedRuta._id ? mapped : r))
         setIsWaypointsModalOpen(false)
