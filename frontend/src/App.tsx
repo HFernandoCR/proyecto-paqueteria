@@ -4,8 +4,7 @@ import { Dashboard } from './pages/Dashboard'
 import { Vehiculos } from './pages/Vehiculos'
 import { Operadores } from './pages/Operadores'
 import { Rutas } from './pages/Rutas'
-import { Reportes } from './pages/Reportes'
-import { DashboardBI } from './pages/DashboardBI'
+import { Analisis } from './pages/Analisis'
 import { Login } from './pages/Login'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 
@@ -20,8 +19,9 @@ function App() {
           <Route path="vehiculos" element={<Vehiculos />} />
           <Route path="operadores" element={<Operadores />} />
           <Route path="rutas" element={<Rutas />} />
-          <Route path="reportes" element={<Reportes />} />
-          <Route path="dashboard" element={<DashboardBI />} />
+          <Route path="analisis" element={<Analisis />} />
+          <Route path="reportes" element={<Navigate to="/analisis" replace />} />
+          <Route path="dashboard" element={<Navigate to="/analisis" replace />} />
         </Route>
       </Route>
       
