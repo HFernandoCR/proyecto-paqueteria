@@ -11,210 +11,29 @@ import {
   Line,
 } from 'recharts'
 import axios from 'axios'
+import { KpiCard } from '@/components/ui/KpiCard'
+import { Truck, Navigation, Package, AlertTriangle } from 'lucide-react'
 
 /* ------------------------------------------------------------------ */
-/*  Design tokens — paleta única                                        */
+/*  Colores para SVG — Recharts no puede usar variables CSS de Tailwind */
 /* ------------------------------------------------------------------ */
-const C = {
-  bg:      '#0b0e18',  // fondo de página
-  surface: '#111827',  // fondo de tarjeta/panel
-  border:  '#1d2740',  // borde general
-  text:    '#dde3f0',  // texto principal
-  muted:   '#5b6887',  // texto secundario
-  accent:  '#4f72ff',  // único color de marca
-  accent2: '#7c9dff',  // variante clara del accent (gráfica tiempo)
-  danger:  '#e05252',  // solo para alertas reales
-  grid:    '#192033',  // líneas de cuadrícula en gráficas
-}
-
-/* ------------------------------------------------------------------ */
-/*  Estilos reutilizables                                               */
-/* ------------------------------------------------------------------ */
-const s = {
-  page: {
-    padding: '1.75rem 2rem',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1.5rem',
-    background: C.bg,
-    minHeight: '100vh',
-    fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
-    fontSize: '0.875rem',
-    color: C.text,
-    boxSizing: 'border-box',
-  },
-  /* ── Header ── */
-  header: {
-    paddingBottom: '1.25rem',
-    borderBottom: `1px solid ${C.border}`,
-  },
-  h2: {
-    margin: 0,
-    fontSize: '1.25rem',
-    fontWeight: 700,
-    color: C.text,
-    letterSpacing: '-0.01em',
-  },
-  sub: {
-    margin: '0.25rem 0 0',
-    fontSize: '0.8rem',
-    color: C.muted,
-    letterSpacing: '0.01em',
-  },
-  /* ── KPI grid ── */
-  kpiGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))',
-    gap: '1rem',
-  },
-  kpiCard: {
-    background: C.surface,
-    borderRadius: '8px',
-    padding: '1rem 1.25rem',
-    border: `1px solid ${C.border}`,
-    borderLeft: `4px solid ${C.accent}`,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.35rem',
-  },
-  kpiCardDanger: {
-    background: C.surface,
-    borderRadius: '8px',
-    padding: '1rem 1.25rem',
-    border: `1px solid ${C.border}`,
-    borderLeft: `4px solid ${C.danger}`,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.35rem',
-  },
-  kpiLabel: {
-    margin: 0,
-    fontSize: '0.7rem',
-    fontWeight: 600,
-    letterSpacing: '0.06em',
-    textTransform: 'uppercase',
-    color: C.muted,
-  },
-  kpiValue: {
-    margin: 0,
-    fontSize: '1.75rem',
-    fontWeight: 700,
-    color: C.text,
-    lineHeight: 1.1,
-  },
-  kpiSub: {
-    margin: 0,
-    fontSize: '0.75rem',
-    color: C.muted,
-  },
-  /* ── Paneles de gráfica ── */
-  panel: {
-    background: C.surface,
-    borderRadius: '8px',
-    padding: '1.25rem 1.5rem',
-    border: `1px solid ${C.border}`,
-  },
-  panelHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '1.25rem',
-  },
-  panelTitle: {
-    margin: 0,
-    fontSize: '0.875rem',
-    fontWeight: 600,
-    color: C.text,
-    letterSpacing: '0.01em',
-  },
-  legend: {
-    fontSize: '0.75rem',
-    color: C.muted,
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.4rem',
-  },
-  legendDot: {
-    width: '8px',
-    height: '8px',
-    borderRadius: '50%',
-    display: 'inline-block',
-    flexShrink: 0,
-  },
-  chartBox: { height: '300px' },
-  grid2: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
-    gap: '1.25rem',
-  },
-  /* ── Estados vacíos / carga ── */
-  spinner: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100%',
-    color: C.muted,
-    fontSize: '0.8rem',
-  },
-  empty: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: '100%',
-    color: C.muted,
-    fontSize: '0.8rem',
-    border: `1px dashed ${C.border}`,
-    borderRadius: '6px',
-  },
-  /* ── Tabla ── */
-  table: {
-    width: '100%',
-    borderCollapse: 'collapse',
-    fontSize: '0.8rem',
-  },
-  th: {
-    textAlign: 'left',
-    padding: '0.5rem 0.75rem',
-    color: C.muted,
-    fontSize: '0.7rem',
-    fontWeight: 600,
-    letterSpacing: '0.05em',
-    textTransform: 'uppercase',
-    borderBottom: `1px solid ${C.border}`,
-  },
-  td: {
-    padding: '0.6rem 0.75rem',
-    borderBottom: `1px solid ${C.border}`,
-    color: C.text,
-  },
-  badgeDanger: {
-    display: 'inline-block',
-    background: 'rgba(224,82,82,0.12)',
-    color: C.danger,
-    borderRadius: '4px',
-    padding: '0.15rem 0.55rem',
-    fontSize: '0.7rem',
-    fontWeight: 600,
-    letterSpacing: '0.03em',
-  },
-  alertSub: {
-    margin: '0 0 1rem',
-    fontSize: '0.78rem',
-    color: C.muted,
-  },
-} as const
+const CHART_ACCENT  = '#4f72ff'
+const CHART_ACCENT2 = '#7c9dff'
+const CHART_DANGER  = '#e05252'
+const CHART_GRID    = '#192033'
+const CHART_MUTED   = '#5b6887'
 
 /* Tooltip compartido para todos los charts */
 const TT = {
   contentStyle: {
     background: '#0d1221',
-    border: `1px solid ${C.border}`,
+    border: '1px solid #1d2740',
     borderRadius: '6px',
     fontSize: '0.8rem',
-    color: C.text,
+    color: '#dde3f0',
     padding: '0.5rem 0.75rem',
   },
-  labelStyle: { color: C.text, fontWeight: 600, marginBottom: '0.2rem' },
+  labelStyle: { color: '#dde3f0', fontWeight: 600, marginBottom: '0.2rem' },
   cursor: { fill: 'rgba(79,114,255,0.05)' },
 }
 
@@ -257,90 +76,85 @@ export function DashboardBI() {
     fetchAll()
   }, [])
 
-  const kpis = [
-    {
-      label: 'Vehículos Activos',
-      value: stats ? `${stats.vehiculosActivos}` : '—',
-      sub: stats ? `de ${stats.vehiculosTotal} registrados` : '',
-      danger: false,
-    },
-    {
-      label: 'Km Recorridos Hoy',
-      value: stats ? `${stats.kmRecorridosHoy}` : '—',
-      sub: 'km totales del día',
-      danger: false,
-    },
-    {
-      label: 'Entregas Hoy',
-      value: stats ? `${stats.entregasHoy}` : '—',
-      sub: 'paquetes entregados',
-      danger: false,
-    },
-    {
-      label: 'Vehículos Detenidos',
-      value: stats ? `${stats.vehiculosDetenidos}` : '—',
-      sub:
-        stats && stats.vehiculosDetenidos > 0
-          ? 'Requieren atención'
-          : 'Sin incidencias',
-      danger: true,
-    },
-  ]
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+    <div className="space-y-6">
 
       {/* ── Header ── */}
-      <div style={s.header}>
-        <h2 className="text-2xl font-bold text-foreground">Dashboard BI</h2>
-        <p className="text-muted-foreground">Indicadores clave · Toma de Decisiones</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">Dashboard BI</h2>
+          <p className="text-muted-foreground">
+            Indicadores clave de rendimiento · Toma de Decisiones
+          </p>
+        </div>
       </div>
 
       {/* ── Tarjetas KPI ── */}
-      <div style={s.kpiGrid}>
-        {kpis.map((kpi) => (
-          <div key={kpi.label} style={kpi.danger ? s.kpiCardDanger : s.kpiCard}>
-            <p style={s.kpiLabel}>{kpi.label}</p>
-            <p style={{ ...s.kpiValue, color: kpi.danger ? C.danger : C.text }}>
-              {isLoading ? '—' : kpi.value}
-            </p>
-            <p style={{ ...s.kpiSub, color: kpi.danger && stats?.vehiculosDetenidos > 0 ? C.danger : C.muted }}>
-              {kpi.sub}
-            </p>
-          </div>
-        ))}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <KpiCard
+          title="Vehículos Activos"
+          value={isLoading ? '—' : String(stats?.vehiculosActivos ?? 0)}
+          subtitle={stats ? `de ${stats.vehiculosTotal} registrados` : 'Cargando...'}
+          icon={Truck}
+          accentColor="primary"
+        />
+        <KpiCard
+          title="Km Recorridos Hoy"
+          value={isLoading ? '—' : String(stats?.kmRecorridosHoy ?? 0)}
+          subtitle="km totales del día"
+          icon={Navigation}
+          accentColor="success"
+        />
+        <KpiCard
+          title="Entregas Hoy"
+          value={isLoading ? '—' : String(stats?.entregasHoy ?? 0)}
+          subtitle="paquetes entregados"
+          icon={Package}
+          accentColor="primary"
+        />
+        <KpiCard
+          title="Vehículos Detenidos"
+          value={isLoading ? '—' : String(stats?.vehiculosDetenidos ?? 0)}
+          subtitle={stats?.vehiculosDetenidos > 0 ? 'Requieren atención' : 'Sin incidencias'}
+          icon={AlertTriangle}
+          accentColor={stats?.vehiculosDetenidos > 0 ? 'destructive' : 'success'}
+        />
       </div>
 
       {/* ── Fila: BarChart km + LineChart entregas ── */}
-      <div style={s.grid2}>
+      <div className="grid gap-6 lg:grid-cols-2">
 
         {/* BarChart: Km por vehículo */}
-        <div style={s.panel}>
-          <div style={s.panelHeader}>
-            <h3 style={s.panelTitle}>Km Recorridos por Vehículo</h3>
-            <span style={s.legend}>
-              <span style={{ ...s.legendDot, background: C.accent }} />
-              km totales hoy
+        <div className="rounded-xl border border-border bg-card p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-foreground">Km Recorridos por Vehículo</h3>
+            <span className="flex items-center gap-2 text-sm">
+              <span className="h-3 w-3 rounded-full" style={{ background: CHART_ACCENT }} />
+              <span className="text-muted-foreground">km totales hoy</span>
             </span>
           </div>
-          <div style={s.chartBox}>
+          <div className="h-[300px]">
             {isLoading ? (
-              <div style={s.spinner}>Cargando…</div>
+              <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
+                Cargando…
+              </div>
             ) : kmPorVehiculo.length === 0 ? (
-              <div style={s.empty}>Sin datos de trayecto disponibles</div>
+              <div className="h-full flex flex-col items-center justify-center text-center">
+                <p className="text-sm text-muted-foreground">Sin datos de trayecto disponibles</p>
+              </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={kmPorVehiculo} barSize={28}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={C.grid} vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} vertical={false} />
                   <XAxis
                     dataKey="placa"
-                    stroke={C.muted}
+                    stroke={CHART_MUTED}
                     fontSize={11}
                     tickLine={false}
                     axisLine={false}
                   />
                   <YAxis
-                    stroke={C.muted}
+                    stroke={CHART_MUTED}
                     fontSize={11}
                     tickLine={false}
                     axisLine={false}
@@ -350,7 +164,7 @@ export function DashboardBI() {
                     {...TT}
                     formatter={(v) => [`${v} km`, 'Km totales']}
                   />
-                  <Bar dataKey="kmTotal" fill={C.accent} radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="kmTotal" fill={CHART_ACCENT} radius={[3, 3, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -358,32 +172,36 @@ export function DashboardBI() {
         </div>
 
         {/* LineChart: Entregas por día */}
-        <div style={s.panel}>
-          <div style={s.panelHeader}>
-            <h3 style={s.panelTitle}>Entregas por Día</h3>
-            <span style={s.legend}>
-              <span style={{ ...s.legendDot, background: C.accent }} />
-              entregas realizadas
+        <div className="rounded-xl border border-border bg-card p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-foreground">Entregas por Día</h3>
+            <span className="flex items-center gap-2 text-sm">
+              <span className="h-3 w-3 rounded-full" style={{ background: CHART_ACCENT }} />
+              <span className="text-muted-foreground">entregas realizadas</span>
             </span>
           </div>
-          <div style={s.chartBox}>
+          <div className="h-[300px]">
             {isLoading ? (
-              <div style={s.spinner}>Cargando…</div>
+              <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
+                Cargando…
+              </div>
             ) : entregasPorDia.length === 0 ? (
-              <div style={s.empty}>Sin historial de entregas disponible</div>
+              <div className="h-full flex flex-col items-center justify-center text-center">
+                <p className="text-sm text-muted-foreground">Sin historial de entregas disponible</p>
+              </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={entregasPorDia}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={C.grid} vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} vertical={false} />
                   <XAxis
                     dataKey="fecha"
-                    stroke={C.muted}
+                    stroke={CHART_MUTED}
                     fontSize={11}
                     tickLine={false}
                     axisLine={false}
                   />
                   <YAxis
-                    stroke={C.muted}
+                    stroke={CHART_MUTED}
                     fontSize={11}
                     tickLine={false}
                     axisLine={false}
@@ -395,9 +213,9 @@ export function DashboardBI() {
                   <Line
                     type="monotone"
                     dataKey="entregas"
-                    stroke={C.accent}
+                    stroke={CHART_ACCENT}
                     strokeWidth={2.5}
-                    dot={{ r: 3, fill: C.accent, strokeWidth: 0 }}
+                    dot={{ r: 3, fill: CHART_ACCENT, strokeWidth: 0 }}
                     activeDot={{ r: 5, strokeWidth: 0 }}
                   />
                 </LineChart>
@@ -409,57 +227,43 @@ export function DashboardBI() {
       </div>{/* fin grid 2 cols */}
 
       {/* ── Tabla de alertas ── */}
-      <div style={s.panel}>
-        <div style={s.panelHeader}>
-          <h3 style={s.panelTitle}>Alertas de Vehículos</h3>
-          <span
-            style={{
-              fontSize: '0.7rem',
-              fontWeight: 700,
-              letterSpacing: '0.04em',
-              background: 'rgba(224,82,82,0.1)',
-              color: C.danger,
-              borderRadius: '4px',
-              padding: '0.2rem 0.6rem',
-            }}
-          >
+      <div className="rounded-xl border border-border bg-card p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold text-foreground">Alertas de Vehículos</h3>
+          <span className="text-xs font-bold px-2 py-0.5 rounded bg-destructive/10 text-destructive">
             {anomalias.length} {anomalias.length === 1 ? 'activa' : 'activas'}
           </span>
         </div>
-        <p style={s.alertSub}>
+        <p className="text-sm text-muted-foreground mb-4">
           Vehículos detenidos en ruta activa por más de 15 minutos
         </p>
         {isLoading ? (
-          <div style={{ ...s.spinner, height: '80px' }}>Cargando…</div>
+          <div className="flex items-center justify-center h-20 text-sm text-muted-foreground">
+            Cargando…
+          </div>
         ) : anomalias.length === 0 ? (
-          <div style={{ ...s.empty, height: '80px' }}>
+          <div className="text-center py-8 text-muted-foreground bg-secondary/5 rounded-lg border border-border border-dashed">
             Operación normal — sin alertas
           </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={s.table}>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
               <thead>
                 <tr>
-                  <th style={s.th}>Placa</th>
-                  <th style={s.th}>ID Vehículo</th>
-                  <th style={s.th}>Tiempo detenido</th>
-                  <th style={s.th}>Estado</th>
+                  <th className="text-left px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground border-b border-border">Placa</th>
+                  <th className="text-left px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground border-b border-border">ID Vehículo</th>
+                  <th className="text-left px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground border-b border-border">Tiempo detenido</th>
+                  <th className="text-left px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground border-b border-border">Estado</th>
                 </tr>
               </thead>
               <tbody>
                 {anomalias.map((a: any, i: number) => (
                   <tr key={`${a.vehiculoId}-${i}`}>
-                    <td style={{ ...s.td, fontWeight: 700, fontFamily: 'monospace', letterSpacing: '0.05em' }}>
-                      {a.placa}
-                    </td>
-                    <td style={{ ...s.td, fontFamily: 'monospace', fontSize: '0.75rem', color: C.muted }}>
-                      {a.vehiculoId}
-                    </td>
-                    <td style={{ ...s.td, color: C.danger, fontWeight: 700 }}>
-                      {a.minutosDetenido} min
-                    </td>
-                    <td style={s.td}>
-                      <span style={s.badgeDanger}>Detenido</span>
+                    <td className="px-3 py-2.5 border-b border-border font-bold font-mono tracking-wide text-foreground">{a.placa}</td>
+                    <td className="px-3 py-2.5 border-b border-border font-mono text-xs text-muted-foreground">{a.vehiculoId}</td>
+                    <td className="px-3 py-2.5 border-b border-border font-bold text-destructive">{a.minutosDetenido} min</td>
+                    <td className="px-3 py-2.5 border-b border-border">
+                      <span className="inline-block bg-destructive/10 text-destructive rounded px-2 py-0.5 text-xs font-semibold tracking-wide">Detenido</span>
                     </td>
                   </tr>
                 ))}
@@ -470,26 +274,30 @@ export function DashboardBI() {
       </div>
 
       {/* ── BarChart horizontal: tiempo por ruta ── */}
-      <div style={s.panel}>
-        <div style={s.panelHeader}>
-          <h3 style={s.panelTitle}>Tiempo Promedio por Ruta</h3>
-          <span style={s.legend}>
-            <span style={{ ...s.legendDot, background: C.accent2 }} />
-            minutos promedio
+      <div className="rounded-xl border border-border bg-card p-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-lg font-semibold text-foreground">Tiempo Promedio por Ruta</h3>
+          <span className="flex items-center gap-2 text-sm">
+            <span className="h-3 w-3 rounded-full" style={{ background: CHART_ACCENT2 }} />
+            <span className="text-muted-foreground">minutos promedio</span>
           </span>
         </div>
-        <div style={s.chartBox}>
+        <div className="h-[300px]">
           {isLoading ? (
-            <div style={s.spinner}>Cargando…</div>
+            <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
+              Cargando…
+            </div>
           ) : tiempoPorRuta.length === 0 ? (
-            <div style={s.empty}>Sin datos de rutas disponibles</div>
+            <div className="h-full flex flex-col items-center justify-center text-center">
+              <p className="text-sm text-muted-foreground">Sin datos de rutas disponibles</p>
+            </div>
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart layout="vertical" data={tiempoPorRuta} barSize={18}>
-                <CartesianGrid strokeDasharray="3 3" stroke={C.grid} horizontal={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} horizontal={false} />
                 <XAxis
                   type="number"
-                  stroke={C.muted}
+                  stroke={CHART_MUTED}
                   fontSize={11}
                   tickLine={false}
                   axisLine={false}
@@ -499,7 +307,7 @@ export function DashboardBI() {
                   type="category"
                   dataKey="nombre"
                   width={130}
-                  stroke={C.muted}
+                  stroke={CHART_MUTED}
                   fontSize={11}
                   tickLine={false}
                   axisLine={false}
@@ -510,7 +318,7 @@ export function DashboardBI() {
                 />
                 <Bar
                   dataKey="tiempoPromedioMin"
-                  fill={C.accent2}
+                  fill={CHART_ACCENT2}
                   radius={[0, 3, 3, 0]}
                 />
               </BarChart>
