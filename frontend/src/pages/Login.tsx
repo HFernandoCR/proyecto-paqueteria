@@ -11,8 +11,7 @@ export function Login() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Credenciales fijas de seguridad básica para la demostración
-    if (username === 'admin' && password === 'admin123') {
+    if (username === 'admin122' && password === 'webAdq6*04') {
       localStorage.setItem('logitrack_auth', 'true');
       navigate('/');
     } else {
@@ -59,7 +58,7 @@ export function Login() {
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2",
                     "disabled:cursor-not-allowed disabled:opacity-50"
                   )}
-                  placeholder="Ej: admin"
+                  placeholder="Tu usuario"
                   value={username}
                   onChange={(e) => {
                     setUsername(e.target.value);
