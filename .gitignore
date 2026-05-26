@@ -28,3 +28,8 @@ Thumbs.db
 
 # Docker
 .dockerignore
+
+# Artefactos de verificación / QA (screenshots de Playwright, etc.)
+verify_shots/
+verify_*.png
+verify_*.jpg
