@@ -194,26 +194,8 @@ export function Reportes() {
         {/* Top Operadores */}
         <div className="rounded-xl border border-border bg-card p-6">
           <h3 className="text-lg font-semibold text-foreground mb-4">Top Operadores por Km</h3>
-          <div className="space-y-3">
-            {[
-              { name: 'Carlos Mendez', km: 245, rutas: 12 },
-              { name: 'Ana Garcia', km: 232, rutas: 11 },
-              { name: 'Luis Hernandez', km: 218, rutas: 10 },
-              { name: 'Elena Rodriguez', km: 205, rutas: 9 },
-            ].map((op, i) => (
-              <div key={op.name} className="flex items-center justify-between py-2 border-b border-border last:border-0">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
-                    {i + 1}
-                  </span>
-                  <span className="font-medium text-foreground">{op.name}</span>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold text-foreground">{op.km} km</p>
-                  <p className="text-xs text-muted-foreground">{op.rutas} rutas</p>
-                </div>
-              </div>
-            ))}
+          <div className="flex h-32 items-center justify-center text-sm text-muted-foreground">
+            Sin datos disponibles
           </div>
         </div>
 

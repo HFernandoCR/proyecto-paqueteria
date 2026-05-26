@@ -78,7 +78,7 @@ export function Vehiculos() {
       setVehiculos(mapped)
     } catch (err: any) {
       console.error("Error loading vehicles:", err)
-      setError("No se pudo conectar al servidor de vehículos. Por favor, asegúrate de que el servidor de tu escuela esté encendido.")
+      setError("No se pudo conectar al servidor. Verifica tu conexión e intenta de nuevo.")
     } finally {
       setIsLoading(false)
     }

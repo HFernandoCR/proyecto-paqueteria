@@ -113,11 +113,11 @@ export function DashboardLayout() {
             <NotificationBell />
             <div className="flex items-center gap-3">
               <div className="h-9 w-9 rounded-full bg-primary/20 flex items-center justify-center">
-                <span className="text-sm font-medium text-primary">JR</span>
+                <span className="text-sm font-medium text-primary">AD</span>
               </div>
               <div className="hidden sm:block">
-                <p className="text-sm font-medium text-foreground">Jennifer Ramos</p>
-                <p className="text-xs text-muted-foreground">Administrador</p>
+                <p className="text-sm font-medium text-foreground">Administrador</p>
+                <p className="text-xs text-muted-foreground">Sistema</p>
               </div>
             </div>
           </div>

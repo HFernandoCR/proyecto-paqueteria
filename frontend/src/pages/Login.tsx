@@ -11,7 +11,7 @@ export function Login() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (username === 'admin122' && password === 'webAdq6*04') {
+    if (username === import.meta.env.VITE_AUTH_USER && password === import.meta.env.VITE_AUTH_PASS) {
       localStorage.setItem('logitrack_auth', 'true');
       navigate('/');
     } else {
