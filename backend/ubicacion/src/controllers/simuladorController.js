@@ -63,9 +63,9 @@ exports.start = async (req, res) => {
 
   try {
     // 1. Obtener la ruta asignada consultando al microservicio de Rutas
-    const rutasRes = await fetch(`${RUTAS_URL}/rutas`);
+    const rutasRes = await fetch(`${RUTAS_URL}/`);
     if (!rutasRes.ok) throw new Error('No se pudo conectar al servicio de Rutas');
-    
+
     const rutas = await rutasRes.json();
     const rutaAsignada = rutas.find(r => String(r.vehiculoAsignado) === String(vehiculoId));
 
@@ -92,10 +92,10 @@ exports.start = async (req, res) => {
     // Iniciar job cada 3 segundos
     const intervalId = setInterval(async () => {
       const target = waypoints[nextWaypointIndex];
-      
+
       const bearing = calcBearing(currentLat, currentLng, target.lat, target.lng);
       const move = moveTowards(currentLat, currentLng, target.lat, target.lng, distancePerTick);
-      
+
       currentLat = move.lat;
       currentLng = move.lng;
 
@@ -110,7 +110,7 @@ exports.start = async (req, res) => {
       try {
         await nuevaUbicacion.save();
         console.log(`[simulador] Vehículo ${vehiculoId} en ${currentLat.toFixed(5)}, ${currentLng.toFixed(5)} -> Hacia waypoint ${nextWaypointIndex}`);
-        
+
         if (move.reached) {
           nextWaypointIndex++;
           if (nextWaypointIndex >= waypoints.length) {
@@ -182,8 +182,8 @@ exports.stop = (req, res) => {
 // GET /simulador/status
 exports.getStatus = (req, res) => {
   const activeIds = Array.from(activeSimulations.keys());
-  res.json({ 
+  res.json({
     activeCount: activeIds.length,
-    activeSimulations: activeIds 
+    activeSimulations: activeIds
   });
 };
