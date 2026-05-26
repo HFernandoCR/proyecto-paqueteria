@@ -60,11 +60,11 @@
 			"item": [
 				{
 					"name": "Vehículos Activos",
-					"request": { "method": "GET", "url": { "raw": "http://localhost:8108/api/seguimiento/seguimiento/activos", "host": ["http://localhost"], "port": "8108", "path": ["api", "seguimiento", "seguimiento", "activos"] } }
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8108/api/seguimiento/activos", "host": ["http://localhost"], "port": "8108", "path": ["api", "seguimiento", "activos"] } }
 				},
 				{
 					"name": "Estado Tiempo Real",
-					"request": { "method": "GET", "url": { "raw": "http://localhost:8108/api/seguimiento/seguimiento/:id", "host": ["http://localhost"], "port": "8108", "path": ["api", "seguimiento", "seguimiento", ":id"], "variable": [{"key": "id", "value": "SUSTITUIR_POR_ID_VEHICULO"}] } }
+					"request": { "method": "GET", "url": { "raw": "http://localhost:8108/api/seguimiento/:id", "host": ["http://localhost"], "port": "8108", "path": ["api", "seguimiento", ":id"], "variable": [{"key": "id", "value": "SUSTITUIR_POR_ID_VEHICULO"}] } }
 				}
 			]
 		},
