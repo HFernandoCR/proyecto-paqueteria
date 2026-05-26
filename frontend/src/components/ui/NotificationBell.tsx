@@ -67,6 +67,16 @@ export function NotificationBell() {
     return () => document.removeEventListener('mousedown', handler)
   }, [open])
 
+  const marcarLeida = async (id: string) => {
+    try {
+      const res = await fetch(`/api/notificaciones/${id}/leida`, { method: 'PATCH' })
+      if (!res.ok) return
+      setNotificaciones(prev => prev.filter(n => n._id !== id))
+    } catch {
+      // ignorar errores de red silenciosamente
+    }
+  }
+
   const recientes = [...notificaciones]
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
     .slice(0, 5)
@@ -111,7 +121,10 @@ export function NotificationBell() {
                 const Icono = iconoPorTipo[n.tipo]
                 return (
                   <li key={n._id}>
-                    <button className="flex w-full items-start gap-3 px-4 py-3 text-left hover:bg-secondary transition-colors">
+                    <button
+                      onClick={() => marcarLeida(n._id)}
+                      className="flex w-full items-start gap-3 px-4 py-3 text-left hover:bg-secondary transition-colors"
+                    >
                       <Icono
                         className={cn('mt-0.5 h-4 w-4 flex-shrink-0', colorPorTipo[n.tipo])}
                       />
