@@ -18,7 +18,6 @@ import { Truck, Navigation, Package, AlertTriangle } from 'lucide-react'
 /*  Design tokens — paleta única                                        */
 /* ------------------------------------------------------------------ */
 const C = {
-  bg:      '#0b0e18',  // fondo de página
   surface: '#111827',  // fondo de tarjeta/panel
   border:  '#1d2740',  // borde general
   text:    '#dde3f0',  // texto principal
@@ -33,36 +32,6 @@ const C = {
 /*  Estilos reutilizables                                               */
 /* ------------------------------------------------------------------ */
 const s = {
-  page: {
-    padding: '1.75rem 2rem',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1.5rem',
-    background: C.bg,
-    minHeight: '100vh',
-    fontFamily: "'Inter', 'Segoe UI', system-ui, sans-serif",
-    fontSize: '0.875rem',
-    color: C.text,
-    boxSizing: 'border-box',
-  },
-  /* ── Header ── */
-  header: {
-    paddingBottom: '1.25rem',
-    borderBottom: `1px solid ${C.border}`,
-  },
-  h2: {
-    margin: 0,
-    fontSize: '1.25rem',
-    fontWeight: 700,
-    color: C.text,
-    letterSpacing: '-0.01em',
-  },
-  sub: {
-    margin: '0.25rem 0 0',
-    fontSize: '0.8rem',
-    color: C.muted,
-    letterSpacing: '0.01em',
-  },
   /* ── Paneles de gráfica ── */
   panel: {
     background: C.surface,
@@ -217,9 +186,13 @@ export function DashboardBI() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
       {/* ── Header ── */}
-      <div style={s.header}>
-        <h2 className="text-2xl font-bold text-foreground">Dashboard BI</h2>
-        <p className="text-muted-foreground">Indicadores clave · Toma de Decisiones</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-foreground">Dashboard BI</h2>
+          <p className="text-muted-foreground">
+            Indicadores clave de rendimiento · Toma de Decisiones
+          </p>
+        </div>
       </div>
 
       {/* ── Tarjetas KPI ── */}
