@@ -94,6 +94,38 @@ export function Analisis() {
       .finally(() => setIsLoading(false))
   }, [rango])
 
+  /* ── Exportar CSV ── */
+  const handleExportCSV = () => {
+    const rows: (string | number | undefined)[][] = [
+      ['Sección', 'Campo', 'Valor'],
+      ['KPIs', 'Vehículos Activos', stats?.vehiculosActivos],
+      ['KPIs', 'Km Recorridos Hoy', stats?.kmRecorridosHoy],
+      ['KPIs', 'Entregas Hoy', stats?.entregasHoy],
+      ['KPIs', 'Vehículos Detenidos', stats?.vehiculosDetenidos],
+      [],
+      ['Km por Vehículo', 'Placa', 'Km Total'],
+      ...kmPorVehiculo.map((v) => ['', v.placa, v.kmTotal]),
+      [],
+      ['Anomalías', 'Placa', 'ID Vehículo', 'Minutos Detenido'],
+      ...anomalias.map((a) => ['', a.placa, a.vehiculoId, a.minutosDetenido]),
+    ]
+    const csv = rows.map((r) => r.join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `analisis-${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+    setShowExportMenu(false)
+  }
+
+  /* ── Exportar PDF / Imprimir ── */
+  const handleExportPrint = () => {
+    window.print()
+    setShowExportMenu(false)
+  }
+
   const rangos: { label: string; value: 7 | 30 | 90 }[] = [
     { label: '7 días', value: 7 },
     { label: '30 días', value: 30 },
@@ -149,13 +181,22 @@ export function Analisis() {
 
             {showExportMenu && (
               <div className="absolute right-0 top-full mt-1 z-10 w-36 rounded-lg border border-border bg-card shadow-lg overflow-hidden">
-                <button className="w-full px-4 py-2.5 text-left text-sm text-foreground hover:bg-secondary transition-colors">
+                <button
+                  onClick={handleExportCSV}
+                  className="w-full px-4 py-2.5 text-left text-sm text-foreground hover:bg-secondary transition-colors"
+                >
                   CSV
                 </button>
-                <button className="w-full px-4 py-2.5 text-left text-sm text-foreground hover:bg-secondary transition-colors">
+                <button
+                  onClick={handleExportPrint}
+                  className="w-full px-4 py-2.5 text-left text-sm text-foreground hover:bg-secondary transition-colors"
+                >
                   PDF
                 </button>
-                <button className="w-full px-4 py-2.5 text-left text-sm text-foreground hover:bg-secondary transition-colors">
+                <button
+                  onClick={handleExportPrint}
+                  className="w-full px-4 py-2.5 text-left text-sm text-foreground hover:bg-secondary transition-colors"
+                >
                   Imprimir
                 </button>
               </div>
