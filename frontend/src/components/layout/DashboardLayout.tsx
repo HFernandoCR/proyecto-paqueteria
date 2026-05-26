@@ -6,7 +6,6 @@ import {
   Route,
   BarChart3,
   PieChart,
-  Bell,
   Settings,
   LogOut,
   ChevronLeft,
@@ -14,6 +13,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
+import { NotificationBell } from '@/components/ui/NotificationBell'
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -110,10 +110,7 @@ export function DashboardLayout() {
             <p className="text-sm text-muted-foreground">Bienvenido, Administrador</p>
           </div>
           <div className="flex items-center gap-4">
-            <button className="relative rounded-lg p-2 text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors">
-              <Bell className="h-5 w-5" />
-              <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-destructive" />
-            </button>
+            <NotificationBell />
             <div className="flex items-center gap-3">
               <div className="h-9 w-9 rounded-full bg-primary/20 flex items-center justify-center">
                 <span className="text-sm font-medium text-primary">JR</span>
