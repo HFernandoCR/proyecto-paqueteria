@@ -400,7 +400,7 @@ export function Analisis() {
           </div>
         ) : anomalias.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground bg-secondary/5 rounded-lg border border-border border-dashed">
-            Operación normal — sin alertas
+            Operación normal sin alertas
           </div>
         ) : (
           <div className="overflow-x-auto">
