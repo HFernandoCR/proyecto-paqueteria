@@ -17,7 +17,7 @@ app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'notificaciones' });
 });
 
-app.use('/notificaciones', notificacionesRouter);
+app.use('/', notificacionesRouter);
 
 app.listen(PORT, () => {
   console.log('[notificaciones] Servidor escuchando en puerto ' + PORT);
