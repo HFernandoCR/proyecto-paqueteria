@@ -110,7 +110,7 @@ export function RutaModal({ isOpen, onClose, onSave, ruta }: RutaModalProps) {
               type="text"
               value={formData.origen}
               onChange={(e) => setFormData({ ...formData, origen: e.target.value })}
-              placeholder="Av. Insurgentes Norte 1500, Gustavo A. Madero"
+              placeholder="Ej: Centro Histórico, Oaxaca"
               required
               className="w-full rounded-lg border border-border bg-secondary/50 px-4 py-2.5 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
@@ -124,7 +124,7 @@ export function RutaModal({ isOpen, onClose, onSave, ruta }: RutaModalProps) {
               type="text"
               value={formData.destino}
               onChange={(e) => setFormData({ ...formData, destino: e.target.value })}
-              placeholder="Central de Abastos, Iztapalapa"
+              placeholder="Ej: Colonia Reforma, Oaxaca"
               required
               className="w-full rounded-lg border border-border bg-secondary/50 px-4 py-2.5 text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />

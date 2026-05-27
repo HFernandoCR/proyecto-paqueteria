@@ -134,8 +134,10 @@ export function OperadorModal({ isOpen, onClose, onSave, operador }: OperadorMod
                     formData.estado === estado
                       ? estado === 'Activo'
                         ? 'border-success bg-success/10 text-success'
-                        : 'border-muted bg-muted text-muted-foreground'
-                      : 'border-border bg-secondary/50 text-muted-foreground hover:bg-secondary'
+                        : 'border-red-500 bg-red-500 text-white'
+                      : estado === 'Inactivo'
+                        ? 'border-red-500 text-red-500 bg-secondary/50 hover:bg-red-500/10'
+                        : 'border-border bg-secondary/50 text-muted-foreground hover:bg-secondary'
                   )}
                 >
                   {estado}
