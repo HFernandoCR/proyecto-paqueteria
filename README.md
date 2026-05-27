@@ -45,18 +45,22 @@ Vehículos  Rutas  Ubicación Seguim.  Analítica  Notificac.
 
 ## Stack tecnológico
 
-| Capa           | Tecnología                         |
-| -------------- | ---------------------------------- |
-| Backend        | Node.js 20 + Express               |
-| ODM            | Mongoose                           |
-| Base de datos  | MongoDB 7                          |
-| Frontend       | React 18 + Vite                    |
-| Mapa           | Leaflet + OpenStreetMap            |
-| Gráficas BI    | Recharts                           |
-| Reverse proxy  | Nginx alpine                       |
-| Contenedores   | Docker + docker-compose            |
-| Repositorio    | GitLab self-hosted                 |
-| Pruebas        | Postman / Newman                   |
+| Capa           | Tecnología                              |
+| -------------- | --------------------------------------- |
+| Backend        | Node.js 20 + Express 4                  |
+| ODM            | Mongoose 8                              |
+| Base de datos  | MongoDB 7                               |
+| Frontend       | React 18 + Vite 5 + TypeScript          |
+| Estilos        | Tailwind CSS 4                          |
+| Ruteo SPA      | React Router 7                          |
+| Cliente HTTP   | Axios                                   |
+| Iconos         | lucide-react                            |
+| Mapa           | Leaflet + react-leaflet + OpenStreetMap |
+| Gráficas BI    | Recharts                                |
+| Reverse proxy  | Nginx alpine                            |
+| Contenedores   | Docker + docker-compose                 |
+| Repositorio    | GitLab self-hosted                      |
+| Pruebas        | Postman / Newman                        |
 
 ---
 
@@ -194,12 +198,19 @@ proyecto-paqueteria/
 │   ├── analitica/   (puerto 3005)
 │   └── notificaciones/ (puerto 3006)
 │       └── cada uno: Dockerfile, package.json, src/index.js
-└── frontend/
+└── frontend/                    # React + Vite + TypeScript
     ├── Dockerfile
     ├── package.json
     ├── vite.config.js
+    ├── tsconfig.json
+    ├── tailwind.config.js
     ├── index.html
     └── src/
+        ├── main.tsx
+        ├── App.tsx
+        ├── pages/               # Login, Dashboard, Vehiculos, Rutas, Operadores, Analisis
+        ├── components/          # auth, layout, modals, ui
+        └── lib/
 ```
 
 ---
