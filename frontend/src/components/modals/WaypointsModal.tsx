@@ -79,7 +79,7 @@ export function WaypointsModal({ isOpen, onClose, onSave, waypoints: initialWayp
               step="0.0001"
               value={newLat}
               onChange={(e) => setNewLat(e.target.value)}
-              placeholder="Latitud"
+              placeholder="Ej: 17.0700"
               className="flex-1 rounded-lg border border-border bg-secondary/50 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
             <input
@@ -87,7 +87,7 @@ export function WaypointsModal({ isOpen, onClose, onSave, waypoints: initialWayp
               step="0.0001"
               value={newLng}
               onChange={(e) => setNewLng(e.target.value)}
-              placeholder="Longitud"
+              placeholder="Ej: -96.7200"
               className="flex-1 rounded-lg border border-border bg-secondary/50 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
             />
             <button
