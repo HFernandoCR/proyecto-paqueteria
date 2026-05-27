@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import {
   BarChart,
   Bar,
@@ -12,6 +12,7 @@ import {
 } from 'recharts'
 import axios from 'axios'
 import { KpiCard } from '@/components/ui/KpiCard'
+import { InsightCard } from '@/components/ui/InsightCard'
 import {
   BarChart3,
   Truck,
@@ -20,6 +21,7 @@ import {
   AlertTriangle,
   Download,
   ChevronDown,
+  Lightbulb,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -132,6 +134,109 @@ export function Analisis() {
     { label: '90 días', value: 90 },
   ]
 
+  /* ── Recomendaciones (Insights) ── */
+  const insights = useMemo(() => {
+    if (!stats || kmPorVehiculo.length === 0 || tiempoPorRuta.length === 0) return []
+    
+    const nuevosInsights: any[] = []
+
+    // 1. Eficiencia de flota
+    const vehiculosConKm = kmPorVehiculo.filter(v => v.kmTotal > 0)
+    if (vehiculosConKm.length > 0) {
+      const max = vehiculosConKm.reduce((prev, current) => (prev.kmTotal > current.kmTotal) ? prev : current)
+      const min = vehiculosConKm.reduce((prev, current) => (prev.kmTotal < current.kmTotal) ? prev : current)
+      
+      const difPorcentaje = max.kmTotal === 0 ? 0 : ((max.kmTotal - min.kmTotal) / max.kmTotal) * 100
+      const nivel = difPorcentaje > 50 ? 'advertencia' : 'info'
+      
+      nuevosInsights.push({
+        id: 'eficiencia',
+        nivel,
+        icono: difPorcentaje > 50 ? 'AlertTriangle' : 'TrendingUp',
+        titulo: 'Eficiencia de flota',
+        descripcion: `${max.placa} lidera con ${max.kmTotal} km recorridos hoy. ${min.placa} registra menor actividad con ${min.kmTotal} km.`,
+        accion: 'Revisar asignación de rutas para equilibrar la carga'
+      })
+    }
+
+    // 2. Ruta crítica
+    if (tiempoPorRuta.length > 0) {
+      const promedioGeneral = tiempoPorRuta.reduce((acc, r) => acc + r.tiempoPromedioMin, 0) / tiempoPorRuta.length
+      const rutaLenta = tiempoPorRuta.reduce((prev, current) => (prev.tiempoPromedioMin > current.tiempoPromedioMin) ? prev : current)
+      
+      const excesoPromedio = ((rutaLenta.tiempoPromedioMin - promedioGeneral) / promedioGeneral) * 100
+      
+      let nivel = 'info'
+      if (excesoPromedio > 50) nivel = 'critico'
+      else if (excesoPromedio >= 20) nivel = 'advertencia'
+
+      nuevosInsights.push({
+        id: 'ruta-critica',
+        nivel,
+        icono: nivel === 'critico' ? 'XCircle' : nivel === 'advertencia' ? 'AlertTriangle' : 'Clock',
+        titulo: 'Ruta más lenta',
+        descripcion: `Ruta ${rutaLenta.nombre} toma ${rutaLenta.tiempoPromedioMin} min promedio, un ${Math.round(excesoPromedio)}% más que el promedio de ${promedioGeneral.toFixed(1)} min.`,
+        accion: 'Considerar redistribuir waypoints o asignar vehículo más rápido a esta ruta'
+      })
+    }
+
+    // 3. Estado de anomalías
+    if (anomalias.length === 0) {
+      nuevosInsights.push({
+        id: 'anomalias',
+        nivel: 'info',
+        icono: 'Activity',
+        titulo: 'Estado de anomalías',
+        descripcion: 'Operación normal. Todos los vehículos activos se mueven dentro de los parámetros esperados.',
+        accion: 'Mantener monitoreo estándar'
+      })
+    } else if (anomalias.length <= 2) {
+      nuevosInsights.push({
+        id: 'anomalias',
+        nivel: 'advertencia',
+        icono: 'AlertTriangle',
+        titulo: 'Estado de anomalías',
+        descripcion: `${anomalias.length} vehículo(s) llevan más de 15 min detenidos en ruta activa.`,
+        accion: 'Contactar a los operadores para verificar estado'
+      })
+    } else {
+      nuevosInsights.push({
+        id: 'anomalias',
+        nivel: 'critico',
+        icono: 'XCircle',
+        titulo: 'Estado de anomalías',
+        descripcion: `${anomalias.length} vehículos llevan más de 15 min detenidos en ruta activa.`,
+        accion: 'Atención inmediata requerida, posible bloqueo en ruta'
+      })
+    }
+
+    // 4. Tasa de actividad
+    if (stats.vehiculosTotal > 0) {
+      const tasaActividad = (stats.vehiculosActivos / stats.vehiculosTotal) * 100
+      let nivel = 'info'
+      let sugerencia = 'Mantener asignación actual'
+      
+      if (tasaActividad < 40) {
+        nivel = 'critico'
+        sugerencia = 'Revisión de flota inactiva urgente'
+      } else if (tasaActividad < 70) {
+        nivel = 'advertencia'
+        sugerencia = 'Revisar disponibilidad de vehículos'
+      }
+      
+      nuevosInsights.push({
+        id: 'actividad',
+        nivel,
+        icono: nivel === 'critico' ? 'TrendingDown' : 'Info',
+        titulo: 'Tasa de actividad de la flota',
+        descripcion: `El ${Math.round(tasaActividad)}% de la flota está activa hoy (${stats.vehiculosActivos} de ${stats.vehiculosTotal}).`,
+        accion: sugerencia
+      })
+    }
+
+    return nuevosInsights
+  }, [stats, kmPorVehiculo, tiempoPorRuta, anomalias])
+
   return (
     <div className="space-y-6">
 
@@ -236,6 +341,30 @@ export function Analisis() {
           accentColor={stats?.vehiculosDetenidos > 0 ? 'destructive' : 'success'}
         />
       </div>
+
+      {/* ── Recomendaciones del Sistema ── */}
+      {!isLoading && insights.length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Lightbulb className="h-5 w-5 text-warning" />
+            <h3 className="text-lg font-bold text-foreground">Recomendaciones del Sistema</h3>
+            <span className="text-sm text-muted-foreground ml-2 hidden sm:inline-block">Basado en datos operativos en tiempo real</span>
+          </div>
+          <p className="text-sm text-muted-foreground sm:hidden">Basado en datos operativos en tiempo real</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {insights.map(insight => (
+              <InsightCard
+                key={insight.id}
+                nivel={insight.nivel as any}
+                icono={insight.icono}
+                titulo={insight.titulo}
+                descripcion={insight.descripcion}
+                accion={insight.accion}
+              />
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ── Grid 2 columnas: BarChart km + LineChart entregas ── */}
       <div className="grid gap-6 lg:grid-cols-2">
