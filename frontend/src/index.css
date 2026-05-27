@@ -1,6 +1,38 @@
 @import "tailwindcss";
 @config "../tailwind.config.js";
 
+:root {
+  --background: #0a0a0b;
+  --foreground: #fafafa;
+  --card: #141417;
+  --popover: #141417;
+  --primary: #10b981;
+  --primary-foreground: #0a0a0b;
+  --secondary: #1e1e24;
+  --secondary-foreground: #a1a1aa;
+  --muted: #27272a;
+  --muted-foreground: #71717a;
+  --accent: #1e1e24;
+  --border: #27272a;
+  --input: #27272a;
+}
+
+.light {
+  --background: #fdfaf2; /* Elegant cream pastel background */
+  --foreground: #3c3a35; /* Soft charcoal-warm dark text */
+  --card: #f5eedc; /* Soft warm card background */
+  --popover: #f5eedc;
+  --primary: #0f9f70; /* Slightly darker rich emerald */
+  --primary-foreground: #fdfaf2;
+  --secondary: #e8ddc4; /* Soft sepia secondary */
+  --secondary-foreground: #6e6757;
+  --muted: #dfd1b3; /* Warm muted borders */
+  --muted-foreground: #8a7f6a;
+  --accent: #e8ddc4;
+  --border: #e2d4b8;
+  --input: #e2d4b8;
+}
+
 @layer base {
   * {
     @apply border-border;
