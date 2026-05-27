@@ -21,6 +21,7 @@ import {
   AlertTriangle,
   Download,
   ChevronDown,
+  ChevronUp,
   Lightbulb,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -55,6 +56,10 @@ export function Analisis() {
   const [rango, setRango] = useState<7 | 30 | 90>(30)
   const [showExportMenu, setShowExportMenu] = useState(false)
   const exportMenuRef = useRef<HTMLDivElement>(null)
+  const [abierto, setAbierto] = useState(() => {
+    const guardado = localStorage.getItem('analisis_recomendaciones_abierto')
+    return guardado !== null ? guardado === 'true' : false
+  })
 
   /* ── Datos ── */
   const [isLoading, setIsLoading] = useState(true)
@@ -344,25 +349,50 @@ export function Analisis() {
 
       {/* ── Recomendaciones del Sistema ── */}
       {!isLoading && insights.length > 0 && (
-        <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <Lightbulb className="h-5 w-5 text-warning" />
-            <h3 className="text-lg font-bold text-foreground">Recomendaciones del Sistema</h3>
-            <span className="text-sm text-muted-foreground ml-2 hidden sm:inline-block">Basado en datos operativos en tiempo real</span>
-          </div>
-          <p className="text-sm text-muted-foreground sm:hidden">Basado en datos operativos en tiempo real</p>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {insights.map(insight => (
-              <InsightCard
-                key={insight.id}
-                nivel={insight.nivel as any}
-                icono={insight.icono}
-                titulo={insight.titulo}
-                descripcion={insight.descripcion}
-                accion={insight.accion}
-              />
-            ))}
-          </div>
+        <div className="rounded-xl border border-border bg-card overflow-hidden transition-all duration-200">
+          {/* Header — siempre visible, clickeable */}
+          <button
+            type="button"
+            onClick={() => {
+              localStorage.setItem('analisis_recomendaciones_abierto', String(!abierto))
+              setAbierto(!abierto)
+            }}
+            className="w-full flex items-center justify-between px-6 py-4 cursor-pointer hover:bg-secondary/30 transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <Lightbulb className="h-5 w-5 text-warning flex-shrink-0" />
+              <div className="text-left">
+                <h3 className="text-base font-semibold text-foreground">Recomendaciones del Sistema</h3>
+                {abierto && (
+                  <p className="text-sm text-muted-foreground">Basado en datos operativos en tiempo real</p>
+                )}
+              </div>
+              {!abierto && (
+                <span className="ml-1 inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary">
+                  {insights.length} recomendaciones
+                </span>
+              )}
+            </div>
+            <span className="flex-shrink-0 text-muted-foreground">
+              {abierto ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+            </span>
+          </button>
+
+          {/* Contenido — solo se renderiza cuando está abierto */}
+          {abierto && (
+            <div className="px-6 pb-6 grid gap-4 sm:grid-cols-2">
+              {insights.map(insight => (
+                <InsightCard
+                  key={insight.id}
+                  nivel={insight.nivel as any}
+                  icono={insight.icono}
+                  titulo={insight.titulo}
+                  descripcion={insight.descripcion}
+                  accion={insight.accion}
+                />
+              ))}
+            </div>
+          )}
         </div>
       )}
 
