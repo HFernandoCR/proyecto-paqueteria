@@ -7,31 +7,31 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#0a0a0b',
-        foreground: '#fafafa',
+        background: 'var(--background)',
+        foreground: 'var(--foreground)',
         card: {
-          DEFAULT: '#141417',
-          foreground: '#fafafa',
+          DEFAULT: 'var(--card)',
+          foreground: 'var(--foreground)',
         },
         popover: {
-          DEFAULT: '#141417',
-          foreground: '#fafafa',
+          DEFAULT: 'var(--popover)',
+          foreground: 'var(--foreground)',
         },
         primary: {
-          DEFAULT: '#10b981',
-          foreground: '#0a0a0b',
+          DEFAULT: 'var(--primary)',
+          foreground: 'var(--primary-foreground)',
         },
         secondary: {
-          DEFAULT: '#1e1e24',
-          foreground: '#a1a1aa',
+          DEFAULT: 'var(--secondary)',
+          foreground: 'var(--secondary-foreground)',
         },
         muted: {
-          DEFAULT: '#27272a',
-          foreground: '#71717a',
+          DEFAULT: 'var(--muted)',
+          foreground: 'var(--muted-foreground)',
         },
         accent: {
-          DEFAULT: '#1e1e24',
-          foreground: '#fafafa',
+          DEFAULT: 'var(--accent)',
+          foreground: 'var(--foreground)',
         },
         destructive: {
           DEFAULT: '#ef4444',
@@ -45,9 +45,9 @@ export default {
           DEFAULT: '#10b981',
           foreground: '#0a0a0b',
         },
-        border: '#27272a',
-        input: '#27272a',
-        ring: '#10b981',
+        border: 'var(--border)',
+        input: 'var(--input)',
+        ring: 'var(--primary)',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
