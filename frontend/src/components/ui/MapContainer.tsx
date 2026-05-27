@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Navigation, Maximize2, MapPin } from 'lucide-react'
-import { MapContainer as LeafletMap, TileLayer, Marker, Popup } from 'react-leaflet'
+import { MapContainer as LeafletMap, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import axios from 'axios'
@@ -25,11 +25,12 @@ const estadoColor: Record<string, string> = {
   mantenimiento:'#f59e0b', // amarillo
 }
 
-const createVehicleIcon = (status: string) => {
+const createVehicleIcon = (status: string, isLoading: boolean = false) => {
   const color = estadoColor[status] ?? '#71717a';
+  const loadingClass = isLoading ? "opacity-50" : "";
   return L.divIcon({
     html: `
-      <div class="relative flex items-center justify-center">
+      <div class="relative flex items-center justify-center ${loadingClass}">
         <span class="absolute inline-flex h-4 w-4 rounded-full animate-ping opacity-75" style="background-color: ${color};"></span>
         <span class="relative inline-flex rounded-full h-3.5 w-3.5 border-2 border-white shadow-md" style="background-color: ${color};"></span>
       </div>
@@ -40,9 +41,85 @@ const createVehicleIcon = (status: string) => {
   });
 }
 
+function MapEventsHandler({ onMapClick }: { onMapClick: () => void }) {
+  useMapEvents({
+    click: onMapClick,
+  })
+  return null
+}
+
 export function MapContainer() {
   const [vehicles, setVehicles] = useState<ActiveVehicle[]>([])
   const [isLoading, setIsLoading] = useState(true)
+
+  const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null)
+  const [historyLoadingId, setHistoryLoadingId] = useState<string | null>(null)
+  const [historyError, setHistoryError] = useState<string | null>(null)
+  const [historyCount, setHistoryCount] = useState<number | null>(null)
+
+  const mapRef = useRef<L.Map | null>(null)
+  const polylineRef = useRef<L.Polyline | null>(null)
+
+  const handleMapClick = () => {
+    if (polylineRef.current) {
+      polylineRef.current.remove()
+      polylineRef.current = null
+    }
+    setSelectedVehicleId(null)
+    setHistoryError(null)
+    setHistoryCount(null)
+  }
+
+  const handleVehicleClick = async (v: ActiveVehicle) => {
+    if (polylineRef.current) {
+      polylineRef.current.remove()
+      polylineRef.current = null
+    }
+    setSelectedVehicleId(v._id)
+    setHistoryError(null)
+    setHistoryCount(null)
+    setHistoryLoadingId(v._id)
+
+    try {
+      let points = []
+      try {
+        const res = await axios.get(`/api/seguimiento/${v._id}/historial`)
+        points = res.data.historial || []
+      } catch (err) {
+        const fallbackRes = await axios.get(`/api/ubicacion/ubicaciones/historial/${v._id}`)
+        points = fallbackRes.data || []
+      }
+
+      if (points.length === 0) {
+        setHistoryError("Sin historial de recorrido disponible")
+      } else {
+        setHistoryCount(points.length)
+        const latlngs = points.map((p: any) => [p.lat, p.lng] as [number, number])
+        const map = mapRef.current
+        if (map) {
+          polylineRef.current = L.polyline(latlngs, {
+            color: estadoColor[v.estadoActual] ?? '#71717a',
+            weight: 3,
+            opacity: 0.8
+          }).addTo(map)
+          map.flyTo([v.lat, v.lng], 14, { duration: 1 })
+        }
+      }
+    } catch (err) {
+      setHistoryError("Sin historial de recorrido disponible")
+      console.error("Error fetching vehicle history:", err)
+    } finally {
+      setHistoryLoadingId(null)
+    }
+  }
+
+  useEffect(() => {
+    return () => {
+      if (polylineRef.current) {
+        polylineRef.current.remove()
+      }
+    }
+  }, [])
 
   useEffect(() => {
     const fetchActiveVehicles = async () => {
@@ -107,12 +184,15 @@ export function MapContainer() {
           </div>
         ) : null}
 
+        {/* @ts-ignore */}
         <LeafletMap 
+          ref={mapRef}
           center={[17.0732, -96.7266] as [number, number]} 
           zoom={11} 
           style={{ height: '100%', width: '100%', zIndex: 1 }}
           zoomControl={true}
         >
+          <MapEventsHandler onMapClick={handleMapClick} />
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -121,7 +201,8 @@ export function MapContainer() {
             <Marker 
               key={v._id} 
               position={[v.lat, v.lng] as [number, number]} 
-              icon={createVehicleIcon(v.estadoActual)}
+              icon={createVehicleIcon(v.estadoActual, historyLoadingId === v._id)}
+              eventHandlers={{ click: () => handleVehicleClick(v) }}
             >
               <Popup className="map-popup" maxWidth={180}>
                 <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '12px', color: '#fafafa' }}>
@@ -148,8 +229,16 @@ export function MapContainer() {
                   </div>
                   {/* Velocidad */}
                   {v.velocidadKmh > 0 && (
-                    <p style={{ color: '#71717a' }}>{v.velocidadKmh} km/h</p>
+                    <p style={{ color: '#71717a', marginBottom: '4px' }}>{v.velocidadKmh} km/h</p>
                   )}
+                  {/* Historial Info */}
+                  {historyLoadingId === v._id ? (
+                    <p style={{ color: '#71717a', fontSize: '11px', fontStyle: 'italic' }}>Cargando historial...</p>
+                  ) : historyError && selectedVehicleId === v._id ? (
+                    <p style={{ color: '#ef4444', fontSize: '11px' }}>{historyError}</p>
+                  ) : historyCount !== null && selectedVehicleId === v._id ? (
+                    <p style={{ color: '#71717a', fontSize: '11px' }}>Historial: {historyCount} puntos</p>
+                  ) : null}
                 </div>
               </Popup>
             </Marker>
