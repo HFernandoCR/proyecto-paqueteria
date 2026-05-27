@@ -204,7 +204,7 @@ export function MapContainer() {
               icon={createVehicleIcon(v.estadoActual, historyLoadingId === v._id)}
               eventHandlers={{ click: () => handleVehicleClick(v) }}
             >
-              <Popup className="map-popup" maxWidth={180}>
+              <Popup className="map-popup" maxWidth={180} autoPan={false}>
                 <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '12px', color: '#fafafa' }}>
                   {/* Placa */}
                   <p style={{ fontWeight: 700, fontSize: '13px', letterSpacing: '0.06em', marginBottom: '6px' }}>
