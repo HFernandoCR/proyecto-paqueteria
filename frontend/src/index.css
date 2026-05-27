@@ -98,3 +98,16 @@
   color: #fafafa;
   background: transparent;
 }
+
+/* ── Estilos de impresión ────────────────────────────────────────── */
+@media print {
+  aside,
+  header,
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+    color: black !important;
+  }
+}

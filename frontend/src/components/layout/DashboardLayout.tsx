@@ -5,7 +5,6 @@ import {
   Users,
   Route,
   BarChart3,
-  PieChart,
   Settings,
   LogOut,
   ChevronLeft,
@@ -22,8 +21,7 @@ const navigation = [
   { name: 'Vehículos', href: '/vehiculos', icon: Truck },
   { name: 'Operadores', href: '/operadores', icon: Users },
   { name: 'Rutas', href: '/rutas', icon: Route },
-  { name: 'Reportes', href: '/reportes', icon: BarChart3 },
-  { name: 'Dashboard BI', href: '/dashboard', icon: PieChart },
+  { name: 'Análisis', href: '/analisis', icon: BarChart3 },
 ]
 
 export function DashboardLayout() {
