@@ -214,3 +214,9 @@ proyecto-paqueteria/
 | Martínez Mendoza Jesús Ángel   | Backend        |
 | Diego García Jennifer          | Frontend       |
 | Candelaria Velázquez Rodrigo   | Frontend       |
+
+---
+
+## Documentacion adicional
+- [Proceso ETL](docs/etl.md) — Extraccion, Transformacion y Carga de datos
+- [Etica y Privacidad de Datos](docs/etica-datos.md)
