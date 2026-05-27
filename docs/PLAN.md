@@ -91,13 +91,16 @@
 
 | Capa | Tecnología |
 | --- | --- |
-| Backend | Node.js 20 + Express |
-| ORM/ODM | Mongoose |
+| Backend | Node.js 20 + Express 4 |
+| ORM/ODM | Mongoose 8 |
 | Base de datos | MongoDB 7 |
-| Frontend | React 18 + Vite |
-| Mapa | Leaflet + OpenStreetMap (sin API key) |
+| Frontend | React 18 + Vite 5 + TypeScript |
+| Estilos | Tailwind CSS 4 |
+| Ruteo SPA | React Router 7 |
+| Cliente HTTP frontend | Axios |
+| Iconos | lucide-react |
+| Mapa | Leaflet + react-leaflet + OpenStreetMap (sin API key) |
 | Gráficas BI | Recharts |
-| Cliente HTTP frontend | fetch nativo o axios |
 | Reverse proxy | Nginx (imagen oficial `nginx:alpine`) |
 | Contenedores | Docker + docker-compose |
 | Repositorio | GitLab self-hosted (gitlab.itolab.lat) |
@@ -121,6 +124,8 @@ proyecto-paqueteria/
 │   ├── casos-de-uso.md         # casos de uso y flujo del sistema
 │   ├── uml-clases.md           # diagrama UML de clases
 │   ├── pruebas.md              # tabla de casos de prueba
+│   ├── etica-datos.md          # ética y privacidad de datos
+│   ├── etl.md                  # proceso ETL (extracción, transformación, carga)
 │   └── capturas/               # screenshots para entrega
 ├── proxy/                      # infraestructura de red, no es servicio de negocio
 │   ├── Dockerfile
