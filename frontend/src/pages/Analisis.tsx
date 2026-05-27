@@ -34,6 +34,16 @@ const CHART_ACCENT2 = '#7c9dff'
 const CHART_GRID    = '#192033'
 const CHART_MUTED   = '#5b6887'
 
+/* Arma un CSV escapando cada campo según RFC 4180 (comillas solo si hace falta,
+   comillas internas duplicadas) y une las filas con CRLF. */
+function buildCsv(rows: (string | number | null | undefined)[][]): string {
+  const escape = (val: string | number | null | undefined) => {
+    const s = val == null ? '' : String(val)
+    return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
+  }
+  return rows.map((r) => r.map(escape).join(',')).join('\r\n')
+}
+
 /* Tooltip compartido para todos los charts */
 const TT = {
   contentStyle: {
@@ -103,20 +113,37 @@ export function Analisis() {
 
   /* ── Exportar CSV ── */
   const handleExportCSV = () => {
-    const rows: (string | number | undefined)[][] = [
-      ['Sección', 'Campo', 'Valor'],
-      ['KPIs', 'Vehículos Activos', stats?.vehiculosActivos],
-      ['KPIs', 'Km Recorridos Hoy', stats?.kmRecorridosHoy],
-      ['KPIs', 'Entregas Hoy', stats?.entregasHoy],
-      ['KPIs', 'Vehículos Detenidos', stats?.vehiculosDetenidos],
+    const rows: (string | number | null | undefined)[][] = [
+      ['Reporte de Análisis - Sistema de Paquetería'],
+      ['Generado', new Date().toLocaleString('es-MX')],
+      ['Rango de días', rango],
       [],
-      ['Km por Vehículo', 'Placa', 'Km Total'],
-      ...kmPorVehiculo.map((v) => ['', v.placa, v.kmTotal]),
+      ['KPIs'],
+      ['Métrica', 'Valor'],
+      ['Vehículos Activos', stats?.vehiculosActivos],
+      ['Vehículos Totales', stats?.vehiculosTotal],
+      ['Km Recorridos Hoy', stats?.kmRecorridosHoy],
+      ['Entregas Hoy', stats?.entregasHoy],
+      ['Vehículos Detenidos', stats?.vehiculosDetenidos],
       [],
-      ['Anomalías', 'Placa', 'ID Vehículo', 'Minutos Detenido'],
-      ...anomalias.map((a) => ['', a.placa, a.vehiculoId, a.minutosDetenido]),
+      ['Km por Vehículo'],
+      ['Placa', 'Km Total'],
+      ...kmPorVehiculo.map((v) => [v.placa, v.kmTotal]),
+      [],
+      ['Entregas por Día'],
+      ['Fecha', 'Entregas'],
+      ...entregasPorDia.map((e) => [e.fecha, e.entregas]),
+      [],
+      ['Tiempo Promedio por Ruta'],
+      ['Ruta', 'Minutos Promedio'],
+      ...tiempoPorRuta.map((t) => [t.nombre, t.tiempoPromedioMin]),
+      [],
+      ['Anomalías'],
+      ['Placa', 'ID Vehículo', 'Minutos Detenido'],
+      ...anomalias.map((a) => [a.placa, a.vehiculoId, a.minutosDetenido]),
     ]
-    const csv = rows.map((r) => r.join(',')).join('\n')
+    const BOM = String.fromCharCode(0xfeff) // BOM UTF-8: Excel respeta acentos
+    const csv = BOM + buildCsv(rows)
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
