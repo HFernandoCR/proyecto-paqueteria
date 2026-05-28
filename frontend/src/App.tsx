@@ -7,6 +7,7 @@ import { Rutas } from './pages/Rutas'
 import { Analisis } from './pages/Analisis'
 import { Login } from './pages/Login'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
+import { Seguimiento } from './pages/Seguimiento'
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
           <Route path="analisis" element={<Analisis />} />
           <Route path="reportes" element={<Navigate to="/analisis" replace />} />
           <Route path="dashboard" element={<Navigate to="/analisis" replace />} />
+          <Route path="/seguimiento" element={<Seguimiento />} />
         </Route>
       </Route>
       
