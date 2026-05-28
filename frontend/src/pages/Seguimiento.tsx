@@ -1,6 +1,33 @@
 import React, { useState, useEffect } from 'react'
 import axios from 'axios'
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
+import L from 'leaflet'
 import { Truck, Navigation, AlertCircle, Radio } from 'lucide-react'
+
+// IMPORTANTE: Estilos de Leaflet para que el mapa no se rompa visualmente
+import 'leaflet/dist/leaflet.css'
+
+import icon from 'leaflet/dist/images/marker-icon.png'
+import iconShadow from 'leaflet/dist/images/marker-shadow.png'
+
+let DefaultIcon = L.icon({
+  iconUrl: icon,
+  shadowUrl: iconShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34]
+})
+L.Marker.prototype.options.icon = DefaultIcon
+
+// Icono personalizado para los camiones en movimiento
+const camionIcon = L.divIcon({
+  html: `<div class="bg-primary text-primary-foreground p-1.5 rounded-full shadow-lg border-2 border-background flex items-center justify-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v10"/><path d="M14 22a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M6 22a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M20 18h2v-4h-7v7"/></svg>
+         </div>`,
+  className: '',
+  iconSize: [28, 28],
+  iconAnchor: [14, 14]
+})
 
 interface VehiculoActivo {
   vehiculoId?: string
@@ -12,10 +39,22 @@ interface VehiculoActivo {
   lng: number
 }
 
+// Componente auxiliar para mover la cámara del mapa suavemente cuando seleccionamos un camión
+function ChangeMapView({ center }: { center: [number, number] }) {
+  const map = useMap()
+  useEffect(() => {
+    map.setView(center, 15, { animate: true })
+  }, [center, map])
+  return null
+}
+
 export function Seguimiento() {
   const [vehiculos, setVehiculos] = useState<VehiculoActivo[]>([])
   const [error, setError] = useState<string | null>(null)
   const [selectedVehiculo, setSelectedVehiculo] = useState<VehiculoActivo | null>(null)
+
+  // Coordenadas iniciales por defecto (puedes ajustarlas a tu ciudad si gustas)
+  const defaultCenter: [number, number] = [17.0732, -96.7266] 
 
   useEffect(() => {
     const fetchActivos = async () => {
@@ -24,7 +63,6 @@ export function Seguimiento() {
         const res = await axios.get('/api/seguimiento/activos')
         setVehiculos(res.data)
         
-        // Si teníamos un vehículo seleccionado, actualizamos sus coordenadas en tiempo real
         if (selectedVehiculo) {
           const actualizado = res.data.find((v: VehiculoActivo) => 
             (v.vehiculoId === selectedVehiculo.vehiculoId || v._id === selectedVehiculo._id)
@@ -42,9 +80,14 @@ export function Seguimiento() {
     return () => clearInterval(interval)
   }, [selectedVehiculo])
 
+  // Determinar el centro dinámico del mapa
+  const mapCenter: [number, number] = selectedVehiculo 
+    ? [selectedVehiculo.lat, selectedVehiculo.lng] 
+    : defaultCenter
+
   return (
     <div className="flex flex-col h-[calc(100vh-120px)] space-y-4">
-      {/* Encabezado del Módulo */}
+      {/* Encabezado */}
       <div className="flex items-center justify-between flex-shrink-0">
         <div>
           <h2 className="text-2xl font-bold text-foreground">Monitoreo en Tiempo Real</h2>
@@ -58,10 +101,10 @@ export function Seguimiento() {
         </div>
       </div>
 
-      {/* Contenedor Principal Dividido */}
+      {/* Contenedor Dividido */}
       <div className="flex-1 flex flex-col md:flex-row gap-4 overflow-hidden w-full">
         
-        {/* PANEL IZQUIERDO: Lista de Vehículos */}
+        {/* PANEL IZQUIERDO: Lista de unidades */}
         <div className="w-full md:w-80 flex flex-col border border-border bg-card rounded-xl overflow-hidden flex-shrink-0">
           <div className="p-4 border-b border-border bg-secondary/20">
             <h3 className="font-semibold text-foreground flex items-center gap-2">
@@ -83,7 +126,7 @@ export function Seguimiento() {
                 <Navigation className="h-8 w-8 text-muted-foreground/40 mb-2 rotate-45" />
                 <p className="text-sm font-medium text-muted-foreground">No hay vehículos activos</p>
                 <p className="text-xs text-muted-foreground/70 mt-1 max-w-[180px]">
-                  Inicia un simulador desde Postman para ver telemetría.
+                  Inicia una ruta simulada para ver la telemetría en el mapa.
                 </p>
               </div>
             ) : (
@@ -103,9 +146,7 @@ export function Seguimiento() {
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-mono font-bold text-sm text-foreground">{vehiculo.placa}</span>
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
-                        vehiculo.estadoActual === 'En Ruta' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'
-                      }`}>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-success/10 text-success">
                         {vehiculo.estadoActual}
                       </span>
                     </div>
@@ -120,25 +161,43 @@ export function Seguimiento() {
           </div>
         </div>
 
-        {/* PANEL DERECHO: El contenedor del Mapa */}
-        <div className="flex-1 border border-border bg-card rounded-xl overflow-hidden relative shadow-inner flex flex-col justify-center items-center">
-          {/* Aquí es donde Leaflet renderizará el mapa real en el paso 4 */}
-          <div className="absolute inset-0 bg-secondary/10 flex flex-col items-center justify-center p-6 text-center">
-            <div className="rounded-full bg-primary/10 p-4 mb-3">
-              <Navigation className="h-8 w-8 text-primary animate-bounce" />
-            </div>
-            <h4 className="text-lg font-medium text-foreground">Contenedor del Mapa Listo</h4>
-            <p className="text-sm text-muted-foreground max-w-sm mt-1">
-              La estructura visual está montada. En el siguiente paso instalaremos Leaflet para dibujar el mapa geográfico real aquí.
-            </p>
-            {selectedVehiculo && (
-              <div className="mt-4 p-2.5 bg-card border border-border rounded-lg text-xs font-mono text-left space-y-1 shadow-sm">
-                <p className="text-primary font-bold">📍 Unidad Enfocada: {selectedVehiculo.placa}</p>
-                <p className="text-muted-foreground">Lat: {selectedVehiculo.lat.toFixed(6)}</p>
-                <p className="text-muted-foreground">Lng: {selectedVehiculo.lng.toFixed(6)}</p>
-              </div>
-            )}
-          </div>
+        {/* PANEL DERECHO: MAPA REAL DE LEAFLET */}
+        <div className="flex-1 border border-border bg-card rounded-xl overflow-hidden relative shadow-inner z-0">
+          <MapContainer 
+            center={defaultCenter} 
+            zoom={13} 
+            className="w-full h-full"
+          >
+            {/* Capa de mapas gratuita OpenStreetMap */}
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+
+            {/* Marcadores dinámicos para cada vehículo del polling */}
+            {vehiculos.map((vehiculo, idx) => {
+              const id = vehiculo.vehiculoId || vehiculo._id || idx
+              return (
+                <Marker 
+                  key={id} 
+                  position={[vehiculo.lat, vehiculo.lng]}
+                  icon={camionIcon}
+                >
+                  <Popup>
+                    <div className="font-sans text-xs space-y-1">
+                      <p className="font-bold text-sm border-b pb-1">🚚 Placa: {vehiculo.placa}</p>
+                      <p><b>Estado:</b> {vehiculo.estadoActual}</p>
+                      <p><b>Velocidad:</b> {vehiculo.velocidadKmh} km/h</p>
+                      <p className="text-[10px] text-muted-foreground">Lat: {vehiculo.lat.toFixed(5)}, Lng: {vehiculo.lng.toFixed(5)}</p>
+                    </div>
+                  </Popup>
+                </Marker>
+              )
+            })}
+
+            {/* Mover la cámara de forma fluida si seleccionamos una unidad */}
+            {selectedVehiculo && <ChangeMapView center={mapCenter} />}
+          </MapContainer>
         </div>
 
       </div>
