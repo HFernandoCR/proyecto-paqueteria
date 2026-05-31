@@ -19,11 +19,17 @@ let DefaultIcon = L.icon({
 })
 L.Marker.prototype.options.icon = DefaultIcon
 
+const estadoColor: Record<string, string> = {
+  en_ruta:      '#10b981', // verde
+  entregando:   '#3b82f6', // azul
+  detenido:     '#ef4444', // rojo
+  disponible:   '#71717a', // gris
+  mantenimiento:'#f59e0b', // amarillo
+}
+
 // Función para generar un icono dinámico según el estado del camión
 const getCamionIcon = (estado?: string) => {
-  let bgColor = '#ef4444' // default (rojo/alerta)
-  if (estado === 'en_ruta') bgColor = '#22c55e' // verde
-  else if (estado === 'entregando') bgColor = '#3b82f6' // azul
+  const bgColor = estado && estadoColor[estado] ? estadoColor[estado] : '#71717a'
 
   return L.divIcon({
     html: `<div style="background-color: ${bgColor}; color: white; padding: 5px; border-radius: 50%; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 2px solid white; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; box-sizing: border-box;">
@@ -270,11 +276,7 @@ export function Seguimiento() {
               <Polyline
                 positions={historial}
                 pathOptions={{
-                  color: selectedVehiculo?.vehiculo?.estadoActual === 'en_ruta'
-                    ? '#22c55e'
-                    : selectedVehiculo?.vehiculo?.estadoActual === 'entregando'
-                    ? '#3b82f6'
-                    : '#ef4444',
+                  color: estadoColor[selectedVehiculo?.vehiculo?.estadoActual ?? ''] ?? '#71717a',
                   weight: 3,
                   opacity: 0.8
                 }}
