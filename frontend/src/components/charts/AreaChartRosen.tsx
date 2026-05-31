@@ -47,6 +47,9 @@ export function AreaChartRosen({
     return () => clearTimeout(t)
   }, [])
 
+  const pathRef = useRef<SVGPathElement>(null)
+  const [pathLength, setPathLength] = useState(0)
+
   useEffect(() => {
     if (pathRef.current) {
       setPathLength(pathRef.current.getTotalLength())
