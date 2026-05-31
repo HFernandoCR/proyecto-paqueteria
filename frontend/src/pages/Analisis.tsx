@@ -1,15 +1,8 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-} from 'recharts'
+import { BarChartRosen } from '../components/charts/BarChartRosen'
+import { AreaChartRosen } from '../components/charts/AreaChartRosen'
+import { HorizontalBarRosen } from '../components/charts/HorizontalBarRosen'
+import { DonutChartRosen } from '../components/charts/DonutChartRosen'
 import axios from 'axios'
 import { KpiCard } from '@/components/ui/KpiCard'
 import { InsightCard } from '@/components/ui/InsightCard'
@@ -26,14 +19,6 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-/* ------------------------------------------------------------------ */
-/*  Colores para SVG — Recharts no puede usar variables CSS de Tailwind */
-/* ------------------------------------------------------------------ */
-const CHART_ACCENT  = '#4f72ff'
-const CHART_ACCENT2 = '#7c9dff'
-const CHART_GRID    = '#192033'
-const CHART_MUTED   = '#5b6887'
-
 /* Arma un CSV escapando cada campo según RFC 4180 (comillas solo si hace falta,
    comillas internas duplicadas) y une las filas con CRLF. */
 function buildCsv(rows: (string | number | null | undefined)[][]): string {
@@ -42,20 +27,6 @@ function buildCsv(rows: (string | number | null | undefined)[][]): string {
     return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
   }
   return rows.map((r) => r.map(escape).join(',')).join('\r\n')
-}
-
-/* Tooltip compartido para todos los charts */
-const TT = {
-  contentStyle: {
-    background: '#0d1221',
-    border: '1px solid #1d2740',
-    borderRadius: '6px',
-    fontSize: '0.8rem',
-    color: '#dde3f0',
-    padding: '0.5rem 0.75rem',
-  },
-  labelStyle: { color: '#dde3f0', fontWeight: 600, marginBottom: '0.2rem' },
-  cursor: { fill: 'rgba(79,114,255,0.05)' },
 }
 
 /* ------------------------------------------------------------------ */
@@ -423,150 +394,46 @@ export function Analisis() {
         </div>
       )}
 
-      {/* ── Grid 2 columnas: BarChart km + LineChart entregas ── */}
+      {/* ── Fila 1: Km por vehículo y Distribución de Flota ── */}
       <div className="grid gap-6 lg:grid-cols-2">
-
-        {/* BarChart: Km por vehículo */}
         <div className="rounded-xl border border-border bg-card p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-foreground">Km Recorridos por Vehículo</h3>
-            <span className="flex items-center gap-2 text-sm">
-              <span className="h-3 w-3 rounded-full" style={{ background: CHART_ACCENT }} />
-              <span className="text-muted-foreground">km totales hoy</span>
-            </span>
-          </div>
-          <div className="h-[300px]">
-            {isLoading ? (
-              <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
-                Cargando…
-              </div>
-            ) : kmPorVehiculo.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-center">
-                <p className="text-sm text-muted-foreground">Sin datos de trayecto disponibles</p>
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={kmPorVehiculo} barSize={28}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} vertical={false} />
-                  <XAxis
-                    dataKey="placa"
-                    stroke={CHART_MUTED}
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis
-                    stroke={CHART_MUTED}
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={false}
-                    unit=" km"
-                  />
-                  <Tooltip {...TT} formatter={(v) => [`${v} km`, 'Km totales']} />
-                  <Bar dataKey="kmTotal" fill={CHART_ACCENT} radius={[3, 3, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </div>
+          <BarChartRosen 
+            title="Km Recorridos por Vehículo"
+            data={kmPorVehiculo.map(v => ({ label: v.placa, value: v.kmTotal, unit: 'km' }))} 
+            color="#22c55e"
+            height={300}
+          />
         </div>
-
-        {/* LineChart: Entregas por día */}
-        <div className="rounded-xl border border-border bg-card p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-foreground">Entregas por Día</h3>
-            <span className="flex items-center gap-2 text-sm">
-              <span className="h-3 w-3 rounded-full" style={{ background: CHART_ACCENT }} />
-              <span className="text-muted-foreground">entregas realizadas</span>
-            </span>
-          </div>
-          <div className="h-[300px]">
-            {isLoading ? (
-              <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
-                Cargando…
-              </div>
-            ) : entregasPorDia.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-center">
-                <p className="text-sm text-muted-foreground">Sin historial de entregas disponible</p>
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={entregasPorDia}>
-                  <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} vertical={false} />
-                  <XAxis
-                    dataKey="fecha"
-                    stroke={CHART_MUTED}
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis
-                    stroke={CHART_MUTED}
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <Tooltip {...TT} formatter={(v) => [`${v}`, 'Entregas']} />
-                  <Line
-                    type="monotone"
-                    dataKey="entregas"
-                    stroke={CHART_ACCENT}
-                    strokeWidth={2.5}
-                    dot={{ r: 3, fill: CHART_ACCENT, strokeWidth: 0 }}
-                    activeDot={{ r: 5, strokeWidth: 0 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            )}
-          </div>
+        <div className="rounded-xl border border-border bg-card p-6 flex items-center justify-center">
+          <DonutChartRosen
+            title="Distribución de Flota"
+            data={[
+              { label: 'En Ruta', value: stats?.vehiculosActivos || 0, color: '#22c55e' },
+              { label: 'Detenidos', value: stats?.vehiculosDetenidos || 0, color: '#ef4444' },
+              { label: 'Disponibles', value: Math.max(0, (stats?.vehiculosTotal || 0) - (stats?.vehiculosActivos || 0) - (stats?.vehiculosDetenidos || 0)), color: '#6b7280' },
+            ].filter(d => d.value > 0)}
+            size={280}
+          />
         </div>
-
       </div>
 
-      {/* ── Full width: Tiempo promedio por ruta ── */}
+      {/* ── Fila 2: AreaChart Entregas por día (Full width) ── */}
       <div className="rounded-xl border border-border bg-card p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-foreground">Tiempo Promedio por Ruta</h3>
-          <span className="flex items-center gap-2 text-sm">
-            <span className="h-3 w-3 rounded-full" style={{ background: CHART_ACCENT2 }} />
-            <span className="text-muted-foreground">minutos promedio</span>
-          </span>
-        </div>
-        <div className="h-[300px]">
-          {isLoading ? (
-            <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
-              Cargando…
-            </div>
-          ) : tiempoPorRuta.length === 0 ? (
-            <div className="h-full flex items-center justify-center text-center">
-              <p className="text-sm text-muted-foreground">Sin datos de rutas disponibles</p>
-            </div>
-          ) : (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart layout="vertical" data={tiempoPorRuta} barSize={18}>
-                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} horizontal={false} />
-                <XAxis
-                  type="number"
-                  stroke={CHART_MUTED}
-                  fontSize={11}
-                  tickLine={false}
-                  axisLine={false}
-                  unit=" min"
-                />
-                <YAxis
-                  type="category"
-                  dataKey="nombre"
-                  width={130}
-                  stroke={CHART_MUTED}
-                  fontSize={11}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <Tooltip {...TT} formatter={(v) => [`${v} min`, 'Tiempo promedio']} />
-                <Bar dataKey="tiempoPromedioMin" fill={CHART_ACCENT2} radius={[0, 3, 3, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </div>
+        <AreaChartRosen
+          title="Entregas por Día"
+          data={entregasPorDia.map(e => ({ label: e.fecha, value: e.entregas }))}
+          color="#3b82f6"
+          height={300}
+        />
+      </div>
+
+      {/* ── Fila 3: Tiempo promedio por ruta (Full width) ── */}
+      <div className="rounded-xl border border-border bg-card p-6">
+        <HorizontalBarRosen
+          title="Tiempo Promedio por Ruta"
+          data={tiempoPorRuta.map(r => ({ label: r.nombre, value: r.tiempoPromedioMin, unit: 'min' }))}
+          color="#f59e0b"
+        />
       </div>
 
       {/* ── Tabla de anomalías ── */}
