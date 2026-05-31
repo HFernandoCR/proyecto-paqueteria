@@ -29,14 +29,25 @@ const camionIcon = L.divIcon({
   iconAnchor: [14, 14]
 })
 
-interface VehiculoActivo {
-  vehiculoId?: string
+// Estructura real del API /api/seguimiento/activos
+interface UbicacionActual {
+  lat?: number
+  lng?: number
+  velocidadKmh?: number
+  bearing?: number
+  timestamp?: string
+}
+
+interface VehiculoData {
   _id?: string
-  placa: string
-  estadoActual: string
-  velocidadKmh: number
-  lat: number
-  lng: number
+  placa?: string
+  estadoActual?: string
+  modelo?: string
+}
+
+interface VehiculoActivo {
+  vehiculo: VehiculoData
+  ubicacionActual?: UbicacionActual
 }
 
 // Componente auxiliar para mover la cámara del mapa suavemente cuando seleccionamos un camión
@@ -81,7 +92,7 @@ export function Seguimiento() {
         const current = selectedRef.current
         if (current) {
           const actualizado = res.data.find((v: VehiculoActivo) =>
-            (v.vehiculoId === current.vehiculoId || v._id === current._id)
+            v.vehiculo?._id === current.vehiculo?._id
           )
           if (actualizado) setSelectedVehiculo(actualizado)
         }
@@ -102,7 +113,7 @@ export function Seguimiento() {
       setHistorial([])
       return
     }
-    const id = selectedVehiculo._id || selectedVehiculo.vehiculoId
+    const id = selectedVehiculo.vehiculo?._id
     if (!id) { setHistorial([]); return }
 
     axios.get(`/api/seguimiento/${id}/historial`)
@@ -115,8 +126,8 @@ export function Seguimiento() {
   }, [selectedVehiculo])
 
   // Determinar el centro dinámico del mapa
-  const mapCenter: [number, number] = selectedVehiculo 
-    ? [selectedVehiculo.lat, selectedVehiculo.lng] 
+  const mapCenter: [number, number] = selectedVehiculo
+    ? [selectedVehiculo.ubicacionActual?.lat ?? 0, selectedVehiculo.ubicacionActual?.lng ?? 0]
     : defaultCenter
 
   return (
@@ -165,28 +176,28 @@ export function Seguimiento() {
               </div>
             ) : (
               vehiculos.map((vehiculo, idx) => {
-                const id = vehiculo.vehiculoId || vehiculo._id || idx
-                const isSelected = selectedVehiculo && (selectedVehiculo.vehiculoId === vehiculo.vehiculoId || selectedVehiculo._id === vehiculo._id)
-                
+                const id = vehiculo.vehiculo?._id || idx
+                const isSelected = selectedVehiculo?.vehiculo?._id === vehiculo.vehiculo?._id
+
                 return (
                   <button
                     key={id}
                     onClick={() => setSelectedVehiculo(vehiculo)}
                     className={`w-full text-left p-3 rounded-lg border transition-all flex flex-col gap-1.5 ${
-                      isSelected 
-                        ? 'border-primary bg-primary/5 ring-1 ring-primary' 
+                      isSelected
+                        ? 'border-primary bg-primary/5 ring-1 ring-primary'
                         : 'border-border bg-secondary/10 hover:bg-secondary/30'
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="font-mono font-bold text-sm text-foreground">{vehiculo.placa}</span>
+                      <span className="font-mono font-bold text-sm text-foreground">{vehiculo.vehiculo?.placa ?? 'Sin placa'}</span>
                       <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-success/10 text-success">
-                        {vehiculo.estadoActual}
+                        {vehiculo.vehiculo?.estadoActual ?? 'disponible'}
                       </span>
                     </div>
                     <div className="flex justify-between items-center text-xs text-muted-foreground mt-1">
                       <span>Velocidad:</span>
-                      <span className="font-semibold text-foreground">{(vehiculo.velocidadKmh ?? 0)} km/h</span>
+                      <span className="font-semibold text-foreground">{(vehiculo.ubicacionActual?.velocidadKmh ?? 0)} km/h</span>
                     </div>
                   </button>
                 )
@@ -208,29 +219,36 @@ export function Seguimiento() {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
 
-            {/* Marcadores dinámicos para cada vehículo del polling */}
-            {vehiculos.map((vehiculo, idx) => {
-              const id = vehiculo.vehiculoId || vehiculo._id || idx
-              return (
-                <Marker
-                  key={id}
-                  position={[vehiculo.lat, vehiculo.lng]}
-                  icon={camionIcon}
-                  eventHandlers={{
-                    click: () => setSelectedVehiculo(vehiculo)
-                  }}
-                >
-                  <Popup>
-                    <div className="font-sans text-xs space-y-1">
-                      <p className="font-bold text-sm border-b pb-1">🚚 Placa: {vehiculo.placa}</p>
-                      <p><b>Estado:</b> {vehiculo.estadoActual}</p>
-                      <p><b>Velocidad:</b> {(vehiculo.velocidadKmh ?? 0)} km/h</p>
-                      <p className="text-[10px] text-muted-foreground">Lat: {(vehiculo.lat ?? 0).toFixed(5)}, Lng: {(vehiculo.lng ?? 0).toFixed(5)}</p>
-                    </div>
-                  </Popup>
-                </Marker>
+            {/* Marcadores: solo vehiculos con coordenadas validas para evitar crash en Leaflet */}
+            {vehiculos
+              .filter(v =>
+                v.ubicacionActual?.lat != null &&
+                v.ubicacionActual?.lng != null &&
+                !isNaN(v.ubicacionActual.lat) &&
+                !isNaN(v.ubicacionActual.lng)
               )
-            })}
+              .map((vehiculo, idx) => {
+                const id = vehiculo.vehiculo?._id || idx
+                return (
+                  <Marker
+                    key={id}
+                    position={[vehiculo.ubicacionActual!.lat!, vehiculo.ubicacionActual!.lng!]}
+                    icon={camionIcon}
+                    eventHandlers={{
+                      click: () => setSelectedVehiculo(vehiculo)
+                    }}
+                  >
+                    <Popup>
+                      <div className="font-sans text-xs space-y-1">
+                        <p className="font-bold text-sm border-b pb-1">🚚 Placa: {vehiculo.vehiculo?.placa ?? 'Sin placa'}</p>
+                        <p><b>Estado:</b> {vehiculo.vehiculo?.estadoActual ?? 'disponible'}</p>
+                        <p><b>Velocidad:</b> {(vehiculo.ubicacionActual?.velocidadKmh ?? 0)} km/h</p>
+                        <p className="text-[10px] text-muted-foreground">Lat: {(vehiculo.ubicacionActual?.lat ?? 0).toFixed(5)}, Lng: {(vehiculo.ubicacionActual?.lng ?? 0).toFixed(5)}</p>
+                      </div>
+                    </Popup>
+                  </Marker>
+                )
+              })}
 
             {/* Mover la cámara de forma fluida si seleccionamos una unidad */}
             {selectedVehiculo && <ChangeMapView center={mapCenter} />}
@@ -243,9 +261,9 @@ export function Seguimiento() {
               <Polyline
                 positions={historial}
                 pathOptions={{
-                  color: selectedVehiculo?.estadoActual === 'en_ruta'
+                  color: selectedVehiculo?.vehiculo?.estadoActual === 'en_ruta'
                     ? '#22c55e'
-                    : selectedVehiculo?.estadoActual === 'entregando'
+                    : selectedVehiculo?.vehiculo?.estadoActual === 'entregando'
                     ? '#3b82f6'
                     : '#ef4444',
                   weight: 3,
