@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import * as d3 from 'd3'
+import { TrendingUp } from 'lucide-react'
 
 interface AreaChartRosenProps {
   data: Array<{ label: string; value: number }>
@@ -46,23 +47,36 @@ export function AreaChartRosen({
     return () => clearTimeout(t)
   }, [])
 
-  const pathRef = useRef<SVGPathElement>(null)
-  const [pathLength, setPathLength] = useState(0)
-
-  const paddedData = data && data.length === 1 ? [{ label: '', value: 0 }, ...data] : (data || [])
-
   useEffect(() => {
     if (pathRef.current) {
       setPathLength(pathRef.current.getTotalLength())
     }
-  }, [dimensions, paddedData])
+  }, [dimensions, data])
 
-  if (!paddedData || paddedData.length === 0) {
+  if (!data || data.length === 0) {
     return (
       <div className="flex flex-col w-full h-full">
         <h3 className="text-lg font-semibold text-foreground mb-4">{title}</h3>
-        <div className="flex-1 flex items-center justify-center text-center" style={{ minHeight: height }}>
-          <p className="text-sm text-muted-foreground">Sin datos disponibles</p>
+        <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground gap-2" style={{ minHeight: height }}>
+          <TrendingUp className="h-8 w-8 opacity-30" />
+          <p className="text-sm">Sin datos disponibles</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (data.length === 1) {
+    return (
+      <div className="flex flex-col w-full h-full">
+        <h3 className="text-lg font-semibold text-foreground mb-4">{title}</h3>
+        <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground gap-2" style={{ minHeight: height }}>
+          <TrendingUp className="h-8 w-8 opacity-40" style={{ color: color }} />
+          <p className="text-sm font-medium text-foreground">
+            {data[0].value} entregas hoy
+          </p>
+          <p className="text-xs text-center max-w-[200px]">
+            La grafica aparecera cuando haya datos de mas de un dia
+          </p>
         </div>
       </div>
     )
@@ -72,10 +86,10 @@ export function AreaChartRosen({
   const innerWidth = Math.max(0, dimensions.width - margin.left - margin.right)
   const innerHeight = Math.max(0, dimensions.height - margin.top - margin.bottom)
 
-  const maxValue = d3.max(paddedData, d => d.value) || 1
+  const maxValue = d3.max(data, d => d.value) || 1
 
   const xScale = d3.scalePoint()
-    .domain(paddedData.map(d => d.label))
+    .domain(data.map(d => d.label))
     .range([0, innerWidth])
     .padding(0.1)
 
@@ -94,8 +108,8 @@ export function AreaChartRosen({
     .y1(d => yScale(d.value))
     .curve(d3.curveMonotoneX)
 
-  const pathD = lineGenerator(paddedData) || ''
-  const areaD = areaGenerator(paddedData) || ''
+  const pathD = lineGenerator(data) || ''
+  const areaD = areaGenerator(data) || ''
 
   const yTicks = yScale.ticks(5)
 
@@ -142,7 +156,7 @@ export function AreaChartRosen({
               ))}
 
               {/* X Axis Labels */}
-              {paddedData.map((d, i) => (
+              {data.map((d, i) => (
                 <text
                   key={`x-${i}-${d.label}`}
                   x={xScale(d.label)}
@@ -175,7 +189,7 @@ export function AreaChartRosen({
               />
 
               {/* Points */}
-              {paddedData.map((d, i) => {
+              {data.map((d, i) => {
                 const cx = xScale(d.label)
                 const cy = yScale(d.value)
                 return cx !== undefined ? (
