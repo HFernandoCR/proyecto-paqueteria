@@ -240,7 +240,10 @@ export function Seguimiento() {
                   >
                     <Popup>
                       <div className="font-sans text-xs space-y-1">
-                        <p className="font-bold text-sm border-b pb-1">🚚 Placa: {vehiculo.vehiculo?.placa ?? 'Sin placa'}</p>
+                        <p className="font-bold text-sm border-b pb-1 flex items-center gap-1.5">
+                          <Truck className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                          {vehiculo.vehiculo?.placa ?? 'Sin placa'}
+                        </p>
                         <p><b>Estado:</b> {vehiculo.vehiculo?.estadoActual ?? 'disponible'}</p>
                         <p><b>Velocidad:</b> {(vehiculo.ubicacionActual?.velocidadKmh ?? 0)} km/h</p>
                         <p className="text-[10px] text-muted-foreground">Lat: {(vehiculo.ubicacionActual?.lat ?? 0).toFixed(5)}, Lng: {(vehiculo.ubicacionActual?.lng ?? 0).toFixed(5)}</p>
