@@ -154,15 +154,15 @@ export function Vehiculos() {
       {/* Page header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Gestion de Vehiculos</h2>
-          <p className="text-muted-foreground">Administra tu flotilla de vehiculos</p>
+          <h2 className="text-2xl font-bold text-foreground">Gestión de Vehículos</h2>
+          <p className="text-muted-foreground">Administra tu flotilla de vehículos</p>
         </div>
         <button
           onClick={handleAddVehiculo}
           className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-primary/30"
         >
           <Plus className="h-4 w-4" />
-          Agregar Vehiculo
+          Agregar Vehículo
         </button>
       </div>
 

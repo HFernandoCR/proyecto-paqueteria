@@ -105,7 +105,7 @@ export function VehiculoModal({ isOpen, onClose, onSave, vehiculo }: VehiculoMod
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-foreground">
-            {vehiculo ? 'Editar Vehiculo' : 'Agregar Vehiculo'}
+            {vehiculo ? 'Editar Vehículo' : 'Agregar Vehículo'}
           </h2>
           <button
             onClick={onClose}
@@ -231,7 +231,7 @@ export function VehiculoModal({ isOpen, onClose, onSave, vehiculo }: VehiculoMod
               type="submit"
               className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary/90 transition-colors"
             >
-              {vehiculo ? 'Guardar Cambios' : 'Agregar Vehiculo'}
+              {vehiculo ? 'Guardar Cambios' : 'Agregar Vehículo'}
             </button>
           </div>
         </form>

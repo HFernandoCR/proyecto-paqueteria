@@ -83,7 +83,7 @@ export function DashboardLayout() {
                   {!collapsed && (
                     <div className="px-3 pt-4 pb-1">
                       <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
-                        Gestion
+                        Gestión
                       </span>
                     </div>
                   )}

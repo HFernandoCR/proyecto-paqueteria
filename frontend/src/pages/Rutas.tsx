@@ -178,7 +178,7 @@ export function Rutas() {
       {/* Page header */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-foreground">Gestion de Rutas</h2>
+          <h2 className="text-2xl font-bold text-foreground">Gestión de Rutas</h2>
           <p className="text-muted-foreground">Administra las rutas de tu flotilla</p>
         </div>
         <button
