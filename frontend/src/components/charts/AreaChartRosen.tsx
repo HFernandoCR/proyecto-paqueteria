@@ -37,6 +37,15 @@ export function AreaChartRosen({
     return () => clearTimeout(t)
   }, [])
 
+  const pathRef = useRef<SVGPathElement>(null)
+  const [pathLength, setPathLength] = useState(0)
+
+  useEffect(() => {
+    if (pathRef.current) {
+      setPathLength(pathRef.current.getTotalLength())
+    }
+  }, [dimensions, data])
+
   if (!data || data.length === 0 || data.every(d => d.value === 0)) {
     return (
       <div className="flex flex-col w-full h-full">
@@ -76,15 +85,6 @@ export function AreaChartRosen({
 
   const pathD = lineGenerator(data) || ''
   const areaD = areaGenerator(data) || ''
-
-  const pathRef = useRef<SVGPathElement>(null)
-  const [pathLength, setPathLength] = useState(0)
-
-  useEffect(() => {
-    if (pathRef.current) {
-      setPathLength(pathRef.current.getTotalLength())
-    }
-  }, [dimensions, data])
 
   const yTicks = yScale.ticks(5)
 
