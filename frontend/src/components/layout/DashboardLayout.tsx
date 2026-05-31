@@ -13,7 +13,7 @@ import {
   Moon,
   MapPin
 } from 'lucide-react'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Fragment } from 'react'
 import { cn } from '@/lib/utils'
 import { NotificationBell } from '@/components/ui/NotificationBell'
 
@@ -75,9 +75,28 @@ export function DashboardLayout() {
         
         {/* Navigation */}
         <nav className="flex-1 space-y-1 p-3">
-          {navigation.map((item) => (
-            <NavLink
-              key={item.name}
+          {navigation.map((item, index) => (
+            <Fragment key={item.name}>
+              {index === 1 && (
+                <>
+                  <div className="mx-3 my-2 border-t border-border" />
+                  {!collapsed && (
+                    <div className="px-3 pt-4 pb-1">
+                      <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
+                        Gestion
+                      </span>
+                    </div>
+                  )}
+                </>
+              )}
+              {index === 4 && !collapsed && (
+                <div className="px-3 pt-4 pb-1">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/60">
+                    Monitoreo
+                  </span>
+                </div>
+              )}
+              <NavLink
               to={item.href}
               className={({ isActive }) =>
                 cn(
@@ -91,6 +110,7 @@ export function DashboardLayout() {
               <item.icon className="h-5 w-5 flex-shrink-0" />
               {!collapsed && <span>{item.name}</span>}
             </NavLink>
+            </Fragment>
           ))}
         </nav>
         
