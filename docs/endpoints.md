@@ -1,7 +1,7 @@
 # Tabla Completa de Endpoints del Sistema
 
 Este documento es una referencia rápida de todos los endpoints disponibles en los 6 microservicios del **Proyecto Paquetería**. Toda esta configuración puede ser probada importando la colección oficial de Postman disponible en el repositorio:
-👉 `postman/proyecto-paqueteria.postman_collection.json`
+`postman/proyecto-paqueteria.postman_collection.json`
 
 > **Nota:** Todas las peticiones deben hacerse al Reverse Proxy Nginx en el puerto `8108` (ej. `http://localhost:8108/api/servicio/...`). Nginx se encargará de enrutar la petición al microservicio correspondiente dentro de la red interna de Docker.
 
