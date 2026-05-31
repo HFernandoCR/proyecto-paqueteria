@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import axios from 'axios'
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import { Truck, Navigation, AlertCircle, Radio } from 'lucide-react'
 
@@ -48,24 +48,40 @@ function ChangeMapView({ center }: { center: [number, number] }) {
   return null
 }
 
+// Componente auxiliar para detectar click en zona vacía del mapa y deseleccionar
+function MapEventsHandler({ onMapClick }: { onMapClick: () => void }) {
+  useMapEvents({ click: onMapClick })
+  return null
+}
+
 export function Seguimiento() {
   const [vehiculos, setVehiculos] = useState<VehiculoActivo[]>([])
   const [error, setError] = useState<string | null>(null)
   const [selectedVehiculo, setSelectedVehiculo] = useState<VehiculoActivo | null>(null)
+  const [historial, setHistorial] = useState<Array<[number, number]>>([])
+
+  // Ref para acceder al vehiculo seleccionado dentro del intervalo sin recrearlo
+  const selectedRef = useRef(selectedVehiculo)
+  useEffect(() => {
+    selectedRef.current = selectedVehiculo
+  }, [selectedVehiculo])
 
   // Coordenadas iniciales por defecto (puedes ajustarlas a tu ciudad si gustas)
-  const defaultCenter: [number, number] = [17.0732, -96.7266] 
+  const defaultCenter: [number, number] = [17.0732, -96.7266]
 
+  // CAMBIO 3: dependency array vacío — el intervalo se crea una sola vez
   useEffect(() => {
     const fetchActivos = async () => {
       try {
         setError(null)
         const res = await axios.get('/api/seguimiento/activos')
         setVehiculos(res.data)
-        
-        if (selectedVehiculo) {
-          const actualizado = res.data.find((v: VehiculoActivo) => 
-            (v.vehiculoId === selectedVehiculo.vehiculoId || v._id === selectedVehiculo._id)
+
+        // Accedemos al ref en lugar de la dependencia para evitar recrear el intervalo
+        const current = selectedRef.current
+        if (current) {
+          const actualizado = res.data.find((v: VehiculoActivo) =>
+            (v.vehiculoId === current.vehiculoId || v._id === current._id)
           )
           if (actualizado) setSelectedVehiculo(actualizado)
         }
@@ -78,6 +94,24 @@ export function Seguimiento() {
     fetchActivos()
     const interval = setInterval(fetchActivos, 3000)
     return () => clearInterval(interval)
+  }, [])
+
+  // CAMBIO 2: Fetch del historial cada vez que cambia el vehiculo seleccionado
+  useEffect(() => {
+    if (!selectedVehiculo) {
+      setHistorial([])
+      return
+    }
+    const id = selectedVehiculo._id || selectedVehiculo.vehiculoId
+    if (!id) { setHistorial([]); return }
+
+    axios.get(`/api/seguimiento/${id}/historial`)
+      .then(res => {
+        const coords: [number, number][] = (res.data.historial || [])
+          .map((p: any) => [p.lat, p.lng] as [number, number])
+        setHistorial(coords)
+      })
+      .catch(() => setHistorial([]))
   }, [selectedVehiculo])
 
   // Determinar el centro dinámico del mapa
@@ -178,10 +212,13 @@ export function Seguimiento() {
             {vehiculos.map((vehiculo, idx) => {
               const id = vehiculo.vehiculoId || vehiculo._id || idx
               return (
-                <Marker 
-                  key={id} 
+                <Marker
+                  key={id}
                   position={[vehiculo.lat, vehiculo.lng]}
                   icon={camionIcon}
+                  eventHandlers={{
+                    click: () => setSelectedVehiculo(vehiculo)
+                  }}
                 >
                   <Popup>
                     <div className="font-sans text-xs space-y-1">
@@ -197,6 +234,25 @@ export function Seguimiento() {
 
             {/* Mover la cámara de forma fluida si seleccionamos una unidad */}
             {selectedVehiculo && <ChangeMapView center={mapCenter} />}
+
+            {/* CAMBIO 1+2: Deseleccionar al click en zona vacía del mapa */}
+            <MapEventsHandler onMapClick={() => setSelectedVehiculo(null)} />
+
+            {/* CAMBIO 2: Polyline del recorrido histórico del vehiculo seleccionado */}
+            {historial.length > 1 && (
+              <Polyline
+                positions={historial}
+                pathOptions={{
+                  color: selectedVehiculo?.estadoActual === 'en_ruta'
+                    ? '#22c55e'
+                    : selectedVehiculo?.estadoActual === 'entregando'
+                    ? '#3b82f6'
+                    : '#ef4444',
+                  weight: 3,
+                  opacity: 0.8
+                }}
+              />
+            )}
           </MapContainer>
         </div>
 
