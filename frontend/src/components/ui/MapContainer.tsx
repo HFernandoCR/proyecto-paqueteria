@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Navigation, Maximize2, MapPin } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { MapContainer as LeafletMap, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -167,9 +168,19 @@ export function MapContainer() {
             <p className="text-sm text-muted-foreground">Oaxaca y zona metropolitana</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
-          <span className="text-xs text-muted-foreground font-medium">En vivo (3s)</span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+            <span className="text-xs text-muted-foreground font-medium">En vivo (3s)</span>
+          </div>
+          <Link
+            to="/seguimiento"
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            title="Ver en pantalla completa"
+          >
+            <Maximize2 className="h-3.5 w-3.5" />
+            <span>Expandir</span>
+          </Link>
         </div>
       </div>
       
