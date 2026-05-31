@@ -179,7 +179,7 @@ export function Analisis() {
         icono: nivel === 'critico' ? 'XCircle' : nivel === 'advertencia' ? 'AlertTriangle' : 'Clock',
         titulo: 'Ruta más lenta',
         descripcion: `Ruta ${rutaLenta.nombre} toma ${rutaLenta.tiempoPromedioMin} min promedio, un ${Math.round(excesoPromedio)}% más que el promedio de ${promedioGeneral.toFixed(1)} min.`,
-        accion: 'Considerar redistribuir waypoints o asignar vehículo más rápido a esta ruta'
+        accion: 'Considerar redistribuir puntos o asignar vehículo más rápido a esta ruta'
       })
     }
 

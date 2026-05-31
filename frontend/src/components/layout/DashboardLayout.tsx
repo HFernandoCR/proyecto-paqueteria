@@ -169,11 +169,11 @@ export function DashboardLayout() {
                       onClick={toggleTheme}
                       className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors"
                     >
-                      <div className="flex items-center gap-2">
-                        {theme === 'light' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                        <span>{theme === 'light' ? 'Modo Sepia (Cálido)' : 'Modo Oscuro'}</span>
+                      <div className="flex items-center gap-2 overflow-hidden">
+                        {theme === 'light' ? <Sun className="h-4 w-4 shrink-0" /> : <Moon className="h-4 w-4 shrink-0" />}
+                        <span className="whitespace-nowrap truncate">{theme === 'light' ? 'Modo Sepia (Cálido)' : 'Modo Oscuro'}</span>
                       </div>
-                      <span className="text-[10px] bg-primary/15 text-primary px-1.5 py-0.5 rounded-full font-medium uppercase">
+                      <span className="text-[10px] bg-primary/15 text-primary px-1.5 py-0.5 rounded-full font-medium uppercase whitespace-nowrap shrink-0">
                         {theme === 'light' ? 'Sepia' : 'Oscuro'}
                       </span>
                     </button>

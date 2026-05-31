@@ -163,7 +163,7 @@ export function RutaModal({ isOpen, onClose, onSave, ruta }: RutaModalProps) {
           </div>
 
           <p className="text-xs text-muted-foreground">
-            Los waypoints se gestionan desde la tabla principal despues de crear la ruta.
+            Los puntos se gestionan desde la tabla principal después de crear la ruta.
           </p>
 
           {/* Actions */}
