@@ -19,10 +19,19 @@ export function AreaChartRosen({
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    if (containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect()
+      if (rect.width > 0 && rect.height > 0) {
+        setDimensions({ width: rect.width, height: rect.height })
+      }
+    }
+
     const resizeObserver = new ResizeObserver(entries => {
       if (!entries || entries.length === 0) return
       const { width, height } = entries[0].contentRect
-      setDimensions({ width, height })
+      if (width > 0 && height > 0) {
+        setDimensions({ width, height })
+      }
     })
     
     if (containerRef.current) {
@@ -40,13 +49,15 @@ export function AreaChartRosen({
   const pathRef = useRef<SVGPathElement>(null)
   const [pathLength, setPathLength] = useState(0)
 
+  const paddedData = data && data.length === 1 ? [{ label: '', value: 0 }, ...data] : (data || [])
+
   useEffect(() => {
     if (pathRef.current) {
       setPathLength(pathRef.current.getTotalLength())
     }
-  }, [dimensions, data])
+  }, [dimensions, paddedData])
 
-  if (!data || data.length === 0) {
+  if (!paddedData || paddedData.length === 0) {
     return (
       <div className="flex flex-col w-full h-full">
         <h3 className="text-lg font-semibold text-foreground mb-4">{title}</h3>
@@ -61,10 +72,10 @@ export function AreaChartRosen({
   const innerWidth = Math.max(0, dimensions.width - margin.left - margin.right)
   const innerHeight = Math.max(0, dimensions.height - margin.top - margin.bottom)
 
-  const maxValue = d3.max(data, d => d.value) || 1
+  const maxValue = d3.max(paddedData, d => d.value) || 1
 
   const xScale = d3.scalePoint()
-    .domain(data.map(d => d.label))
+    .domain(paddedData.map(d => d.label))
     .range([0, innerWidth])
     .padding(0.1)
 
@@ -83,8 +94,8 @@ export function AreaChartRosen({
     .y1(d => yScale(d.value))
     .curve(d3.curveMonotoneX)
 
-  const pathD = lineGenerator(data) || ''
-  const areaD = areaGenerator(data) || ''
+  const pathD = lineGenerator(paddedData) || ''
+  const areaD = areaGenerator(paddedData) || ''
 
   const yTicks = yScale.ticks(5)
 
@@ -131,9 +142,9 @@ export function AreaChartRosen({
               ))}
 
               {/* X Axis Labels */}
-              {data.map(d => (
+              {paddedData.map((d, i) => (
                 <text
-                  key={`x-${d.label}`}
+                  key={`x-${i}-${d.label}`}
                   x={xScale(d.label)}
                   y={innerHeight + 20}
                   textAnchor="middle"
@@ -164,7 +175,7 @@ export function AreaChartRosen({
               />
 
               {/* Points */}
-              {data.map((d, i) => {
+              {paddedData.map((d, i) => {
                 const cx = xScale(d.label)
                 const cy = yScale(d.value)
                 return cx !== undefined ? (
