@@ -70,31 +70,36 @@ export function WaypointsModal({ isOpen, onClose, onSave, waypoints: initialWayp
           </button>
         </div>
 
-        {/* Add waypoint form */}
         <div className="mb-4 p-4 rounded-lg bg-secondary/30 border border-border">
           <p className="text-sm font-medium text-foreground mb-3">Agregar nuevo punto</p>
-          <div className="flex gap-2">
-            <input
-              type="number"
-              step="0.0001"
-              value={newLat}
-              onChange={(e) => setNewLat(e.target.value)}
-              placeholder="Ej: 17.0700"
-              className="flex-1 rounded-lg border border-border bg-secondary/50 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            />
-            <input
-              type="number"
-              step="0.0001"
-              value={newLng}
-              onChange={(e) => setNewLng(e.target.value)}
-              placeholder="Ej: -96.7200"
-              className="flex-1 rounded-lg border border-border bg-secondary/50 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
-            />
+          <div className="flex items-end gap-2">
+            <div className="flex-1 flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground ml-1">Latitud</label>
+              <input
+                type="number"
+                step="any"
+                value={newLat}
+                onChange={(e) => setNewLat(e.target.value)}
+                placeholder="Ej: 17.0700"
+                className="w-full rounded-lg border border-border bg-secondary/50 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+            </div>
+            <div className="flex-1 flex flex-col gap-1.5">
+              <label className="text-xs font-medium text-muted-foreground ml-1">Longitud</label>
+              <input
+                type="number"
+                step="any"
+                value={newLng}
+                onChange={(e) => setNewLng(e.target.value)}
+                placeholder="Ej: -96.7200"
+                className="w-full rounded-lg border border-border bg-secondary/50 px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+              />
+            </div>
             <button
               type="button"
               onClick={handleAddWaypoint}
               disabled={!newLat || !newLng}
-              className="rounded-lg bg-primary px-3 py-2 text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="h-[38px] rounded-lg bg-primary px-3 py-2 text-primary-foreground hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             >
               <Plus className="h-4 w-4" />
             </button>
