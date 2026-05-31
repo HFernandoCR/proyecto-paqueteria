@@ -46,7 +46,7 @@ export function AreaChartRosen({
     }
   }, [dimensions, data])
 
-  if (!data || data.length === 0 || data.every(d => d.value === 0)) {
+  if (!data || data.length === 0) {
     return (
       <div className="flex flex-col w-full h-full">
         <h3 className="text-lg font-semibold text-foreground mb-4">{title}</h3>
