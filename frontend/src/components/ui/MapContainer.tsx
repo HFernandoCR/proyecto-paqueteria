@@ -214,7 +214,7 @@ export function MapContainer() {
               icon={createVehicleIcon(v.estadoActual, historyLoadingId === v._id)}
               eventHandlers={{ click: () => handleVehicleClick(v) }}
             >
-              <Popup className="map-popup" maxWidth={180} autoPan={false}>
+              <Popup>
                 <div className="font-sans text-xs space-y-1">
                   <p className="font-bold text-sm border-b pb-1 flex items-center gap-1.5">
                     <Truck className="h-3.5 w-3.5 text-primary flex-shrink-0" />
@@ -223,14 +223,6 @@ export function MapContainer() {
                   <p><b>Estado:</b> {v.estadoActual ?? 'disponible'}</p>
                   <p><b>Velocidad:</b> {(v.velocidadKmh ?? 0)} km/h</p>
                   <p className="text-[10px] text-muted-foreground">Lat: {(v.lat ?? 0).toFixed(5)}, Lng: {(v.lng ?? 0).toFixed(5)}</p>
-                  
-                  {historyLoadingId === v._id ? (
-                    <p className="text-[10px] text-muted-foreground italic">Cargando historial...</p>
-                  ) : historyError && selectedVehicleId === v._id ? (
-                    <p className="text-[10px] text-destructive">{historyError}</p>
-                  ) : historyCount !== null && selectedVehicleId === v._id ? (
-                    <p className="text-[10px] text-muted-foreground">Historial: {historyCount} puntos</p>
-                  ) : null}
                 </div>
               </Popup>
             </Marker>
