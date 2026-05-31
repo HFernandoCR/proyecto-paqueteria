@@ -10,6 +10,10 @@ import {
   AreaChart,
   Area,
   LabelList,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
 } from 'recharts'
 import axios from 'axios'
 import { KpiCard } from '@/components/ui/KpiCard'
@@ -270,6 +274,26 @@ export function Analisis() {
     return nuevosInsights
   }, [stats, kmPorVehiculo, tiempoPorRuta, anomalias])
 
+  const flotaData = [
+    {
+      name: 'En Ruta',
+      value: stats?.vehiculosActivos || 0,
+      color: '#22c55e'
+    },
+    {
+      name: 'Detenidos',
+      value: stats?.vehiculosDetenidos || 0,
+      color: '#ef4444'
+    },
+    {
+      name: 'Disponibles',
+      value: Math.max(0, (stats?.vehiculosTotal || 0)
+               - (stats?.vehiculosActivos || 0)
+               - (stats?.vehiculosDetenidos || 0)),
+      color: '#6b7280'
+    },
+  ].filter(d => d.value > 0)
+
   return (
     <div className="space-y-6">
 
@@ -479,8 +503,48 @@ export function Analisis() {
           </div>
         </div>
 
-        {/* LineChart: Entregas por día */}
+        {/* PieChart: Distribución de Flota */}
         <div className="rounded-xl border border-border bg-card p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold text-foreground">Distribución de Flota</h3>
+          </div>
+          <div className="h-[300px]">
+            {isLoading ? (
+              <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
+                Cargando…
+              </div>
+            ) : (!stats || stats.vehiculosTotal === 0) ? (
+              <div className="h-full flex items-center justify-center text-center">
+                <p className="text-sm text-muted-foreground">Sin datos de flota disponibles</p>
+              </div>
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={flotaData}
+                    cx="50%"
+                    cy="45%"
+                    innerRadius={55}
+                    outerRadius={80}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    {flotaData.map((entry, i) => (
+                      <Cell key={i} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip {...TT} formatter={(value: number) => [`${value} vehículos`]} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+        </div>
+
+      </div>
+
+      {/* ── AreaChart: Entregas por día (Full width) ── */}
+      <div className="rounded-xl border border-border bg-card p-6">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-foreground">Entregas por Día</h3>
             <span className="flex items-center gap-2 text-sm">
@@ -535,8 +599,6 @@ export function Analisis() {
             )}
           </div>
         </div>
-
-      </div>
 
       {/* ── Full width: Tiempo promedio por ruta ── */}
       <div className="rounded-xl border border-border bg-card p-6">
