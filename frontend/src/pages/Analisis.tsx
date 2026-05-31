@@ -7,8 +7,8 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   LabelList,
 } from 'recharts'
 import axios from 'axios'
@@ -499,7 +499,13 @@ export function Analisis() {
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={entregasPorDia}>
+                <AreaChart data={entregasPorDia}>
+                  <defs>
+                    <linearGradient id="gradEntregas" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} vertical={false} />
                   <XAxis
                     dataKey="fecha"
@@ -515,15 +521,16 @@ export function Analisis() {
                     axisLine={false}
                   />
                   <Tooltip {...TT} formatter={(v) => [`${v}`, 'Entregas']} />
-                  <Line
+                  <Area
                     type="monotone"
                     dataKey="entregas"
-                    stroke={CHART_ACCENT}
-                    strokeWidth={2.5}
-                    dot={{ r: 3, fill: CHART_ACCENT, strokeWidth: 0 }}
-                    activeDot={{ r: 5, strokeWidth: 0 }}
+                    stroke="#3b82f6"
+                    strokeWidth={2}
+                    fill="url(#gradEntregas)"
+                    dot={{ fill: '#3b82f6', r: 4 }}
+                    activeDot={{ r: 6 }}
                   />
-                </LineChart>
+                </AreaChart>
               </ResponsiveContainer>
             )}
           </div>
