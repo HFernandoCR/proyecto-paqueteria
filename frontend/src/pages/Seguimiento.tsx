@@ -186,7 +186,7 @@ export function Seguimiento() {
                     </div>
                     <div className="flex justify-between items-center text-xs text-muted-foreground mt-1">
                       <span>Velocidad:</span>
-                      <span className="font-semibold text-foreground">{vehiculo.velocidadKmh} km/h</span>
+                      <span className="font-semibold text-foreground">{(vehiculo.velocidadKmh ?? 0)} km/h</span>
                     </div>
                   </button>
                 )
@@ -224,8 +224,8 @@ export function Seguimiento() {
                     <div className="font-sans text-xs space-y-1">
                       <p className="font-bold text-sm border-b pb-1">🚚 Placa: {vehiculo.placa}</p>
                       <p><b>Estado:</b> {vehiculo.estadoActual}</p>
-                      <p><b>Velocidad:</b> {vehiculo.velocidadKmh} km/h</p>
-                      <p className="text-[10px] text-muted-foreground">Lat: {vehiculo.lat.toFixed(5)}, Lng: {vehiculo.lng.toFixed(5)}</p>
+                      <p><b>Velocidad:</b> {(vehiculo.velocidadKmh ?? 0)} km/h</p>
+                      <p className="text-[10px] text-muted-foreground">Lat: {(vehiculo.lat ?? 0).toFixed(5)}, Lng: {(vehiculo.lng ?? 0).toFixed(5)}</p>
                     </div>
                   </Popup>
                 </Marker>
