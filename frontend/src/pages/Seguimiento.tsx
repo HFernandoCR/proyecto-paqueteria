@@ -19,15 +19,21 @@ let DefaultIcon = L.icon({
 })
 L.Marker.prototype.options.icon = DefaultIcon
 
-// Icono personalizado para los camiones en movimiento
-const camionIcon = L.divIcon({
-  html: `<div class="bg-primary text-primary-foreground p-1.5 rounded-full shadow-lg border-2 border-background flex items-center justify-center">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v10"/><path d="M14 22a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M6 22a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M20 18h2v-4h-7v7"/></svg>
-         </div>`,
-  className: '',
-  iconSize: [28, 28],
-  iconAnchor: [14, 14]
-})
+// Función para generar un icono dinámico según el estado del camión
+const getCamionIcon = (estado?: string) => {
+  let bgColor = '#ef4444' // default (rojo/alerta)
+  if (estado === 'en_ruta') bgColor = '#22c55e' // verde
+  else if (estado === 'entregando') bgColor = '#3b82f6' // azul
+
+  return L.divIcon({
+    html: `<div style="background-color: ${bgColor}; color: white; padding: 5px; border-radius: 50%; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 2px solid white; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; box-sizing: border-box;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v10"/><path d="M14 22a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M6 22a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M20 18h2v-4h-7v7"/></svg>
+           </div>`,
+    className: '',
+    iconSize: [28, 28],
+    iconAnchor: [14, 14]
+  })
+}
 
 // Estructura real del API /api/seguimiento/activos
 interface UbicacionActual {
@@ -233,7 +239,7 @@ export function Seguimiento() {
                   <Marker
                     key={id}
                     position={[vehiculo.ubicacionActual!.lat!, vehiculo.ubicacionActual!.lng!]}
-                    icon={camionIcon}
+                    icon={getCamionIcon(vehiculo.vehiculo?.estadoActual)}
                     eventHandlers={{
                       click: () => setSelectedVehiculo(vehiculo)
                     }}
