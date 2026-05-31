@@ -59,7 +59,7 @@ export function WaypointsModal({ isOpen, onClose, onSave, waypoints: initialWayp
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h2 className="text-xl font-semibold text-foreground">Waypoints</h2>
+            <h2 className="text-xl font-semibold text-foreground">Puntos</h2>
             <p className="text-sm text-muted-foreground">{rutaNombre}</p>
           </div>
           <button
@@ -72,7 +72,7 @@ export function WaypointsModal({ isOpen, onClose, onSave, waypoints: initialWayp
 
         {/* Add waypoint form */}
         <div className="mb-4 p-4 rounded-lg bg-secondary/30 border border-border">
-          <p className="text-sm font-medium text-foreground mb-3">Agregar nuevo waypoint</p>
+          <p className="text-sm font-medium text-foreground mb-3">Agregar nuevo punto</p>
           <div className="flex gap-2">
             <input
               type="number"
@@ -106,7 +106,7 @@ export function WaypointsModal({ isOpen, onClose, onSave, waypoints: initialWayp
           {waypoints.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
               <MapPin className="h-10 w-10 text-muted-foreground/50 mb-3" />
-              <p className="text-muted-foreground">No hay waypoints definidos</p>
+              <p className="text-muted-foreground">No hay puntos definidos</p>
               <p className="text-sm text-muted-foreground/70">Agrega coordenadas Lat/Lng arriba</p>
             </div>
           ) : (
@@ -152,7 +152,7 @@ export function WaypointsModal({ isOpen, onClose, onSave, waypoints: initialWayp
             onClick={handleSave}
             className="flex-1 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 hover:bg-primary/90 transition-colors"
           >
-            Guardar Waypoints
+            Guardar Puntos
           </button>
         </div>
       </div>

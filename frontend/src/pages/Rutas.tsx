@@ -279,7 +279,7 @@ export function Rutas() {
                     Duración (Min)
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                    Waypoints
+                    Puntos
                   </th>
                   <th className="px-6 py-4 text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Acciones

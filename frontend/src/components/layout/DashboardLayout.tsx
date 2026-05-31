@@ -171,10 +171,10 @@ export function DashboardLayout() {
                     >
                       <div className="flex items-center gap-2">
                         {theme === 'light' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                        <span>{theme === 'light' ? 'Modo Sepia (Cálido)' : 'Modo Oscuro'}</span>
+                        <span className="whitespace-nowrap">{theme === 'light' ? 'Modo Claro' : 'Modo Oscuro'}</span>
                       </div>
-                      <span className="text-[10px] bg-primary/15 text-primary px-1.5 py-0.5 rounded-full font-medium uppercase">
-                        {theme === 'light' ? 'Sepia' : 'Oscuro'}
+                      <span className="text-[10px] bg-primary/15 text-primary px-1.5 py-0.5 rounded-full font-medium uppercase whitespace-nowrap">
+                        {theme === 'light' ? 'Claro' : 'Oscuro'}
                       </span>
                     </button>
 
