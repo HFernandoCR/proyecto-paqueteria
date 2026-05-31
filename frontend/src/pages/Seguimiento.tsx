@@ -66,7 +66,7 @@ interface VehiculoActivo {
 function ChangeMapView({ center }: { center: [number, number] }) {
   const map = useMap()
   useEffect(() => {
-    map.setView(center, 15, { animate: true })
+    map.setView(center, map.getZoom(), { animate: true })
   }, [center, map])
   return null
 }
