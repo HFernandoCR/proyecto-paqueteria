@@ -220,7 +220,12 @@ export function MapContainer() {
                     <Truck className="h-3.5 w-3.5 text-primary flex-shrink-0" />
                     {v.placa ?? 'Sin placa'}
                   </p>
-                  <p><b>Estado:</b> {v.estadoActual ?? 'disponible'}</p>
+                  <p>
+                    <b>Estado:</b>{' '}
+                    <span className="capitalize">
+                      {(v.estadoActual ?? 'disponible').replace('_', ' ')}
+                    </span>
+                  </p>
                   <p><b>Velocidad:</b> {(v.velocidadKmh ?? 0)} km/h</p>
                   <p className="text-[10px] text-muted-foreground">Lat: {(v.lat ?? 0).toFixed(5)}, Lng: {(v.lng ?? 0).toFixed(5)}</p>
                 </div>
