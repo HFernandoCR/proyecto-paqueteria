@@ -1,20 +1,8 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  LabelList,
-  PieChart,
-  Pie,
-  Cell,
-  Legend,
-} from 'recharts'
+import { BarChartRosen } from '../components/charts/BarChartRosen'
+import { AreaChartRosen } from '../components/charts/AreaChartRosen'
+import { HorizontalBarRosen } from '../components/charts/HorizontalBarRosen'
+import { DonutChartRosen } from '../components/charts/DonutChartRosen'
 import axios from 'axios'
 import { KpiCard } from '@/components/ui/KpiCard'
 import { InsightCard } from '@/components/ui/InsightCard'
@@ -31,14 +19,6 @@ import {
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
-/* ------------------------------------------------------------------ */
-/*  Colores para SVG — Recharts no puede usar variables CSS de Tailwind */
-/* ------------------------------------------------------------------ */
-const CHART_ACCENT  = '#4f72ff'
-const CHART_ACCENT2 = '#7c9dff'
-const CHART_GRID    = '#192033'
-const CHART_MUTED   = '#5b6887'
-
 /* Arma un CSV escapando cada campo según RFC 4180 (comillas solo si hace falta,
    comillas internas duplicadas) y une las filas con CRLF. */
 function buildCsv(rows: (string | number | null | undefined)[][]): string {
@@ -47,20 +27,6 @@ function buildCsv(rows: (string | number | null | undefined)[][]): string {
     return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
   }
   return rows.map((r) => r.map(escape).join(',')).join('\r\n')
-}
-
-/* Tooltip compartido para todos los charts */
-const TT = {
-  contentStyle: {
-    backgroundColor: 'hsl(var(--card))',
-    border: '1px solid hsl(var(--border))',
-    borderRadius: '8px',
-    color: 'hsl(var(--foreground))',
-    fontSize: '0.8rem',
-    padding: '0.5rem 0.75rem',
-  },
-  labelStyle: { color: 'hsl(var(--foreground))', fontWeight: 600, marginBottom: '0.2rem' },
-  cursor: { fill: 'rgba(79,114,255,0.05)' },
 }
 
 /* ------------------------------------------------------------------ */
@@ -274,26 +240,6 @@ export function Analisis() {
     return nuevosInsights
   }, [stats, kmPorVehiculo, tiempoPorRuta, anomalias])
 
-  const flotaData = [
-    {
-      name: 'En Ruta',
-      value: stats?.vehiculosActivos || 0,
-      color: '#22c55e'
-    },
-    {
-      name: 'Detenidos',
-      value: stats?.vehiculosDetenidos || 0,
-      color: '#ef4444'
-    },
-    {
-      name: 'Disponibles',
-      value: Math.max(0, (stats?.vehiculosTotal || 0)
-               - (stats?.vehiculosActivos || 0)
-               - (stats?.vehiculosDetenidos || 0)),
-      color: '#6b7280'
-    },
-  ].filter(d => d.value > 0)
-
   return (
     <div className="space-y-6">
 
@@ -448,213 +394,46 @@ export function Analisis() {
         </div>
       )}
 
-      {/* ── Grid 2 columnas: BarChart km + LineChart entregas ── */}
+      {/* ── Fila 1: Km por vehículo y Distribución de Flota ── */}
       <div className="grid gap-6 lg:grid-cols-2">
-
-        {/* BarChart: Km por vehículo */}
         <div className="rounded-xl border border-border bg-card p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-foreground">Km Recorridos por Vehículo</h3>
-            <span className="flex items-center gap-2 text-sm">
-              <span className="h-3 w-3 rounded-full" style={{ background: CHART_ACCENT }} />
-              <span className="text-muted-foreground">km totales hoy</span>
-            </span>
-          </div>
-          <div className="h-[300px]">
-            {isLoading ? (
-              <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
-                Cargando…
-              </div>
-            ) : kmPorVehiculo.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-center">
-                <p className="text-sm text-muted-foreground">Sin datos de trayecto disponibles</p>
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={kmPorVehiculo} barSize={28}>
-                  <defs>
-                    <linearGradient id="gradKm" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#22c55e" stopOpacity={0.9} />
-                      <stop offset="95%" stopColor="#16a34a" stopOpacity={0.6} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} vertical={false} />
-                  <XAxis
-                    dataKey="placa"
-                    stroke={CHART_MUTED}
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis
-                    stroke={CHART_MUTED}
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={false}
-                    unit=" km"
-                  />
-                  <Tooltip {...TT} formatter={(v) => [`${v} km`, 'Km totales']} />
-                  <Bar dataKey="kmTotal" fill="url(#gradKm)" radius={[3, 3, 0, 0]}>
-                    <LabelList dataKey="kmTotal" position="top" formatter={(v: number) => `${v.toFixed(1)} km`} className="text-xs fill-foreground" />
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </div>
+          <BarChartRosen 
+            title="Km Recorridos por Vehículo"
+            data={kmPorVehiculo.map(v => ({ label: v.placa, value: v.kmTotal, unit: 'km' }))} 
+            color="#22c55e"
+            height={300}
+          />
         </div>
-
-        {/* PieChart: Distribución de Flota */}
-        <div className="rounded-xl border border-border bg-card p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-foreground">Distribución de Flota</h3>
-          </div>
-          <div className="h-[300px]">
-            {isLoading ? (
-              <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
-                Cargando…
-              </div>
-            ) : (!stats || stats.vehiculosTotal === 0) ? (
-              <div className="h-full flex items-center justify-center text-center">
-                <p className="text-sm text-muted-foreground">Sin datos de flota disponibles</p>
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={flotaData}
-                    cx="50%"
-                    cy="45%"
-                    innerRadius={55}
-                    outerRadius={80}
-                    paddingAngle={3}
-                    dataKey="value"
-                  >
-                    {flotaData.map((entry, i) => (
-                      <Cell key={i} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip {...TT} formatter={(value: number) => [`${value} vehículos`]} />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            )}
-          </div>
+        <div className="rounded-xl border border-border bg-card p-6 flex items-center justify-center">
+          <DonutChartRosen
+            title="Distribución de Flota"
+            data={[
+              { label: 'En Ruta', value: stats?.vehiculosActivos || 0, color: '#22c55e' },
+              { label: 'Detenidos', value: stats?.vehiculosDetenidos || 0, color: '#ef4444' },
+              { label: 'Disponibles', value: Math.max(0, (stats?.vehiculosTotal || 0) - (stats?.vehiculosActivos || 0) - (stats?.vehiculosDetenidos || 0)), color: '#6b7280' },
+            ].filter(d => d.value > 0)}
+            size={280}
+          />
         </div>
-
       </div>
 
-      {/* ── AreaChart: Entregas por día (Full width) ── */}
+      {/* ── Fila 2: AreaChart Entregas por día (Full width) ── */}
       <div className="rounded-xl border border-border bg-card p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-foreground">Entregas por Día</h3>
-            <span className="flex items-center gap-2 text-sm">
-              <span className="h-3 w-3 rounded-full" style={{ background: CHART_ACCENT }} />
-              <span className="text-muted-foreground">entregas realizadas</span>
-            </span>
-          </div>
-          <div className="h-[300px]">
-            {isLoading ? (
-              <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
-                Cargando…
-              </div>
-            ) : entregasPorDia.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-center">
-                <p className="text-sm text-muted-foreground">Sin historial de entregas disponible</p>
-              </div>
-            ) : (
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={entregasPorDia}>
-                  <defs>
-                    <linearGradient id="gradEntregas" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} vertical={false} />
-                  <XAxis
-                    dataKey="fecha"
-                    stroke={CHART_MUTED}
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis
-                    stroke={CHART_MUTED}
-                    fontSize={11}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <Tooltip {...TT} formatter={(v) => [`${v}`, 'Entregas']} />
-                  <Area
-                    type="monotone"
-                    dataKey="entregas"
-                    stroke="#3b82f6"
-                    strokeWidth={2}
-                    fill="url(#gradEntregas)"
-                    dot={{ fill: '#3b82f6', r: 4 }}
-                    activeDot={{ r: 6 }}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-        </div>
+        <AreaChartRosen
+          title="Entregas por Día"
+          data={entregasPorDia.map(e => ({ label: e.fecha, value: e.entregas }))}
+          color="#3b82f6"
+          height={300}
+        />
+      </div>
 
-      {/* ── Full width: Tiempo promedio por ruta ── */}
+      {/* ── Fila 3: Tiempo promedio por ruta (Full width) ── */}
       <div className="rounded-xl border border-border bg-card p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="text-lg font-semibold text-foreground">Tiempo Promedio por Ruta</h3>
-          <span className="flex items-center gap-2 text-sm">
-            <span className="h-3 w-3 rounded-full" style={{ background: CHART_ACCENT2 }} />
-            <span className="text-muted-foreground">minutos promedio</span>
-          </span>
-        </div>
-        <div className="h-[300px]">
-          {isLoading ? (
-            <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
-              Cargando…
-            </div>
-          ) : tiempoPorRuta.length === 0 ? (
-            <div className="h-full flex items-center justify-center text-center">
-              <p className="text-sm text-muted-foreground">Sin datos de rutas disponibles</p>
-            </div>
-          ) : (
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart layout="vertical" data={tiempoPorRuta} barSize={18}>
-                <defs>
-                  <linearGradient id="gradTiempo" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.9} />
-                    <stop offset="95%" stopColor="#d97706" stopOpacity={0.7} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} horizontal={false} />
-                <XAxis
-                  type="number"
-                  stroke={CHART_MUTED}
-                  fontSize={11}
-                  tickLine={false}
-                  axisLine={false}
-                  unit=" min"
-                />
-                <YAxis
-                  type="category"
-                  dataKey="nombre"
-                  width={130}
-                  stroke={CHART_MUTED}
-                  fontSize={11}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <Tooltip {...TT} formatter={(v) => [`${v} min`, 'Tiempo promedio']} />
-                <Bar dataKey="tiempoPromedioMin" fill="url(#gradTiempo)" radius={[0,4,4,0]}>
-                  <LabelList dataKey="tiempoPromedioMin" position="right"
-                    formatter={(v: number) => `${v.toFixed(0)} min`}
-                    className="text-xs fill-muted-foreground" />
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          )}
-        </div>
+        <HorizontalBarRosen
+          title="Tiempo Promedio por Ruta"
+          data={tiempoPorRuta.map(r => ({ label: r.nombre, value: r.tiempoPromedioMin, unit: 'min' }))}
+          color="#f59e0b"
+        />
       </div>
 
       {/* ── Tabla de anomalías ── */}
