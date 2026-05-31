@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
   LineChart,
   Line,
+  LabelList,
 } from 'recharts'
 import axios from 'axios'
 import { KpiCard } from '@/components/ui/KpiCard'
@@ -47,14 +48,14 @@ function buildCsv(rows: (string | number | null | undefined)[][]): string {
 /* Tooltip compartido para todos los charts */
 const TT = {
   contentStyle: {
-    background: '#0d1221',
-    border: '1px solid #1d2740',
-    borderRadius: '6px',
+    backgroundColor: 'hsl(var(--card))',
+    border: '1px solid hsl(var(--border))',
+    borderRadius: '8px',
+    color: 'hsl(var(--foreground))',
     fontSize: '0.8rem',
-    color: '#dde3f0',
     padding: '0.5rem 0.75rem',
   },
-  labelStyle: { color: '#dde3f0', fontWeight: 600, marginBottom: '0.2rem' },
+  labelStyle: { color: 'hsl(var(--foreground))', fontWeight: 600, marginBottom: '0.2rem' },
   cursor: { fill: 'rgba(79,114,255,0.05)' },
 }
 
@@ -447,6 +448,12 @@ export function Analisis() {
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={kmPorVehiculo} barSize={28}>
+                  <defs>
+                    <linearGradient id="gradKm" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#22c55e" stopOpacity={0.9} />
+                      <stop offset="95%" stopColor="#16a34a" stopOpacity={0.6} />
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} vertical={false} />
                   <XAxis
                     dataKey="placa"
@@ -463,7 +470,9 @@ export function Analisis() {
                     unit=" km"
                   />
                   <Tooltip {...TT} formatter={(v) => [`${v} km`, 'Km totales']} />
-                  <Bar dataKey="kmTotal" fill={CHART_ACCENT} radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="kmTotal" fill="url(#gradKm)" radius={[3, 3, 0, 0]}>
+                    <LabelList dataKey="kmTotal" position="top" formatter={(v: number) => `${v.toFixed(1)} km`} className="text-xs fill-foreground" />
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -543,6 +552,12 @@ export function Analisis() {
           ) : (
             <ResponsiveContainer width="100%" height="100%">
               <BarChart layout="vertical" data={tiempoPorRuta} barSize={18}>
+                <defs>
+                  <linearGradient id="gradTiempo" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.9} />
+                    <stop offset="95%" stopColor="#d97706" stopOpacity={0.7} />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke={CHART_GRID} horizontal={false} />
                 <XAxis
                   type="number"
@@ -562,7 +577,11 @@ export function Analisis() {
                   axisLine={false}
                 />
                 <Tooltip {...TT} formatter={(v) => [`${v} min`, 'Tiempo promedio']} />
-                <Bar dataKey="tiempoPromedioMin" fill={CHART_ACCENT2} radius={[0, 3, 3, 0]} />
+                <Bar dataKey="tiempoPromedioMin" fill="url(#gradTiempo)" radius={[0,4,4,0]}>
+                  <LabelList dataKey="tiempoPromedioMin" position="right"
+                    formatter={(v: number) => `${v.toFixed(0)} min`}
+                    className="text-xs fill-muted-foreground" />
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
           )}
