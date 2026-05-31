@@ -10,7 +10,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Sun,
-  Moon
+  Moon,
+  MapPin
 } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
@@ -21,6 +22,7 @@ const navigation = [
   { name: 'Vehículos', href: '/vehiculos', icon: Truck },
   { name: 'Operadores', href: '/operadores', icon: Users },
   { name: 'Rutas', href: '/rutas', icon: Route },
+  { name: 'Seguimiento', href: '/seguimiento', icon: MapPin },
   { name: 'Análisis', href: '/analisis', icon: BarChart3 },
 ]
 

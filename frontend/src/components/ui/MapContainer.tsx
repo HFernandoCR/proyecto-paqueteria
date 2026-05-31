@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import { Navigation, Maximize2, MapPin } from 'lucide-react'
+import { Navigation, Maximize2, MapPin, Truck } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import { MapContainer as LeafletMap, TileLayer, Marker, Popup, useMapEvents } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
@@ -27,17 +28,16 @@ const estadoColor: Record<string, string> = {
 
 const createVehicleIcon = (status: string, isLoading: boolean = false) => {
   const color = estadoColor[status] ?? '#71717a';
-  const loadingClass = isLoading ? "opacity-50" : "";
+  const loadingClass = isLoading ? "opacity-50 animate-pulse" : "";
   return L.divIcon({
     html: `
-      <div class="relative flex items-center justify-center ${loadingClass}">
-        <span class="absolute inline-flex h-4 w-4 rounded-full animate-ping opacity-75" style="background-color: ${color};"></span>
-        <span class="relative inline-flex rounded-full h-3.5 w-3.5 border-2 border-white shadow-md" style="background-color: ${color};"></span>
+      <div class="${loadingClass}" style="background-color: ${color}; color: white; padding: 5px; border-radius: 50%; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 2px solid white; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; box-sizing: border-box;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v10"/><path d="M14 22a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M6 22a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M20 18h2v-4h-7v7"/></svg>
       </div>
     `,
     className: 'custom-vehicle-marker',
-    iconSize: [16, 16],
-    iconAnchor: [8, 8]
+    iconSize: [28, 28],
+    iconAnchor: [14, 14]
   });
 }
 
@@ -167,9 +167,19 @@ export function MapContainer() {
             <p className="text-sm text-muted-foreground">Oaxaca y zona metropolitana</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
-          <span className="text-xs text-muted-foreground font-medium">En vivo (3s)</span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
+            <span className="text-xs text-muted-foreground font-medium">En vivo (3s)</span>
+          </div>
+          <Link
+            to="/seguimiento"
+            className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            title="Ver en pantalla completa"
+          >
+            <Maximize2 className="h-3.5 w-3.5" />
+            <span>Expandir</span>
+          </Link>
         </div>
       </div>
       
@@ -204,41 +214,20 @@ export function MapContainer() {
               icon={createVehicleIcon(v.estadoActual, historyLoadingId === v._id)}
               eventHandlers={{ click: () => handleVehicleClick(v) }}
             >
-              <Popup className="map-popup" maxWidth={180} autoPan={false}>
-                <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '12px', color: '#fafafa' }}>
-                  {/* Placa */}
-                  <p style={{ fontWeight: 700, fontSize: '13px', letterSpacing: '0.06em', marginBottom: '6px' }}>
-                    {v.placa}
+              <Popup>
+                <div className="font-sans text-xs space-y-1">
+                  <p className="font-bold text-sm border-b pb-1 flex items-center gap-1.5">
+                    <Truck className="h-3.5 w-3.5 text-primary flex-shrink-0" />
+                    {v.placa ?? 'Sin placa'}
                   </p>
-                  {/* Estado con badge de color */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '4px' }}>
-                    <span style={{
-                      display: 'inline-block',
-                      width: '7px', height: '7px',
-                      borderRadius: '50%',
-                      backgroundColor: estadoColor[v.estadoActual] ?? '#71717a',
-                      flexShrink: 0,
-                    }} />
-                    <span style={{
-                      color: estadoColor[v.estadoActual] ?? '#71717a',
-                      fontWeight: 600,
-                      textTransform: 'capitalize',
-                    }}>
-                      {v.estadoActual.replace('_', ' ')}
+                  <p>
+                    <b>Estado:</b>{' '}
+                    <span className="capitalize">
+                      {(v.estadoActual ?? 'disponible').replace('_', ' ')}
                     </span>
-                  </div>
-                  {/* Velocidad */}
-                  {v.velocidadKmh > 0 && (
-                    <p style={{ color: '#71717a', marginBottom: '4px' }}>{v.velocidadKmh} km/h</p>
-                  )}
-                  {/* Historial Info */}
-                  {historyLoadingId === v._id ? (
-                    <p style={{ color: '#71717a', fontSize: '11px', fontStyle: 'italic' }}>Cargando historial...</p>
-                  ) : historyError && selectedVehicleId === v._id ? (
-                    <p style={{ color: '#ef4444', fontSize: '11px' }}>{historyError}</p>
-                  ) : historyCount !== null && selectedVehicleId === v._id ? (
-                    <p style={{ color: '#71717a', fontSize: '11px' }}>Historial: {historyCount} puntos</p>
-                  ) : null}
+                  </p>
+                  <p><b>Velocidad:</b> {(v.velocidadKmh ?? 0)} km/h</p>
+                  <p className="text-[10px] text-muted-foreground">Lat: {(v.lat ?? 0).toFixed(5)}, Lng: {(v.lng ?? 0).toFixed(5)}</p>
                 </div>
               </Popup>
             </Marker>
