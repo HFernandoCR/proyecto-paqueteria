@@ -53,6 +53,34 @@ async function notificarLlegada(vehiculoId) {
   }
 }
 
+async function obtenerRutaOSRM(waypoints) {
+  try {
+    const coordsStr = waypoints.map(wp => `${wp.lng},${wp.lat}`).join(';');
+    const url = `https://router.project-osrm.org/route/v1/driving/${coordsStr}?overview=full&geometries=geojson`;
+    
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    
+    const res = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    
+    if (!res.ok) throw new Error(`OSRM API respondió con estado ${res.status}`);
+    
+    const data = await res.json();
+    if (data.routes && data.routes.length > 0 && data.routes[0].geometry) {
+      const coordinates = data.routes[0].geometry.coordinates;
+      const path = coordinates.map(coord => ({ lat: coord[1], lng: coord[0] }));
+      console.log(`[simulador] Usando ruta OSRM con ${path.length} puntos`);
+      return path;
+    }
+    throw new Error('Estructura de respuesta OSRM inválida');
+  } catch (error) {
+    console.error(`[simulador] Error obteniendo ruta OSRM:`, error.message);
+    console.log(`[simulador] Fallback a waypoints lineales`);
+    return waypoints;
+  }
+}
+
 // POST /simulador/start/:vehiculoId
 exports.start = async (req, res) => {
   const { vehiculoId } = req.params;
@@ -73,7 +101,8 @@ exports.start = async (req, res) => {
       return res.status(400).json({ message: 'El vehículo no tiene una ruta asignada válida con waypoints' });
     }
 
-    const waypoints = rutaAsignada.waypoints;
+    let waypoints = await obtenerRutaOSRM(rutaAsignada.waypoints);
+    
     let currentLat = waypoints[0].lat;
     let currentLng = waypoints[0].lng;
     let nextWaypointIndex = 1;
@@ -114,19 +143,10 @@ exports.start = async (req, res) => {
         if (move.reached) {
           nextWaypointIndex++;
           if (nextWaypointIndex >= waypoints.length) {
-            console.log(`[simulador] Vehículo ${vehiculoId} ha llegado a su destino.`);
-            clearInterval(intervalId);
-            activeSimulations.delete(vehiculoId);
-            await notificarLlegada(vehiculoId);
-            try {
-              await fetch(`${process.env.VEHICULOS_SERVICE_URL || 'http://vehiculos:3001'}/vehiculos/${vehiculoId}/estado`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ estadoActual: 'detenido' })
-              });
-            } catch (err) {
-              console.error(`[simulador] Error cambiando estado a detenido:`, err.message);
-            }
+            console.log(`[simulador] Vehículo ${vehiculoId} completó el recorrido. Reiniciando circuito continuo...`);
+            nextWaypointIndex = 1;
+            currentLat = waypoints[0].lat;
+            currentLng = waypoints[0].lng;
           }
         }
       } catch (err) {
