@@ -1,55 +1,112 @@
 # Casos de Uso y Flujo del Sistema
 
-Este documento describe formalmente la interacción entre los actores y el sistema de **Proyecto Paquetería**, apoyado por diagramas diseñados en Draw.io.
-
-## 1. Diagrama de Casos de Uso General
-
-El siguiente diagrama ilustra las funciones principales que puede realizar el Administrador/Operador logístico dentro de la plataforma, así como la interacción automatizada del Simulador GPS.
-
-![Diagrama de Casos de Uso](./diagramas/diagrama-casos-uso.png)
-
-### Actores del Sistema
-1. **Operador Logístico (Humano):** Usuario de la interfaz web (React) encargado de dar de alta la infraestructura (vehículos, rutas) y monitorear la operación. Dado que el sistema no requiere Login, cualquier cliente que acceda actúa bajo este rol general.
-2. **Simulador GPS (Sistema Automático):** Microservicio interno (Ubicación) que simula el hardware GPS de los camiones, inyectando coordenadas en tiempo real al historial.
-
-### CU-01: Gestión de Flotilla (CRUDs)
-- **Actor:** Operador Logístico
-- **Descripción:** El operador registra vehículos en el sistema y administra a los choferes encargados de operarlos.
-- **Flujo Principal:**
-  1. El operador navega al panel de Vehículos/Operadores.
-  2. Llena el formulario con placas, capacidad y datos del chofer.
-  3. El sistema guarda la entidad en MongoDB (`db_vehiculos`).
-
-### CU-02: Diseño y Asignación de Rutas
-- **Actor:** Operador Logístico
-- **Descripción:** Se define un trayecto en el mapa con puntos intermedios (waypoints) y se asigna un camión disponible para recorrerlo.
-- **Flujo Principal:**
-  1. El operador ingresa origen, destino y dibuja la ruta.
-  2. El sistema calcula la distancia y la guarda en `db_rutas`.
-  3. El operador vincula un vehículo específico a esta ruta.
-
-### CU-03: Seguimiento y Monitoreo en Tiempo Real
-- **Actores:** Operador Logístico, Simulador GPS
-- **Descripción:** Una vez iniciada la simulación, el vehículo recorre la ruta asignada y el operador lo observa moverse en el mapa.
-- **Flujo Principal:**
-  1. El operador "Inicia Viaje" para un vehículo.
-  2. El **Simulador GPS** comienza a generar y emitir coordenadas basadas en los waypoints.
-  3. El Frontend realiza *long-polling* cada 3 segundos al servicio de Seguimiento.
-  4. El vehículo se actualiza visualmente en el mapa con su *bearing* (rotación) correcta.
+Este documento describe formalmente la interaccion entre los
+actores y el sistema de **Proyecto Paqueteria**, apoyado por
+diagramas disenados en Draw.io.
 
 ---
 
-## 2. Diagramas de Actividad
+## Actores del Sistema
 
-Los diagramas de actividad detallan el flujo paso a paso de los procesos internos del sistema, desde que inicia un viaje hasta que se detiene o llega a su destino.
+### Administrador
+Usuario de la interfaz web encargado de registrar la
+infraestructura (vehiculos, operadores, rutas) y monitorear
+la operacion en tiempo real desde el panel de control.
 
-### Flujo Completo de Operación
+### Sistema de Simulacion GPS
+Microservicio interno (ubicacion:3003) que simula el hardware
+GPS instalado en los vehiculos, generando e inyectando
+coordenadas geograficas reales cada 3 segundos al historial.
+Consulta la API de OSRM para seguir calles reales.
+
+> **Nota sobre Operador:** El Operador es una entidad de datos
+> (conductor registrado con nombre, licencia y telefono), no
+> un usuario del sistema. No inicia sesion ni interactua con
+> la interfaz web directamente.
+
+---
+
+## Casos de Uso Principales
+
+![Diagrama de Casos de Uso](./diagramas/diagrama-casos-uso.png)
+
+### CU-01: Gestion de Flotilla
+- **Actor:** Administrador
+- **Descripcion:** Registra vehiculos y operadores en el sistema.
+- **Flujo:**
+  1. Navega al modulo de Vehiculos u Operadores
+  2. Llena el formulario con los datos requeridos
+  3. El sistema persiste la entidad en MongoDB (db_vehiculos)
+
+### CU-02: Diseno y Asignacion de Rutas
+- **Actor:** Administrador
+- **Descripcion:** Define trayectos con waypoints y asigna un
+  vehiculo disponible para recorrerlos.
+- **Flujo:**
+  1. Ingresa origen, destino y waypoints con coordenadas
+  2. El sistema calcula distancia y guarda en db_rutas
+  3. Asigna un vehiculo especifico a la ruta
+
+### CU-03: Iniciar Simulacion GPS
+- **Actor:** Administrador
+- **Descripcion:** Activa el simulador para un vehiculo. El
+  sistema consulta los waypoints de la ruta asignada, obtiene
+  la geometria real de calles via OSRM y comienza a generar
+  coordenadas cada 3 segundos.
+- **Flujo:**
+  1. POST /api/ubicacion/simulador/start/:vehiculoId
+  2. El Sistema GPS obtiene ruta real por calles (OSRM)
+  3. Persiste posiciones en HistorialUbicacion cada 3s
+
+### CU-04: Seguimiento y Monitoreo en Tiempo Real
+- **Actores:** Administrador, Sistema de Simulacion GPS
+- **Descripcion:** El administrador observa los vehiculos
+  moverse en el mapa mientras el simulador genera posiciones.
+- **Flujo:**
+  1. El Sistema GPS emite coordenadas cada 3 segundos
+  2. El frontend consulta /api/seguimiento/activos cada 3s
+  3. Los marcadores se actualizan en el mapa con bearing correcto
+  4. Click en un vehiculo muestra su recorrido historico
+
+### CU-05: Consultar Analisis y Recomendaciones (DSS)
+- **Actor:** Administrador
+- **Descripcion:** Accede al modulo de Analisis para revisar
+  KPIs de rendimiento y recomendaciones automaticas del sistema.
+- **Flujo:**
+  1. El servicio Analitica extrae datos via HTTP (ETL)
+  2. Calcula KPIs: km recorridos, entregas, anomalias
+  3. El dashboard muestra graficas e insights accionables
+  4. El administrador puede exportar el reporte (CSV/PDF)
+
+---
+
+## Flujo Completo del Sistema
+
+1. El administrador registra vehiculos y operadores
+2. Define rutas con origen, destino y waypoints
+3. Asigna una ruta a cada vehiculo
+4. Inicia la simulacion GPS para los vehiculos activos
+5. El Sistema GPS genera coordenadas reales por calles (OSRM)
+6. Las posiciones se actualizan cada 3 segundos
+7. El administrador monitorea la flota en el mapa en tiempo real
+8. Consulta el recorrido historico de cada unidad
+9. El modulo de Analisis genera recomendaciones automaticas
+
+---
+
+## Diagramas de Actividad
+
+Los diagramas detallan el flujo paso a paso de los procesos
+internos del sistema.
+
+### Flujo Completo de Operacion
 ![Diagrama de Actividades](./diagramas/diagrama-actividades.png)
 
 ### Flujo Simplificado
-Representación resumida del ciclo de vida de un envío en la plataforma.
+Representacion resumida del ciclo de vida de un envio.
 ![Diagrama Simplificado](./diagramas/diagrama-actividad-simplificado.png)
 
-### Flujo de KPIs Analíticos
-Este diagrama muestra cómo la información cruda generada por el Simulador GPS fluye hacia el microservicio de Analítica para ser procesada y mostrada en el **Dashboard BI** como métricas de negocio.
-![Diagrama KPI Analíticos](./diagramas/diagrama-actividades-kpi-analiticos.png)
+### Flujo de KPIs Analiticos
+Muestra como la informacion del Simulador GPS fluye hacia
+Analitica para ser procesada y mostrada en el Dashboard DSS.
+![Diagrama KPI Analiticos](./diagramas/diagrama-actividades-kpi-analiticos.png)
