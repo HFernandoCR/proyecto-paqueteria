@@ -1,6 +1,6 @@
-# Guía de contribución — Equipo 6B
+# Guía de contribución: Equipo 6B
 
-Este documento define **cómo trabajamos**. Léelo completo una vez antes de tomar tu primera issue. El profesor revisa el historial de Git, así que seguir esto cuenta para la calificación.
+Este documento define **cómo trabajamos**. Léelo completo una vez antes de tomar tu primera issue.
 
 ---
 
@@ -8,7 +8,7 @@ Este documento define **cómo trabajamos**. Léelo completo una vez antes de tom
 
 1. Clona el repositorio:
    ```bash
-   git clone https://gitlab.itolab.lat/equipo-6b/proyecto-paqueteria.git
+   git clone https://github.com/HFernandoCR/proyecto-paqueteria.git
    cd proyecto-paqueteria
    ```
 2. Configura tu identidad real (el profe revisa `git log` y debe ver tu nombre):
