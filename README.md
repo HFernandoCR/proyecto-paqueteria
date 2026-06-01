@@ -5,6 +5,10 @@ Materias: Servicios Web + Toma de Decisiones
 
 ---
 
+▶️ **[LogiTrack: Ver Demo Funcional en YouTube](https://youtu.be/qLbhtff7ujE)**
+
+---
+
 ## Arquitectura del sistema
 
 ```
