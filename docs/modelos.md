@@ -20,3 +20,26 @@ Se decidió modelar `EstadoVehiculo` como un enum directamente dentro de la cole
 | nombre | String | Sí | Nombre completo del operador |
 | numeroLicencia | String | Sí | Número de la licencia de conducir |
 | vehiculoAsignado | ObjectId | No | Referencia al vehículo actualmente asignado |
+
+## Ruta (db_rutas)
+
+| Campo | Tipo | Requerido | Descripción |
+| :--- | :--- | :--- | :--- |
+| _id | ObjectId | Sí | Identificador único de la ruta |
+| origen | String | Sí | Dirección de origen |
+| destino | String | Sí | Dirección de destino |
+| distanciaKms | Number | Sí | Distancia total en kilómetros |
+| vehiculoId | ObjectId | Sí | Referencia al vehículo asignado para esta ruta |
+| estado | String | Sí | Estado de la ruta (e.g. pendiente, en_curso, completada) |
+
+## HistorialUbicacion (db_ubicacion)
+
+| Campo | Tipo | Requerido | Descripción |
+| :--- | :--- | :--- | :--- |
+| _id | ObjectId | Sí | Identificador único del registro de ubicación |
+| vehiculoId | ObjectId | Sí | Referencia al vehículo asociado |
+| latitud | Number | Sí | Coordenada de latitud |
+| longitud | Number | Sí | Coordenada de longitud |
+| timestamp | Date | Sí | Fecha y hora en la que se registró la ubicación |
+
+Índice compuesto: { vehiculoId: 1, timestamp: -1 }
