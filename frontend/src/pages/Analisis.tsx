@@ -66,9 +66,9 @@ export function Analisis() {
     setIsLoading(true)
     Promise.all([
       axios.get('/api/analitica/kpi/resumen'),
-      axios.get('/api/analitica/kpi/km-por-vehiculo'),
+      axios.get(`/api/analitica/kpi/km-por-vehiculo?dias=${rango}`),
       axios.get(`/api/analitica/kpi/entregas-por-dia?dias=${rango}`),
-      axios.get('/api/analitica/kpi/tiempo-por-ruta').catch(() => ({ data: { datos: [] } })),
+      axios.get(`/api/analitica/kpi/tiempo-por-ruta?dias=${rango}`).catch(() => ({ data: { datos: [] } })),
       axios.get('/api/analitica/reportes/anomalias'),
     ])
       .then(([resumenRes, kmRes, entregasRes, tiempoRes, anomaliasRes]) => {

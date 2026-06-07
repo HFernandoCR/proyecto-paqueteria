@@ -1,5 +1,5 @@
 const express = require('express');
-const { fetchVehiculos, fetchHistorial } = require('../helpers/http');
+const { fetchVehiculos, fetchHistoriales } = require('../helpers/http');
 
 const router = express.Router();
 const UMBRAL_DETENIDO_MIN = 15;
@@ -8,16 +8,19 @@ const UMBRAL_COORD = 0.0001; // diferencia mínima en grados para considerar mov
 router.get('/anomalias', async (req, res) => {
   try {
     const vehiculos = await fetchVehiculos();
+    const vehiculosActivos = vehiculos.filter((v) =>
+      ['en_ruta', 'entregando'].includes(v.estadoActual)
+    );
+    const historiales = await fetchHistoriales(
+      vehiculosActivos.map((v) => String(v._id)),
+      { limit: 2, fields: 'lat,lng,timestamp' }
+    );
     const anomalias = [];
     const ahora = Date.now();
 
-    for (const v of vehiculos) {
-      if (!['en_ruta', 'entregando'].includes(v.estadoActual)) continue;
-
-      // Solo traemos los últimos 2 puntos para comparar coordenadas
-      const historial = await fetchHistorial(v._id, 2);
-
+    for (const v of vehiculosActivos) {
       // Sin al menos 2 puntos no podemos determinar si hubo movimiento
+      const historial = historiales[String(v._id)] || [];
       if (historial.length < 2) continue;
 
       // historial viene ordenado desc: [0] = más reciente, [1] = anterior
