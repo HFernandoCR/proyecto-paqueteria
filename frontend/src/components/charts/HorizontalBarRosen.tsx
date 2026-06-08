@@ -94,7 +94,7 @@ export function HorizontalBarRosen({
               <span className="truncate text-sm font-medium text-foreground" title={datum.label}>
                 {datum.label}
               </span>
-              <div className="h-[18px] rounded-[3px] bg-secondary/40">
+              <div className="h-[18px] rounded-[3px] border border-border/70 bg-muted/55">
                 <div
                   className="h-full rounded-[3px] transition-all duration-700 ease-out"
                   style={{
@@ -103,6 +103,7 @@ export function HorizontalBarRosen({
                     background: isZero
                       ? 'var(--border)'
                       : `linear-gradient(90deg, ${barColor} 0%, ${barColor}CC 100%)`,
+                    boxShadow: isZero ? 'none' : `0 0 0 1px color-mix(in srgb, ${barColor} 45%, transparent), 0 4px 12px color-mix(in srgb, ${barColor} 18%, transparent)`,
                   }}
                 />
               </div>
