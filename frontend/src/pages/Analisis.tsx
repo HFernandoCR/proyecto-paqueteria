@@ -26,7 +26,7 @@ import { HorizontalBarRosen } from '../components/charts/HorizontalBarRosen'
 import { cn } from '@/lib/utils'
 
 const BRAND_PRIMARY = 'var(--primary)'
-const OK_GREEN = 'var(--success)'
+const AVAILABLE_BLUE = 'var(--info)'
 const WARNING_AMBER = 'var(--warning)'
 const STOPPED_GRAY = 'var(--muted-foreground)'
 
@@ -92,7 +92,8 @@ interface KpiBadge {
 
 function buildCsv(rows: CsvCell[][]): string {
   const escape = (val: CsvCell) => {
-    const s = val == null ? '' : String(val)
+    const raw = val == null ? '' : String(val)
+    const s = /^[=+\-@\t\r]/.test(raw) ? `'${raw}` : raw
     return /[",\r\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s
   }
   return rows.map((row) => row.map(escape).join(',')).join('\r\n')
@@ -233,7 +234,7 @@ const softBg = (token: string) => `color-mix(in srgb, ${token} 14%, transparent)
 const insightStyles: Record<Insight['id'], { color: string; bg: string }> = {
   eficiencia: { color: BRAND_PRIMARY, bg: softBg(BRAND_PRIMARY) },
   'ruta-critica': { color: WARNING_AMBER, bg: softBg(WARNING_AMBER) },
-  anomalias: { color: OK_GREEN, bg: softBg(OK_GREEN) },
+  anomalias: { color: 'var(--success)', bg: softBg('var(--success)') },
   actividad: { color: 'var(--teal)', bg: softBg('var(--teal)') },
 }
 
@@ -398,6 +399,10 @@ export function Analisis() {
       ['Anomalías'],
       ['Placa', 'ID Vehículo', 'Minutos Detenido'],
       ...anomalias.map((anomalia) => [anomalia.placa, anomalia.vehiculoId, anomalia.minutosDetenido]),
+      [],
+      ['Recomendaciones DSS'],
+      ['Nivel', 'Título', 'Descripción', 'Acción sugerida'],
+      ...insights.map((insight) => [insight.nivel, insight.titulo, insight.descripcion, insight.accion]),
     ]
     const csv = String.fromCharCode(0xfeff) + buildCsv(rows)
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
@@ -405,8 +410,10 @@ export function Analisis() {
     const anchor = document.createElement('a')
     anchor.href = url
     anchor.download = `analisis-${new Date().toISOString().slice(0, 10)}.csv`
+    document.body.appendChild(anchor)
     anchor.click()
-    URL.revokeObjectURL(url)
+    anchor.remove()
+    window.setTimeout(() => URL.revokeObjectURL(url), 0)
     setShowExportMenu(false)
   }
 
@@ -416,7 +423,7 @@ export function Analisis() {
   }
 
   return (
-    <div className="-m-6 min-h-[calc(100vh-4rem)] bg-tertiary p-6">
+    <div className="analisis-print -m-3 min-h-[calc(100vh-4rem)] bg-tertiary p-3 sm:-m-4 sm:p-4 lg:-m-6 lg:p-6">
       <div className="space-y-5">
         <section className="flex flex-col gap-4 rounded-xl border border-border/70 bg-card px-5 py-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
@@ -514,7 +521,7 @@ export function Analisis() {
               title="Distribución de flota"
               data={[
                 { label: 'En ruta', value: stats?.vehiculosActivos ?? 0, color: BRAND_PRIMARY },
-                { label: 'Disponible', value: disponibles, color: OK_GREEN },
+                { label: 'Disponible', value: disponibles, color: AVAILABLE_BLUE },
                 { label: 'Mantenimiento', value: 0, color: WARNING_AMBER },
                 { label: 'Detenido', value: stats?.vehiculosDetenidos ?? 0, color: STOPPED_GRAY },
               ]}

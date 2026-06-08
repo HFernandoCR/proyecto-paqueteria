@@ -52,7 +52,7 @@ export function OperadorModal({ isOpen, onClose, onSave, operador }: OperadorMod
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-background/80 backdrop-blur-sm"
@@ -60,7 +60,7 @@ export function OperadorModal({ isOpen, onClose, onSave, operador }: OperadorMod
       />
       
       {/* Modal */}
-      <div className="relative w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-2xl mx-4">
+      <div className="relative max-h-[calc(100dvh-1.5rem)] w-full max-w-lg overflow-y-auto rounded-xl border border-border bg-card p-4 shadow-2xl sm:max-h-[calc(100dvh-2rem)] sm:p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-foreground">
@@ -147,7 +147,7 @@ export function OperadorModal({ isOpen, onClose, onSave, operador }: OperadorMod
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-2">
+          <div className="flex flex-col gap-3 pt-2 sm:flex-row">
             <button
               type="button"
               onClick={onClose}

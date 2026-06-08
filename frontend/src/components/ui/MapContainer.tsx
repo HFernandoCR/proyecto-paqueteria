@@ -18,6 +18,31 @@ interface ActiveVehicle {
   timestamp: string
 }
 
+interface ActiveVehicleResponse {
+  vehiculo: {
+    _id: string
+    placa: string
+    modelo: string
+    estadoActual: string
+  }
+  ubicacionActual?: {
+    lat?: number
+    lng?: number
+    velocidadKmh?: number
+    bearing?: number
+    timestamp?: string
+  }
+}
+
+interface HistoryPoint {
+  lat?: number
+  lng?: number
+}
+
+interface HistoryResponse {
+  historial?: HistoryPoint[]
+}
+
 const estadoColor: Record<string, string> = {
   en_ruta:      '#10b981', // verde
   entregando:   '#3b82f6', // azul
@@ -59,6 +84,11 @@ export function MapContainer() {
 
   const mapRef = useRef<L.Map | null>(null)
   const polylineRef = useRef<L.Polyline | null>(null)
+  const selectedVehicleIdRef = useRef<string | null>(null)
+
+  useEffect(() => {
+    selectedVehicleIdRef.current = selectedVehicleId
+  }, [selectedVehicleId])
 
   const handleMapClick = () => {
     if (polylineRef.current) {
@@ -70,39 +100,45 @@ export function MapContainer() {
     setHistoryCount(null)
   }
 
-  const handleVehicleClick = async (v: ActiveVehicle) => {
-    if (polylineRef.current) {
-      polylineRef.current.remove()
-      polylineRef.current = null
-    }
-    setSelectedVehicleId(v._id)
-    setHistoryError(null)
-    setHistoryCount(null)
-    setHistoryLoadingId(v._id)
-
+  const refreshVehicleHistory = async (v: ActiveVehicle, flyToVehicle = false) => {
     try {
-      let points = []
+      if (flyToVehicle || !polylineRef.current) {
+        setHistoryLoadingId(v._id)
+      }
+
+      let points: HistoryPoint[] = []
       try {
-        const res = await axios.get(`/api/seguimiento/${v._id}/historial`)
+        const res = await axios.get<HistoryResponse>(`/api/seguimiento/${v._id}/historial`)
         points = res.data.historial || []
       } catch (err) {
-        const fallbackRes = await axios.get(`/api/ubicacion/ubicaciones/historial/${v._id}`)
+        const fallbackRes = await axios.get<HistoryPoint[]>(`/api/ubicacion/ubicaciones/historial/${v._id}`)
         points = fallbackRes.data || []
       }
 
-      if (points.length === 0) {
+      const latlngs = points
+        .filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lng))
+        .map((p) => [p.lat!, p.lng!] as [number, number])
+
+      if (latlngs.length === 0) {
         setHistoryError("Sin historial de recorrido disponible")
       } else {
-        setHistoryCount(points.length)
-        const latlngs = points.map((p: any) => [p.lat, p.lng] as [number, number])
+        setHistoryError(null)
+        setHistoryCount(latlngs.length)
         const map = mapRef.current
         if (map) {
-          polylineRef.current = L.polyline(latlngs, {
-            color: estadoColor[v.estadoActual] ?? '#71717a',
-            weight: 3,
-            opacity: 0.8
-          }).addTo(map)
-          map.flyTo([v.lat, v.lng], 14, { duration: 1 })
+          if (polylineRef.current) {
+            polylineRef.current.setLatLngs(latlngs)
+          } else {
+            polylineRef.current = L.polyline(latlngs, {
+              color: estadoColor[v.estadoActual] ?? '#71717a',
+              weight: 3,
+              opacity: 0.8
+            }).addTo(map)
+          }
+
+          if (flyToVehicle) {
+            map.flyTo([v.lat, v.lng], 14, { duration: 1 })
+          }
         }
       }
     } catch (err) {
@@ -111,6 +147,17 @@ export function MapContainer() {
     } finally {
       setHistoryLoadingId(null)
     }
+  }
+
+  const handleVehicleClick = async (v: ActiveVehicle) => {
+    if (polylineRef.current) {
+      polylineRef.current.remove()
+      polylineRef.current = null
+    }
+    setSelectedVehicleId(v._id)
+    setHistoryError(null)
+    setHistoryCount(null)
+    await refreshVehicleHistory(v, true)
   }
 
   useEffect(() => {
@@ -127,7 +174,7 @@ export function MapContainer() {
         const res = await axios.get('/api/seguimiento/activos')
         // La API devuelve [{vehiculo: {...}, ubicacionActual: {lat,lng,...}|null}].
         // Solo mostramos vehículos con coordenadas conocidas.
-        const items: any[] = res.data || []
+        const items: ActiveVehicleResponse[] = res.data || []
         const mapped = items
           .filter((item) => item.ubicacionActual?.lat != null && item.ubicacionActual?.lng != null)
           .map((item) => ({
@@ -142,6 +189,12 @@ export function MapContainer() {
             timestamp:    item.ubicacionActual.timestamp ?? new Date().toISOString(),
           }))
         setVehicles(mapped)
+
+        const selectedId = selectedVehicleIdRef.current
+        const selected = selectedId ? mapped.find((v) => v._id === selectedId) : null
+        if (selected) {
+          await refreshVehicleHistory(selected)
+        }
       } catch (err) {
         console.error("Error loading active tracking vehicles:", err)
       } finally {
@@ -155,20 +208,20 @@ export function MapContainer() {
   }, [])
 
   return (
-    <div className="rounded-xl border border-border bg-card overflow-hidden">
+    <div className="overflow-hidden rounded-xl border border-border bg-card">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-border px-5 py-4">
-        <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-primary/10 p-2">
+      <div className="flex flex-col gap-3 border-b border-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="shrink-0 rounded-lg bg-primary/10 p-2">
             <Navigation className="h-5 w-5 text-primary" />
           </div>
-          <div>
-            <h3 className="font-semibold text-foreground">Seguimiento en Vivo</h3>
-            <p className="text-sm text-muted-foreground">Oaxaca y zona metropolitana</p>
+          <div className="min-w-0">
+            <h3 className="truncate font-semibold text-foreground">Seguimiento en Vivo</h3>
+            <p className="truncate text-sm text-muted-foreground">Oaxaca y zona metropolitana</p>
           </div>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex shrink-0 items-center gap-2">
             <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
             <span className="text-xs text-muted-foreground font-medium">En vivo (3s)</span>
           </div>
@@ -184,7 +237,7 @@ export function MapContainer() {
       </div>
       
       {/* Map Content */}
-      <div className="relative h-[400px] bg-secondary/10">
+      <div className="relative h-[320px] bg-secondary/10 sm:h-[400px]">
         {isLoading && vehicles.length === 0 ? (
           <div className="absolute inset-0 flex items-center justify-center z-[1000] bg-background/50 backdrop-blur-xs">
             <div className="text-center">
@@ -236,12 +289,12 @@ export function MapContainer() {
       </div>
       
       {/* Footer with vehicle list */}
-      <div className="border-t border-border px-5 py-4 bg-secondary/10">
+      <div className="border-t border-border bg-secondary/10 px-4 py-4 sm:px-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between text-sm">
           <span className="text-muted-foreground">
             <span className="font-semibold text-foreground">{vehicles.length}</span> vehículos activos en mapa
           </span>
-          <div className="flex items-center gap-4 flex-wrap">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             {([
               { estado: 'disponible',    label: 'Disponible'    },
               { estado: 'en_ruta',       label: 'En ruta'       },

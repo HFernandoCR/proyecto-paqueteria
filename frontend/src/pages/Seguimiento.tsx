@@ -143,14 +143,14 @@ export function Seguimiento() {
     : defaultCenter
 
   return (
-    <div className="flex flex-col h-[calc(100vh-120px)] space-y-4">
+    <div className="flex min-h-[calc(100vh-5rem)] flex-col space-y-4 lg:h-[calc(100vh-7rem)]">
       {/* Encabezado */}
-      <div className="flex items-center justify-between flex-shrink-0">
-        <div>
+      <div className="flex flex-shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
           <h2 className="text-2xl font-bold text-foreground">Monitoreo en Tiempo Real</h2>
           <p className="text-muted-foreground text-sm">Ubicación y telemetría de las unidades activas</p>
         </div>
-        <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 px-3 py-1.5 rounded-full">
+        <div className="flex shrink-0 items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5">
           <Radio className="h-4 w-4 text-primary animate-pulse" />
           <span className="text-xs font-semibold text-primary uppercase tracking-wider">
             Polling Activo (3s)
@@ -159,10 +159,10 @@ export function Seguimiento() {
       </div>
 
       {/* Contenedor Dividido */}
-      <div className="flex-1 flex flex-col md:flex-row gap-4 overflow-hidden w-full">
+      <div className="flex min-h-0 w-full flex-1 flex-col gap-4 lg:flex-row lg:overflow-hidden">
         
         {/* PANEL IZQUIERDO: Lista de unidades */}
-        <div className="w-full md:w-80 flex flex-col border border-border bg-card rounded-xl overflow-hidden flex-shrink-0">
+        <div className="flex max-h-80 w-full flex-shrink-0 flex-col overflow-hidden rounded-xl border border-border bg-card lg:max-h-none lg:w-80">
           <div className="p-4 border-b border-border bg-secondary/20">
             <h3 className="font-semibold text-foreground flex items-center gap-2">
               <Truck className="h-4 w-4 text-primary" />
@@ -170,7 +170,7 @@ export function Seguimiento() {
             </h3>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-3 space-y-2">
+          <div className="flex-1 space-y-2 overflow-y-auto p-3">
             {error && (
               <div className="p-3 rounded-lg border border-destructive/20 bg-destructive/5 text-destructive text-xs flex items-center gap-2">
                 <AlertCircle className="h-4 w-4 flex-shrink-0" />
@@ -219,7 +219,7 @@ export function Seguimiento() {
         </div>
 
         {/* PANEL DERECHO: MAPA REAL DE LEAFLET */}
-        <div className="flex-1 border border-border bg-card rounded-xl overflow-hidden relative shadow-inner z-0">
+        <div className="relative z-0 min-h-[360px] flex-1 overflow-hidden rounded-xl border border-border bg-card shadow-inner sm:min-h-[440px] lg:min-h-0">
           <MapContainer 
             center={defaultCenter} 
             zoom={13} 

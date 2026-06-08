@@ -159,7 +159,7 @@ export function Vehiculos() {
         </div>
         <button
           onClick={handleAddVehiculo}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-primary/30"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 hover:shadow-primary/30 sm:w-auto"
         >
           <Plus className="h-4 w-4" />
           Agregar Vehículo
@@ -167,7 +167,7 @@ export function Vehiculos() {
       </div>
 
       {/* Stats cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <div className="rounded-xl border border-border bg-card p-4">
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-secondary p-2">
@@ -227,7 +227,7 @@ export function Vehiculos() {
 
       {/* Filters */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="relative flex-1 max-w-md">
+        <div className="relative w-full max-w-md flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
@@ -237,12 +237,12 @@ export function Vehiculos() {
             className="w-full rounded-lg border border-border bg-secondary/50 py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
           />
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex w-full items-center gap-2 sm:w-auto">
           <Filter className="h-4 w-4 text-muted-foreground" />
           <select
             value={filterEstado}
             onChange={(e) => setFilterEstado(e.target.value)}
-            className="rounded-lg border border-border bg-secondary/50 px-3 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+            className="w-full rounded-lg border border-border bg-secondary/50 px-3 py-2.5 text-sm text-foreground focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary sm:w-auto"
           >
             <option value="todos">Todos los estados</option>
             <option value="disponible">Disponible</option>
@@ -369,7 +369,7 @@ export function Vehiculos() {
           )}
 
           {/* Table footer */}
-          <div className="border-t border-border bg-secondary/20 px-6 py-3">
+          <div className="border-t border-border bg-secondary/20 px-4 py-3 sm:px-6">
             <p className="text-sm text-muted-foreground">
               Mostrando <span className="font-medium text-foreground">{filteredVehiculos.length}</span> de{' '}
               <span className="font-medium text-foreground">{vehiculos.length}</span> vehículos

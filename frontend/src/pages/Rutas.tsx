@@ -183,7 +183,7 @@ export function Rutas() {
         </div>
         <button
           onClick={handleAddRuta}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/25 transition-all hover:bg-primary/90 sm:w-auto"
         >
           <Plus className="h-4 w-4" />
           Agregar Ruta
@@ -191,7 +191,7 @@ export function Rutas() {
       </div>
 
       {/* Stats */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <div className="rounded-xl border border-border bg-card p-4">
           <div className="flex items-center gap-3">
             <div className="rounded-lg bg-primary/10 p-2">
@@ -229,7 +229,7 @@ export function Rutas() {
 
       {/* Filters */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
-        <div className="relative flex-1 max-w-md">
+        <div className="relative w-full max-w-md flex-1">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
@@ -364,7 +364,7 @@ export function Rutas() {
           )}
 
           {/* Table footer */}
-          <div className="border-t border-border bg-secondary/20 px-6 py-3">
+          <div className="border-t border-border bg-secondary/20 px-4 py-3 sm:px-6">
             <p className="text-sm text-muted-foreground">
               Mostrando <span className="font-medium text-foreground">{filteredRutas.length}</span> de{' '}
               <span className="font-medium text-foreground">{rutas.length}</span> rutas
