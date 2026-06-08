@@ -1,6 +1,6 @@
 # Sistema de Gestión de Rutas y Seguimiento de Vehículos de Paquetería
 
-**Proyecto Integrador 8 — Equipo 6B**  
+**Proyecto Integrador 8: Equipo 6B**  
 Materias: Servicios Web + Toma de Decisiones
 
 ---
