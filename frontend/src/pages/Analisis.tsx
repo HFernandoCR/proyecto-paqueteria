@@ -24,6 +24,9 @@ import { AreaChartRosen } from '../components/charts/AreaChartRosen'
 import { DonutChartRosen } from '../components/charts/DonutChartRosen'
 import { HorizontalBarRosen } from '../components/charts/HorizontalBarRosen'
 import { cn } from '@/lib/utils'
+import { svgToPng } from '@/lib/svgToPng'
+import { exportPdf } from '@/lib/exportPdf'
+import type { BarChartSpec, KpiHighlight, RasterChart, ReportSection } from '@/lib/exportPdf'
 
 const BRAND_PRIMARY = 'var(--primary)'
 const AVAILABLE_BLUE = 'var(--info)'
@@ -334,7 +337,10 @@ function DssInsightCard({ insight }: { insight: Insight }) {
 export function Analisis() {
   const [rango, setRango] = useState<Rango>(30)
   const [showExportMenu, setShowExportMenu] = useState(false)
+  const [isExporting, setIsExporting] = useState(false)
   const exportMenuRef = useRef<HTMLDivElement>(null)
+  const areaChartRef = useRef<HTMLDivElement>(null)
+  const donutChartRef = useRef<HTMLDivElement>(null)
   const [abierto, setAbierto] = useState(() => {
     const guardado = localStorage.getItem('analisis_recomendaciones_abierto')
     return guardado !== null ? guardado === 'true' : true
@@ -402,40 +408,94 @@ export function Analisis() {
       ? { label: 'Bajo promedio', tone: 'warning', icon: TrendingDown }
       : { label: 'En rango esperado', tone: 'success', icon: CheckCircle2 }
 
+  // Fuente única de datos tabulares para CSV y PDF.
+  const buildReportSections = (): ReportSection[] => [
+    {
+      titulo: 'KPIs',
+      headers: ['Métrica', 'Valor'],
+      rows: [
+        ['Vehículos activos', stats?.vehiculosActivos ?? 0],
+        ['Vehículos totales', stats?.vehiculosTotal ?? 0],
+        ['Vehículos disponibles', disponibles],
+        ['Vehículos detenidos', stats?.vehiculosDetenidos ?? 0],
+        ['Tasa de actividad', `${Math.round(tasaActividad)}%`],
+        ['Km recorridos hoy', formatNumber(stats?.kmRecorridosHoy ?? 0, 1)],
+        ['Entregas hoy', stats?.entregasHoy ?? 0],
+        ['Promedio entregas/día', formatNumber(promedioEntregas, 1)],
+      ],
+    },
+    {
+      titulo: 'Distribución de flota',
+      headers: ['Estado', 'Vehículos'],
+      rows: [
+        ['En ruta', stats?.vehiculosActivos ?? 0],
+        ['Disponible', disponibles],
+        ['Mantenimiento', 0],
+        ['Detenido', stats?.vehiculosDetenidos ?? 0],
+      ],
+    },
+    {
+      titulo: 'Km por vehículo',
+      headers: ['Placa', 'Km total'],
+      rows: kmPorVehiculo.map((vehiculo) => [vehiculo.placa, vehiculo.kmTotal]),
+    },
+    {
+      titulo: 'Entregas por día',
+      headers: ['Fecha', 'Entregas'],
+      rows: entregasPorDia.map((dia) => [dia.fecha, dia.entregas]),
+    },
+    {
+      titulo: 'Tiempo promedio por ruta',
+      headers: ['Ruta', 'Minutos promedio'],
+      rows: tiempoPorRuta.map((ruta) => [ruta.nombre, ruta.tiempoPromedioMin]),
+    },
+    {
+      titulo: 'Anomalías',
+      headers: ['Placa', 'ID Vehículo', 'Minutos detenido'],
+      rows: anomalias.map((anomalia) => [anomalia.placa, anomalia.vehiculoId, anomalia.minutosDetenido]),
+      vacioMsg: 'Sin anomalías registradas',
+    },
+    {
+      titulo: 'Recomendaciones DSS',
+      headers: ['Nivel', 'Título', 'Descripción', 'Acción sugerida'],
+      rows: insights.map((insight) => [insight.nivel, insight.titulo, insight.descripcion, insight.accion]),
+    },
+  ]
+
+  const buildKpiHighlights = (): KpiHighlight[] => [
+    { label: 'Km recorridos hoy', value: formatNumber(stats?.kmRecorridosHoy ?? 0, 1) },
+    { label: 'Entregas hoy', value: formatNumber(stats?.entregasHoy ?? 0) },
+    { label: 'Tasa de actividad', value: `${Math.round(tasaActividad)}%` },
+    { label: 'Vehículos activos', value: `${stats?.vehiculosActivos ?? 0} / ${stats?.vehiculosTotal ?? 0}` },
+    { label: 'Promedio entregas/día', value: formatNumber(promedioEntregas, 1) },
+    { label: 'Vehículos detenidos', value: String(stats?.vehiculosDetenidos ?? 0) },
+  ]
+
+  const buildBarCharts = (): BarChartSpec[] => [
+    {
+      titulo: 'Km por vehículo',
+      data: kmPorVehiculo.map((vehiculo) => ({ label: vehiculo.placa, value: vehiculo.kmTotal, unit: 'km' })),
+    },
+    {
+      titulo: 'Tiempo promedio por ruta',
+      data: tiempoPorRuta.map((ruta) => ({ label: ruta.nombre, value: ruta.tiempoPromedioMin, unit: 'min' })),
+    },
+  ]
+
   const handleExportCSV = () => {
     const rows: CsvCell[][] = [
       ['Reporte de Análisis - Sistema de Paquetería'],
       ['Generado', new Date().toLocaleString('es-MX')],
       ['Rango de días', rango],
-      [],
-      ['KPIs'],
-      ['Métrica', 'Valor'],
-      ['Vehículos Activos', stats?.vehiculosActivos],
-      ['Vehículos Totales', stats?.vehiculosTotal],
-      ['Km Recorridos Hoy', stats?.kmRecorridosHoy],
-      ['Entregas Hoy', stats?.entregasHoy],
-      ['Vehículos Detenidos', stats?.vehiculosDetenidos],
-      [],
-      ['Km por Vehículo'],
-      ['Placa', 'Km Total'],
-      ...kmPorVehiculo.map((vehiculo) => [vehiculo.placa, vehiculo.kmTotal]),
-      [],
-      ['Entregas por Día'],
-      ['Fecha', 'Entregas'],
-      ...entregasPorDia.map((dia) => [dia.fecha, dia.entregas]),
-      [],
-      ['Tiempo Promedio por Ruta'],
-      ['Ruta', 'Minutos Promedio'],
-      ...tiempoPorRuta.map((ruta) => [ruta.nombre, ruta.tiempoPromedioMin]),
-      [],
-      ['Anomalías'],
-      ['Placa', 'ID Vehículo', 'Minutos Detenido'],
-      ...anomalias.map((anomalia) => [anomalia.placa, anomalia.vehiculoId, anomalia.minutosDetenido]),
-      [],
-      ['Recomendaciones DSS'],
-      ['Nivel', 'Título', 'Descripción', 'Acción sugerida'],
-      ...insights.map((insight) => [insight.nivel, insight.titulo, insight.descripcion, insight.accion]),
     ]
+    for (const section of buildReportSections()) {
+      rows.push([], [section.titulo], section.headers)
+      if (section.rows.length === 0) {
+        rows.push([section.vacioMsg ?? 'Sin datos disponibles'])
+      } else {
+        rows.push(...section.rows)
+      }
+    }
     const csv = String.fromCharCode(0xfeff) + buildCsv(rows)
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
@@ -447,6 +507,52 @@ export function Analisis() {
     anchor.remove()
     window.setTimeout(() => URL.revokeObjectURL(url), 0)
     setShowExportMenu(false)
+  }
+
+  const handleExportPDF = async () => {
+    if (isExporting) return
+    setShowExportMenu(false)
+    setIsExporting(true)
+    try {
+      const rasterCharts: RasterChart[] = []
+      const areaSvg = areaChartRef.current?.querySelector('svg')
+      if (areaSvg) {
+        try {
+          rasterCharts.push({
+            titulo: 'Entregas por día',
+            image: await svgToPng(areaSvg as unknown as SVGSVGElement),
+            maxHeightMm: 80,
+          })
+        } catch (error) {
+          console.error('No se pudo rasterizar la gráfica de entregas:', error)
+        }
+      }
+      const donutSvg = donutChartRef.current?.querySelector('svg')
+      if (donutSvg) {
+        try {
+          rasterCharts.push({
+            titulo: 'Distribución de flota',
+            image: await svgToPng(donutSvg as unknown as SVGSVGElement),
+            maxHeightMm: 70,
+          })
+        } catch (error) {
+          console.error('No se pudo rasterizar la gráfica de distribución:', error)
+        }
+      }
+
+      exportPdf({
+        rango,
+        generado: new Date().toLocaleString('es-MX'),
+        kpis: buildKpiHighlights(),
+        rasterCharts,
+        barCharts: buildBarCharts(),
+        sections: buildReportSections(),
+      })
+    } catch (error) {
+      console.error('Error al generar PDF:', error)
+    } finally {
+      setIsExporting(false)
+    }
   }
 
   const handleExportPrint = () => {
@@ -487,10 +593,11 @@ export function Analisis() {
             <div className="relative" ref={exportMenuRef}>
               <button
                 onClick={() => setShowExportMenu((value) => !value)}
-                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                disabled={isExporting}
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 <Download className="h-4 w-4" />
-                Exportar
+                {isExporting ? 'Generando…' : 'Exportar'}
                 <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', showExportMenu && 'rotate-180')} />
               </button>
 
@@ -499,7 +606,7 @@ export function Analisis() {
                   <button onClick={handleExportCSV} className="w-full px-4 py-2.5 text-left text-sm text-foreground hover:bg-secondary">
                     CSV
                   </button>
-                  <button onClick={handleExportPrint} className="w-full px-4 py-2.5 text-left text-sm text-foreground hover:bg-secondary">
+                  <button onClick={handleExportPDF} className="w-full px-4 py-2.5 text-left text-sm text-foreground hover:bg-secondary">
                     PDF
                   </button>
                   <button onClick={handleExportPrint} className="w-full px-4 py-2.5 text-left text-sm text-foreground hover:bg-secondary">
@@ -539,7 +646,7 @@ export function Analisis() {
         </section>
 
         <section className="grid gap-5 xl:grid-cols-[1.35fr_0.9fr]">
-          <div className="rounded-xl border border-border/80 bg-card p-5 shadow-sm">
+          <div ref={areaChartRef} className="rounded-xl border border-border/80 bg-card p-5 shadow-sm">
             <AreaChartRosen
               title="Entregas por día"
               data={entregasChartData}
@@ -548,7 +655,7 @@ export function Analisis() {
             />
           </div>
 
-          <div className="rounded-xl border border-border/80 bg-card p-5 shadow-sm">
+          <div ref={donutChartRef} className="rounded-xl border border-border/80 bg-card p-5 shadow-sm">
             <DonutChartRosen
               title="Distribución de flota"
               data={[
