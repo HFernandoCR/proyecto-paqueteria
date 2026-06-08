@@ -1,213 +1,225 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import * as d3 from 'd3'
 import { TrendingUp } from 'lucide-react'
 
+export interface AreaChartDatum {
+  label: string
+  value: number
+}
+
 interface AreaChartRosenProps {
-  data: Array<{ label: string; value: number }>
+  data: AreaChartDatum[]
   title: string
   color?: string
   height?: number
 }
 
+const compactDate = (label: string) => {
+  const parts = label.split('-')
+  if (parts.length === 3) return `${parts[2]}/${parts[1]}`
+  return label
+}
+
 export function AreaChartRosen({
   data,
   title,
-  color = '#3b82f6',
-  height = 250,
+  color = 'var(--primary)',
+  height = 280,
 }: AreaChartRosenProps) {
+  const gradientId = useId().replace(/:/g, '')
   const containerRef = useRef<HTMLDivElement>(null)
+  const pathRef = useRef<SVGPathElement>(null)
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 })
   const [mounted, setMounted] = useState(false)
+  const [pathLength, setPathLength] = useState(0)
 
   useEffect(() => {
-    if (containerRef.current) {
+    const updateSize = () => {
+      if (!containerRef.current) return
       const rect = containerRef.current.getBoundingClientRect()
       if (rect.width > 0 && rect.height > 0) {
         setDimensions({ width: rect.width, height: rect.height })
       }
     }
 
-    const resizeObserver = new ResizeObserver(entries => {
-      if (!entries || entries.length === 0) return
-      const { width, height } = entries[0].contentRect
-      if (width > 0 && height > 0) {
-        setDimensions({ width, height })
-      }
-    })
-    
-    if (containerRef.current) {
-      resizeObserver.observe(containerRef.current)
-    }
-    
+    updateSize()
+    const resizeObserver = new ResizeObserver(updateSize)
+    if (containerRef.current) resizeObserver.observe(containerRef.current)
     return () => resizeObserver.disconnect()
   }, [])
 
   useEffect(() => {
-    const t = setTimeout(() => setMounted(true), 100)
-    return () => clearTimeout(t)
+    const timer = window.setTimeout(() => setMounted(true), 80)
+    return () => window.clearTimeout(timer)
   }, [])
 
-  const pathRef = useRef<SVGPathElement>(null)
-  const [pathLength, setPathLength] = useState(0)
-
   useEffect(() => {
-    if (pathRef.current) {
-      setPathLength(pathRef.current.getTotalLength())
-    }
+    if (pathRef.current) setPathLength(pathRef.current.getTotalLength())
   }, [dimensions, data])
 
   if (!data || data.length === 0) {
     return (
-      <div className="flex flex-col w-full h-full">
-        <h3 className="text-lg font-semibold text-foreground mb-4">{title}</h3>
-        <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground gap-2" style={{ minHeight: height }}>
-          <TrendingUp className="h-8 w-8 opacity-30" />
+      <div className="flex h-full w-full flex-col">
+        <h3 className="mb-4 text-sm font-semibold text-foreground">{title}</h3>
+        <div
+          className="flex flex-1 flex-col items-center justify-center gap-2 text-muted-foreground"
+          style={{ minHeight: height }}
+        >
+          <TrendingUp className="h-7 w-7 opacity-30" />
           <p className="text-sm">Sin datos disponibles</p>
         </div>
       </div>
     )
   }
 
-  if (data.length === 1) {
-    return (
-      <div className="flex flex-col w-full h-full">
-        <h3 className="text-lg font-semibold text-foreground mb-4">{title}</h3>
-        <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground gap-2" style={{ minHeight: height }}>
-          <TrendingUp className="h-8 w-8 opacity-40" style={{ color: color }} />
-          <p className="text-sm font-medium text-foreground">
-            {data[0].value} entregas hoy
-          </p>
-          <p className="text-xs text-center max-w-[200px]">
-            La grafica aparecera cuando haya datos de mas de un dia
-          </p>
-        </div>
-      </div>
-    )
-  }
-
-  const margin = { top: 20, right: 20, bottom: 30, left: 40 }
+  const margin = { top: 18, right: 18, bottom: 34, left: 42 }
   const innerWidth = Math.max(0, dimensions.width - margin.left - margin.right)
   const innerHeight = Math.max(0, dimensions.height - margin.top - margin.bottom)
+  const maxValue = Math.max(d3.max(data, (datum) => datum.value) ?? 0, 1)
+  const meanValue = d3.mean(data, (datum) => datum.value) ?? 0
 
-  const maxValue = d3.max(data, d => d.value) || 1
-
-  const xScale = d3.scalePoint()
-    .domain(data.map(d => d.label))
+  const xScale = d3
+    .scalePoint<string>()
+    .domain(data.map((datum) => datum.label))
     .range([0, innerWidth])
-    .padding(0.1)
+    .padding(data.length === 1 ? 0.5 : 0.25)
 
-  const yScale = d3.scaleLinear()
-    .domain([0, maxValue * 1.1])
+  const yScale = d3
+    .scaleLinear()
+    .domain([0, Math.ceil(maxValue * 1.15)])
+    .nice(4)
     .range([innerHeight, 0])
 
-  const lineGenerator = d3.line<any>()
-    .x(d => xScale(d.label) ?? 0)
-    .y(d => yScale(d.value))
-    .curve(d3.curveMonotoneX)
+  const lineGenerator = d3
+    .line<AreaChartDatum>()
+    .defined((datum) => Number.isFinite(datum.value))
+    .x((datum) => xScale(datum.label) ?? 0)
+    .y((datum) => yScale(datum.value))
+    .curve(data.length > 1 ? d3.curveMonotoneX : d3.curveLinear)
 
-  const areaGenerator = d3.area<any>()
-    .x(d => xScale(d.label) ?? 0)
+  const areaGenerator = d3
+    .area<AreaChartDatum>()
+    .defined((datum) => Number.isFinite(datum.value))
+    .x((datum) => xScale(datum.label) ?? 0)
     .y0(innerHeight)
-    .y1(d => yScale(d.value))
-    .curve(d3.curveMonotoneX)
+    .y1((datum) => yScale(datum.value))
+    .curve(data.length > 1 ? d3.curveMonotoneX : d3.curveLinear)
 
-  const pathD = lineGenerator(data) || ''
-  const areaD = areaGenerator(data) || ''
-
-  const yTicks = yScale.ticks(5)
+  const yTicks = yScale.ticks(4)
+  const labelStep = Math.max(1, Math.ceil(data.length / 7))
+  const areaPath = areaGenerator(data) ?? ''
+  const linePath = lineGenerator(data) ?? ''
+  const meanY = yScale(meanValue)
 
   return (
-    <div className="flex flex-col w-full h-full">
-      <h3 className="text-lg font-semibold text-foreground mb-2">{title}</h3>
-      <div className="flex-1 w-full relative" ref={containerRef} style={{ minHeight: height }}>
+    <div className="flex h-full w-full flex-col">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+        <span className="rounded-full bg-secondary/60 px-2.5 py-1 text-xs font-medium text-muted-foreground">
+          Media {meanValue.toFixed(1)}
+        </span>
+      </div>
+      <div ref={containerRef} className="relative w-full flex-1" style={{ minHeight: height }}>
         {dimensions.width > 0 && dimensions.height > 0 && (
-          <svg width={dimensions.width} height={dimensions.height}>
+          <svg width={dimensions.width} height={dimensions.height} role="img" aria-label={title}>
             <defs>
-              <linearGradient id="area-grad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={color} stopOpacity={0.3} />
+              <linearGradient id={`${gradientId}-area`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={color} stopOpacity={0.2} />
                 <stop offset="100%" stopColor={color} stopOpacity={0} />
               </linearGradient>
             </defs>
             <g transform={`translate(${margin.left},${margin.top})`}>
-              
-              {/* Grid horizontales */}
-              {yTicks.map(tick => (
-                <line
-                  key={`grid-${tick}`}
-                  x1={0}
-                  x2={innerWidth}
-                  y1={yScale(tick)}
-                  y2={yScale(tick)}
-                  stroke="currentColor"
-                  className="text-border opacity-50"
-                  strokeDasharray="3 3"
-                />
+              {yTicks.map((tick) => (
+                <g key={`y-${tick}`}>
+                  <line
+                    x1={0}
+                    x2={innerWidth}
+                    y1={yScale(tick)}
+                    y2={yScale(tick)}
+                    className="stroke-border"
+                    strokeDasharray="2 4"
+                    strokeWidth={0.7}
+                  />
+                  <text
+                    x={-10}
+                    y={yScale(tick)}
+                    dy="0.32em"
+                    textAnchor="end"
+                    className="fill-muted-foreground text-[11px]"
+                  >
+                    {tick}
+                  </text>
+                </g>
               ))}
 
-              {/* Y Axis Labels */}
-              {yTicks.map(tick => (
-                <text
-                  key={`y-${tick}`}
-                  x={-10}
-                  y={yScale(tick)}
-                  dy="0.32em"
-                  textAnchor="end"
-                  className="text-xs fill-muted-foreground"
-                >
-                  {tick}
-                </text>
-              ))}
+              <line
+                x1={0}
+                x2={innerWidth}
+                y1={meanY}
+                y2={meanY}
+                stroke={color}
+                strokeDasharray="5 5"
+                strokeOpacity={0.7}
+                strokeWidth={1}
+              />
 
-              {/* X Axis Labels */}
-              {data.map((d, i) => (
-                <text
-                  key={`x-${i}-${d.label}`}
-                  x={xScale(d.label)}
-                  y={innerHeight + 20}
-                  textAnchor="middle"
-                  className="text-xs fill-muted-foreground"
-                >
-                  {d.label}
-                </text>
-              ))}
+              <line x1={0} x2={innerWidth} y1={innerHeight} y2={innerHeight} className="stroke-border" />
+              <line x1={0} x2={0} y1={0} y2={innerHeight} className="stroke-border" />
 
-              {/* Area */}
+              {data.map((datum, index) => {
+                if (index % labelStep !== 0 && index !== data.length - 1) return null
+                return (
+                  <text
+                    key={`x-${datum.label}`}
+                    x={xScale(datum.label)}
+                    y={innerHeight + 22}
+                    textAnchor="middle"
+                    className="fill-muted-foreground text-[11px]"
+                  >
+                    {compactDate(datum.label)}
+                  </text>
+                )
+              })}
+
               <path
-                d={areaD}
-                fill="url(#area-grad)"
-                className="transition-opacity duration-1000"
+                d={areaPath}
+                fill={`url(#${gradientId}-area)`}
+                className="transition-opacity duration-700"
                 style={{ opacity: mounted ? 1 : 0 }}
               />
+              {data.length > 1 && (
+                <path
+                  ref={pathRef}
+                  d={linePath}
+                  fill="none"
+                  stroke={color}
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeDasharray={pathLength || undefined}
+                  strokeDashoffset={mounted ? 0 : pathLength}
+                  className="transition-all duration-700 ease-out"
+                />
+              )}
 
-              {/* Line */}
-              <path
-                ref={pathRef}
-                d={pathD}
-                fill="none"
-                stroke={color}
-                strokeWidth={2}
-                strokeDasharray={pathLength}
-                strokeDashoffset={mounted ? 0 : pathLength}
-                className="transition-all duration-1000 ease-in-out"
-              />
-
-              {/* Points */}
-              {data.map((d, i) => {
-                const cx = xScale(d.label)
-                const cy = yScale(d.value)
-                return cx !== undefined ? (
+              {data.map((datum) => {
+                const cx = xScale(datum.label)
+                if (cx === undefined) return null
+                return (
                   <circle
-                    key={`pt-${i}`}
+                    key={`point-${datum.label}`}
                     cx={cx}
-                    cy={cy}
+                    cy={yScale(datum.value)}
                     r={4}
-                    fill={color}
-                    className="transition-opacity duration-1000 delay-500"
+                    fill="var(--card)"
+                    stroke={color}
+                    strokeWidth={2}
+                    className="transition-opacity duration-500"
                     style={{ opacity: mounted ? 1 : 0 }}
                   >
-                    <title>{`${d.label}: ${d.value}`}</title>
+                    <title>{`${datum.label}: ${datum.value}`}</title>
                   </circle>
-                ) : null
+                )
               })}
             </g>
           </svg>

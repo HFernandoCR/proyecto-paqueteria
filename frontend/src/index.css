@@ -5,9 +5,21 @@
   --background: #0a0a0b;
   --foreground: #fafafa;
   --card: #141417;
+  --tertiary: #0f0f12;
   --popover: #141417;
   --primary: #10b981;
   --primary-foreground: #0a0a0b;
+  --success: #1d9e75;
+  --warning: #ba7517;
+  --danger: #ef4444;
+  --info: #3b82b8;
+  --teal: #22d3ee;
+  --ranking-high: #10b981;
+  --ranking-mid: #34d399;
+  --ranking-low: #a7f3d0;
+  --route-slow: #d85a30;
+  --route-medium: #ef9f27;
+  --route-fast: #1d9e75;
   --secondary: #1e1e24;
   --secondary-foreground: #a1a1aa;
   --muted: #27272a;
@@ -21,9 +33,21 @@
   --background: #fdfaf2; /* Elegant cream pastel background */
   --foreground: #3c3a35; /* Soft charcoal-warm dark text */
   --card: #f5eedc; /* Soft warm card background */
+  --tertiary: #fdfaf2;
   --popover: #f5eedc;
   --primary: #0f9f70; /* Slightly darker rich emerald */
   --primary-foreground: #fdfaf2;
+  --success: #187f63;
+  --warning: #9a6116;
+  --danger: #c7352b;
+  --info: #2f668c;
+  --teal: #117f79;
+  --ranking-high: #0f9f70;
+  --ranking-mid: #63b792;
+  --ranking-low: #b8d9c2;
+  --route-slow: #b8502d;
+  --route-medium: #b87522;
+  --route-fast: #187f63;
   --secondary: #e8ddc4; /* Soft sepia secondary */
   --secondary-foreground: #6e6757;
   --muted: #dfd1b3; /* Warm muted borders */

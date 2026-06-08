@@ -37,7 +37,7 @@ export function Dashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-foreground">Dashboard Principal</h2>
-          <p className="text-muted-foreground">Resumen de operaciones en tiempo real</p>
+          <p className="text-muted-foreground">Operaciones en tiempo real</p>
         </div>
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
@@ -60,14 +60,14 @@ export function Dashboard() {
           value={stats ? String(stats.entregasHoy) : '...'}
           subtitle={stats ? `${stats.kmRecorridosHoy} km recorridos` : 'Cargando...'}
           icon={Package}
-          accentColor="success"
+          accentColor="info"
         />
         <KpiCard
           title="Alertas Activas"
           value={String(anomaliasCount)}
           subtitle={anomaliasCount > 0 ? 'Requiere atención' : 'Operación normal'}
           icon={AlertTriangle}
-          accentColor={anomaliasCount > 0 ? 'destructive' : 'success'}
+          accentColor="destructive"
         />
       </div>
       

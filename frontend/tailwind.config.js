@@ -8,6 +8,7 @@ export default {
     extend: {
       colors: {
         background: 'var(--background)',
+        tertiary: 'var(--tertiary)',
         foreground: 'var(--foreground)',
         card: {
           DEFAULT: 'var(--card)',
@@ -34,15 +35,15 @@ export default {
           foreground: 'var(--foreground)',
         },
         destructive: {
-          DEFAULT: '#ef4444',
+          DEFAULT: 'var(--danger)',
           foreground: '#fafafa',
         },
         warning: {
-          DEFAULT: '#f59e0b',
+          DEFAULT: 'var(--warning)',
           foreground: '#0a0a0b',
         },
         success: {
-          DEFAULT: '#10b981',
+          DEFAULT: 'var(--success)',
           foreground: '#0a0a0b',
         },
         border: 'var(--border)',
