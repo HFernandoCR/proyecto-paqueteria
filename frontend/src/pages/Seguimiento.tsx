@@ -27,6 +27,14 @@ const estadoColor: Record<string, string> = {
   mantenimiento:'#f59e0b', // amarillo
 }
 
+const estadoLabel: Record<string, string> = {
+  en_ruta: 'En ruta',
+  entregando: 'Entregando',
+  detenido: 'Detenido',
+  disponible: 'Disponible',
+  mantenimiento: 'Mantenimiento',
+}
+
 // Función para generar un icono dinámico según el estado del camión
 const getCamionIcon = (estado?: string) => {
   const bgColor = estado && estadoColor[estado] ? estadoColor[estado] : '#71717a'
@@ -74,6 +82,26 @@ function ChangeMapView({ center }: { center: [number, number] }) {
 // Componente auxiliar para detectar click en zona vacía del mapa y deseleccionar
 function MapEventsHandler({ onMapClick }: { onMapClick: () => void }) {
   useMapEvents({ click: onMapClick })
+  return null
+}
+
+function InvalidateMapSize() {
+  const map = useMap()
+
+  useEffect(() => {
+    const container = map.getContainer()
+    const invalidate = () => map.invalidateSize()
+    const timeoutId = window.setTimeout(invalidate, 0)
+
+    const observer = new ResizeObserver(invalidate)
+    observer.observe(container)
+
+    return () => {
+      window.clearTimeout(timeoutId)
+      observer.disconnect()
+    }
+  }, [map])
+
   return null
 }
 
@@ -204,7 +232,7 @@ export function Seguimiento() {
                     <div className="flex items-center justify-between">
                       <span className="font-mono font-bold text-sm text-foreground">{vehiculo.vehiculo?.placa ?? 'Sin placa'}</span>
                       <span className="text-[10px] px-2 py-0.5 rounded-full font-medium bg-success/10 text-success">
-                        {vehiculo.vehiculo?.estadoActual ?? 'disponible'}
+                        {estadoLabel[vehiculo.vehiculo?.estadoActual ?? 'disponible'] ?? 'Disponible'}
                       </span>
                     </div>
                     <div className="flex justify-between items-center text-xs text-muted-foreground mt-1">
@@ -219,12 +247,14 @@ export function Seguimiento() {
         </div>
 
         {/* PANEL DERECHO: MAPA REAL DE LEAFLET */}
-        <div className="relative z-0 min-h-[360px] flex-1 overflow-hidden rounded-xl border border-border bg-card shadow-inner sm:min-h-[440px] lg:min-h-0">
+        <div className="relative z-0 h-[360px] flex-1 overflow-hidden rounded-xl border border-border bg-card shadow-inner sm:h-[440px] lg:h-full lg:min-h-0">
           <MapContainer 
             center={defaultCenter} 
             zoom={13} 
             className="w-full h-full"
           >
+            <InvalidateMapSize />
+
             {/* Capa de mapas gratuita OpenStreetMap */}
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
