@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { X, Plus, Trash2, MapPin } from 'lucide-react'
-import { MapContainer as LeafletMap, TileLayer, Marker, useMapEvents, Polyline } from 'react-leaflet'
+import { MapContainer as LeafletMap, TileLayer, Marker, useMap, useMapEvents, Polyline } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
@@ -32,6 +32,43 @@ function MapEventsHandler({ onMapClick }: { onMapClick: (e: L.LeafletMouseEvent)
       onMapClick(e)
     }
   })
+  return null
+}
+
+function InvalidateMapSize() {
+  const map = useMap()
+
+  useEffect(() => {
+    const container = map.getContainer()
+    const parent = container.parentElement
+    const animationFrames: number[] = []
+    const timeoutIds: number[] = []
+    const invalidate = () => map.invalidateSize(false)
+    const scheduleInvalidate = () => {
+      invalidate()
+      animationFrames.push(window.requestAnimationFrame(invalidate))
+      timeoutIds.push(window.setTimeout(invalidate, 120))
+      timeoutIds.push(window.setTimeout(invalidate, 320))
+    }
+
+    scheduleInvalidate()
+
+    const observer = new ResizeObserver(scheduleInvalidate)
+    observer.observe(container)
+    if (parent) observer.observe(parent)
+
+    window.addEventListener('resize', scheduleInvalidate)
+    window.addEventListener('orientationchange', scheduleInvalidate)
+
+    return () => {
+      animationFrames.forEach((id) => window.cancelAnimationFrame(id))
+      timeoutIds.forEach((id) => window.clearTimeout(id))
+      observer.disconnect()
+      window.removeEventListener('resize', scheduleInvalidate)
+      window.removeEventListener('orientationchange', scheduleInvalidate)
+    }
+  }, [map])
+
   return null
 }
 
@@ -178,12 +215,14 @@ export function WaypointsModal({ isOpen, onClose, onSave, waypoints: initialWayp
           </div>
 
           {/* Mapa Interactivo */}
-          <div className="relative min-h-[320px] flex-1 overflow-hidden rounded-xl border border-border bg-secondary/10 lg:min-h-0">
+          <div className="relative h-[45svh] min-h-[320px] flex-1 shrink-0 overflow-hidden rounded-xl border border-border bg-secondary/10 lg:h-auto lg:min-h-0">
             <LeafletMap 
               center={mapCenter} 
               zoom={13} 
+              className="h-full w-full"
               style={{ height: '100%', width: '100%', zIndex: 1 }}
             >
+              <InvalidateMapSize />
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

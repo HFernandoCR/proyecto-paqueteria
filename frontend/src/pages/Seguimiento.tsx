@@ -90,15 +90,32 @@ function InvalidateMapSize() {
 
   useEffect(() => {
     const container = map.getContainer()
-    const invalidate = () => map.invalidateSize()
-    const timeoutId = window.setTimeout(invalidate, 0)
+    const parent = container.parentElement
+    const animationFrames: number[] = []
+    const timeoutIds: number[] = []
+    const invalidate = () => map.invalidateSize(false)
+    const scheduleInvalidate = () => {
+      invalidate()
+      animationFrames.push(window.requestAnimationFrame(invalidate))
+      timeoutIds.push(window.setTimeout(invalidate, 120))
+      timeoutIds.push(window.setTimeout(invalidate, 320))
+    }
 
-    const observer = new ResizeObserver(invalidate)
+    scheduleInvalidate()
+
+    const observer = new ResizeObserver(scheduleInvalidate)
     observer.observe(container)
+    if (parent) observer.observe(parent)
+
+    window.addEventListener('resize', scheduleInvalidate)
+    window.addEventListener('orientationchange', scheduleInvalidate)
 
     return () => {
-      window.clearTimeout(timeoutId)
+      animationFrames.forEach((id) => window.cancelAnimationFrame(id))
+      timeoutIds.forEach((id) => window.clearTimeout(id))
       observer.disconnect()
+      window.removeEventListener('resize', scheduleInvalidate)
+      window.removeEventListener('orientationchange', scheduleInvalidate)
     }
   }, [map])
 
@@ -247,11 +264,12 @@ export function Seguimiento() {
         </div>
 
         {/* PANEL DERECHO: MAPA REAL DE LEAFLET */}
-        <div className="relative z-0 h-[360px] flex-1 overflow-hidden rounded-xl border border-border bg-card shadow-inner sm:h-[440px] lg:h-full lg:min-h-0">
+        <div className="relative z-0 h-[55svh] min-h-[360px] max-h-[640px] flex-1 overflow-hidden rounded-xl border border-border bg-card shadow-inner sm:h-[60svh] lg:h-full lg:min-h-0 lg:max-h-none">
           <MapContainer 
             center={defaultCenter} 
             zoom={13} 
             className="w-full h-full"
+            style={{ height: '100%', width: '100%', zIndex: 1 }}
           >
             <InvalidateMapSize />
 
