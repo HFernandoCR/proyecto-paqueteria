@@ -37,8 +37,8 @@ export function AreaChartRosen({
     const updateSize = () => {
       if (!containerRef.current) return
       const rect = containerRef.current.getBoundingClientRect()
-      if (rect.width > 0 && rect.height > 0) {
-        setDimensions({ width: rect.width, height: rect.height })
+      if (rect.width > 0) {
+        setDimensions({ width: rect.width, height: rect.height > 0 ? rect.height : height })
       }
     }
 
@@ -46,7 +46,7 @@ export function AreaChartRosen({
     const resizeObserver = new ResizeObserver(updateSize)
     if (containerRef.current) resizeObserver.observe(containerRef.current)
     return () => resizeObserver.disconnect()
-  }, [])
+  }, [height])
 
   useEffect(() => {
     const timer = window.setTimeout(() => setMounted(true), 80)

@@ -244,6 +244,33 @@ const badgeStyles: Record<KpiBadge['tone'], CSSProperties> = {
   neutral: { backgroundColor: 'var(--secondary)', color: 'var(--muted-foreground)' },
 }
 
+function isoDateKey(date: Date) {
+  return date.toISOString().slice(0, 10)
+}
+
+function normalizeEntregasPorDia(data: EntregaPorDia[], rango: Rango, entregasHoy: number) {
+  const porFecha = new Map<string, number>()
+  for (const dia of data) {
+    porFecha.set(dia.fecha, dia.entregas)
+  }
+
+  const today = new Date()
+  const todayKey = isoDateKey(today)
+  if (!porFecha.has(todayKey) && entregasHoy > 0) {
+    porFecha.set(todayKey, entregasHoy)
+  }
+
+  return Array.from({ length: rango }, (_, index) => {
+    const date = new Date(today)
+    date.setDate(today.getDate() - (rango - 1 - index))
+    const label = isoDateKey(date)
+    return {
+      label,
+      value: porFecha.get(label) ?? 0,
+    }
+  })
+}
+
 function KpiHeroCard({
   title,
   value,
@@ -361,6 +388,11 @@ export function Analisis() {
     if (entregasPorDia.length === 0) return 0
     return entregasPorDia.reduce((total, dia) => total + dia.entregas, 0) / entregasPorDia.length
   }, [entregasPorDia])
+
+  const entregasChartData = useMemo(
+    () => normalizeEntregasPorDia(entregasPorDia, rango, stats?.entregasHoy ?? 0),
+    [entregasPorDia, rango, stats?.entregasHoy],
+  )
 
   const tasaActividad = stats && stats.vehiculosTotal > 0 ? (stats.vehiculosActivos / stats.vehiculosTotal) * 100 : 0
   const disponibles = Math.max(0, (stats?.vehiculosTotal ?? 0) - (stats?.vehiculosActivos ?? 0) - (stats?.vehiculosDetenidos ?? 0))
@@ -510,7 +542,7 @@ export function Analisis() {
           <div className="rounded-xl border border-border/80 bg-card p-5 shadow-sm">
             <AreaChartRosen
               title="Entregas por día"
-              data={entregasPorDia.map((dia) => ({ label: dia.fecha, value: dia.entregas }))}
+              data={entregasChartData}
               color={BRAND_PRIMARY}
               height={310}
             />

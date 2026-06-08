@@ -15,11 +15,11 @@
   --info: #3b82b8;
   --teal: #22d3ee;
   --ranking-high: #10b981;
-  --ranking-mid: #34d399;
-  --ranking-low: #a7f3d0;
-  --route-slow: #d85a30;
-  --route-medium: #ef9f27;
-  --route-fast: #1d9e75;
+  --ranking-mid: #2f80ed;
+  --ranking-low: #f59e0b;
+  --route-slow: #f0523a;
+  --route-medium: #f59e0b;
+  --route-fast: #10b981;
   --secondary: #1e1e24;
   --secondary-foreground: #a1a1aa;
   --muted: #27272a;
@@ -43,9 +43,9 @@
   --info: #2f668c;
   --teal: #117f79;
   --ranking-high: #0f9f70;
-  --ranking-mid: #63b792;
-  --ranking-low: #b8d9c2;
-  --route-slow: #b8502d;
+  --ranking-mid: #2f668c;
+  --ranking-low: #b87522;
+  --route-slow: #c7352b;
   --route-medium: #b87522;
   --route-fast: #187f63;
   --secondary: #e8ddc4; /* Soft sepia secondary */
