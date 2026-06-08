@@ -1,78 +1,83 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import * as d3 from 'd3'
 
+export interface DonutDatum {
+  label: string
+  value: number
+  color: string
+}
+
 interface DonutChartRosenProps {
-  data: Array<{ label: string; value: number; color: string }>
+  data: DonutDatum[]
   title: string
   size?: number
 }
 
-export function DonutChartRosen({
-  data,
-  title,
-  size = 200,
-}: DonutChartRosenProps) {
+export function DonutChartRosen({ data, title, size = 210 }: DonutChartRosenProps) {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    const t = setTimeout(() => setMounted(true), 50)
-    return () => clearTimeout(t)
+    const timer = window.setTimeout(() => setMounted(true), 60)
+    return () => window.clearTimeout(timer)
   }, [])
 
-  if (!data || data.length === 0 || data.every((d) => d.value === 0)) {
-    return (
-      <div className="flex flex-col w-full h-full">
-        <h3 className="text-lg font-semibold text-foreground mb-4">{title}</h3>
-        <div className="flex-1 flex items-center justify-center text-center" style={{ minHeight: size }}>
-          <p className="text-sm text-muted-foreground">Sin datos disponibles</p>
-        </div>
-      </div>
-    )
-  }
+  const total = d3.sum(data, (datum) => datum.value)
+  const radius = size / 2
+  const outerRadius = Math.max(70, radius - 12)
+  const innerRadius = Math.max(48, outerRadius - 24)
 
-  const total = d3.sum(data, (d) => d.value)
-  const pie = d3.pie<any>().value((d) => d.value).sort(null)
-  const arcs = pie(data)
+  const arcs = useMemo(() => {
+    const visibleData = data.filter((datum) => datum.value > 0)
+    return d3
+      .pie<DonutDatum>()
+      .value((datum) => datum.value)
+      .sort(null)(visibleData)
+  }, [data])
 
-  const arcGenerator = d3.arc<any>().innerRadius(60).outerRadius(90)
+  const arcGenerator = d3.arc<d3.PieArcDatum<DonutDatum>>().innerRadius(innerRadius).outerRadius(outerRadius)
 
   return (
-    <div className="flex flex-col w-full h-full">
-      <h3 className="text-lg font-semibold text-foreground mb-4">{title}</h3>
-      <div className="flex-1 flex flex-col items-center justify-center">
+    <div className="flex h-full w-full flex-col">
+      <h3 className="mb-4 text-sm font-semibold text-foreground">{title}</h3>
+      <div className="flex flex-1 flex-col items-center gap-5 lg:flex-row lg:items-center lg:justify-center">
         <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
-          <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="overflow-visible">
-            <g transform={`translate(${size / 2}, ${size / 2})`}>
-              {arcs.map((arc, i) => {
-                const d = arcGenerator(arc) || ''
-                return (
-                  <path
-                    key={`arc-${i}`}
-                    d={d}
-                    fill={arc.data.color}
-                    className="transition-all duration-700 hover:scale-[1.03] cursor-pointer"
-                    style={{
-                      opacity: mounted ? 1 : 0,
-                      transformOrigin: '0px 0px',
-                    }}
-                  >
-                    <title>{`${arc.data.label}: ${arc.data.value}`}</title>
-                  </path>
-                )
-              })}
-              
+          <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} role="img" aria-label={title}>
+            <g transform={`translate(${radius}, ${radius})`}>
+              <circle
+                r={outerRadius}
+                fill="none"
+                stroke="var(--secondary)"
+                strokeWidth={outerRadius - innerRadius}
+                opacity={0.55}
+              />
+              {arcs.map((arc, index) => (
+                <path
+                  key={`${arc.data.label}-${index}`}
+                  d={arcGenerator(arc) ?? ''}
+                  fill={arc.data.color}
+                  className="transition-all duration-700 hover:opacity-90"
+                  style={{
+                    opacity: mounted ? 1 : 0,
+                    transform: mounted ? 'scale(1)' : 'scale(0.96)',
+                    transformOrigin: '0 0',
+                  }}
+                >
+                  <title>{`${arc.data.label}: ${arc.data.value}`}</title>
+                </path>
+              ))}
+
               <text
                 textAnchor="middle"
-                y={0}
-                className="text-3xl font-bold fill-foreground transition-opacity duration-700"
+                y={-2}
+                className="fill-foreground text-4xl font-bold transition-opacity duration-700"
                 style={{ opacity: mounted ? 1 : 0 }}
               >
                 {total}
               </text>
               <text
                 textAnchor="middle"
-                y={20}
-                className="text-xs font-medium fill-muted-foreground transition-opacity duration-700"
+                y={22}
+                className="fill-muted-foreground text-xs font-medium transition-opacity duration-700"
                 style={{ opacity: mounted ? 1 : 0 }}
               >
                 vehículos
@@ -81,12 +86,14 @@ export function DonutChartRosen({
           </svg>
         </div>
 
-        <div className="flex flex-wrap items-center justify-center gap-4 mt-6">
-          {data.map((d, i) => (
-            <div key={`legend-${i}`} className="flex items-center gap-2">
-              <span className="w-3 h-3 rounded-full" style={{ backgroundColor: d.color }} />
-              <span className="text-sm text-foreground">{d.label}</span>
-              <span className="text-sm font-semibold text-muted-foreground">{d.value}</span>
+        <div className="grid w-full max-w-[220px] gap-2">
+          {data.map((datum) => (
+            <div key={datum.label} className="flex items-center justify-between gap-3 rounded-lg bg-secondary/30 px-3 py-2">
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="h-3 w-3 flex-shrink-0 rounded-[3px]" style={{ backgroundColor: datum.color }} />
+                <span className="truncate text-sm font-medium text-foreground">{datum.label}</span>
+              </div>
+              <span className="font-mono text-sm font-semibold text-muted-foreground">{datum.value}</span>
             </div>
           ))}
         </div>

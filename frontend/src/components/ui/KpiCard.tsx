@@ -10,7 +10,7 @@ interface KpiCardProps {
     value: number
     isPositive: boolean
   }
-  accentColor?: 'primary' | 'success' | 'warning' | 'destructive'
+  accentColor?: 'primary' | 'success' | 'warning' | 'destructive' | 'info'
 }
 
 const accentStyles = {
@@ -29,6 +29,10 @@ const accentStyles = {
   destructive: {
     icon: 'bg-destructive/10 text-destructive',
     border: 'border-l-destructive',
+  },
+  info: {
+    icon: 'bg-[color-mix(in_srgb,var(--info)_14%,transparent)] text-[var(--info)]',
+    border: 'border-l-[var(--info)]',
   },
 }
 

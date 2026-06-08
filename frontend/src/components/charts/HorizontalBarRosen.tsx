@@ -1,68 +1,117 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import * as d3 from 'd3'
 
+export interface HorizontalBarDatum {
+  label: string
+  value: number
+  unit?: string
+}
+
+type BarVariant = 'ranking' | 'duration' | 'single'
+type SortDirection = 'desc' | 'asc' | 'none'
+
 interface HorizontalBarRosenProps {
-  data: Array<{ label: string; value: number; unit?: string }>
+  data: HorizontalBarDatum[]
   title: string
   color?: string
+  variant?: BarVariant
+  sort?: SortDirection
+  minHeight?: number
+}
+
+const rankingColors = ['var(--ranking-high)', 'var(--ranking-mid)', 'var(--ranking-low)']
+const slowColor = 'var(--route-slow)'
+const mediumColor = 'var(--route-medium)'
+const fastColor = 'var(--route-fast)'
+
+function colorForRanking(index: number, total: number) {
+  if (total <= 1) return rankingColors[0]
+  if (index === 0) return rankingColors[0]
+  if (index <= Math.ceil(total / 2)) return rankingColors[1]
+  return rankingColors[2]
+}
+
+function colorForDuration(index: number, total: number) {
+  if (total <= 1) return mediumColor
+  if (index === 0) return slowColor
+  if (index === total - 1) return fastColor
+  return mediumColor
 }
 
 export function HorizontalBarRosen({
   data,
   title,
-  color = '#f59e0b',
+  color = 'var(--primary)',
+  variant = 'single',
+  sort = 'none',
+  minHeight = 260,
 }: HorizontalBarRosenProps) {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    const t = setTimeout(() => setMounted(true), 50)
-    return () => clearTimeout(t)
+    const timer = window.setTimeout(() => setMounted(true), 60)
+    return () => window.clearTimeout(timer)
   }, [])
 
-  if (!data || data.length === 0) {
+  const sortedData = useMemo(() => {
+    const copy = [...data]
+    if (sort === 'desc') return copy.sort((a, b) => b.value - a.value)
+    if (sort === 'asc') return copy.sort((a, b) => a.value - b.value)
+    return copy
+  }, [data, sort])
+
+  if (!sortedData || sortedData.length === 0) {
     return (
-      <div className="flex flex-col w-full h-full">
-        <h3 className="text-lg font-semibold text-foreground mb-4">{title}</h3>
-        <div className="flex-1 flex items-center justify-center text-center" style={{ minHeight: 200 }}>
+      <div className="flex h-full w-full flex-col">
+        <h3 className="mb-4 text-sm font-semibold text-foreground">{title}</h3>
+        <div className="flex flex-1 items-center justify-center text-center" style={{ minHeight }}>
           <p className="text-sm text-muted-foreground">Sin datos disponibles</p>
         </div>
       </div>
     )
   }
 
-  const maxValue = d3.max(data, (d) => d.value) || 1
+  const maxValue = Math.max(d3.max(sortedData, (datum) => datum.value) ?? 0, 1)
   const scale = d3.scaleLinear().domain([0, maxValue]).range([0, 100])
 
   return (
-    <div className="flex flex-col w-full h-full">
-      <h3 className="text-lg font-semibold text-foreground mb-4">{title}</h3>
-      <div className="flex-1 flex flex-col gap-4 overflow-y-auto">
-        {data.map((d, i) => (
-          <div key={`${d.label}-${i}`} className="flex flex-col w-full group border-b border-border/40 pb-3 last:border-0 last:pb-0">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-sm font-medium text-foreground truncate max-w-[80%]">
-                {d.label}
+    <div className="flex h-full w-full flex-col">
+      <h3 className="mb-4 text-sm font-semibold text-foreground">{title}</h3>
+      <div className="flex flex-1 flex-col gap-3 overflow-y-auto pr-1" style={{ minHeight }}>
+        {sortedData.map((datum, index) => {
+          const isZero = datum.value <= 0
+          const barColor =
+            variant === 'ranking'
+              ? colorForRanking(index, sortedData.length)
+              : variant === 'duration'
+                ? colorForDuration(index, sortedData.length)
+                : color
+          const width = isZero ? 3 : scale(datum.value)
+          const valueText = `${datum.value.toFixed(datum.value % 1 === 0 ? 0 : 1)} ${datum.unit ?? ''}`.trim()
+
+          return (
+            <div key={`${datum.label}-${index}`} className="grid grid-cols-[minmax(88px,0.9fr)_2fr_auto] items-center gap-3">
+              <span className="truncate text-sm font-medium text-foreground" title={datum.label}>
+                {datum.label}
               </span>
-              <span 
-                className="text-xs font-semibold text-muted-foreground transition-opacity duration-700"
-                style={{ opacity: mounted ? 1 : 0 }}
-              >
-                {d.value.toFixed(0)} {d.unit || ''}
+              <div className="h-[18px] rounded-[3px] bg-secondary/40">
+                <div
+                  className="h-full rounded-[3px] transition-all duration-700 ease-out"
+                  style={{
+                    width: mounted ? `${width}%` : '0%',
+                    minWidth: isZero ? 10 : 18,
+                    background: isZero
+                      ? 'var(--border)'
+                      : `linear-gradient(90deg, ${barColor} 0%, ${barColor}CC 100%)`,
+                  }}
+                />
+              </div>
+              <span className={isZero ? 'text-xs font-semibold text-muted-foreground/60' : 'text-xs font-semibold text-foreground'}>
+                {valueText}
               </span>
             </div>
-            
-            <div className="w-full relative flex items-center bg-secondary/10 rounded-r-md h-8">
-              <div
-                className="absolute left-0 top-0 h-full rounded-r-md transition-all duration-700 ease-out"
-                style={{
-                  width: mounted ? `${scale(d.value)}%` : '0%',
-                  background: `linear-gradient(90deg, ${color} 0%, ${color}AA 100%)`,
-                }}
-                title={`${d.value} ${d.unit || ''}`}
-              />
-            </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
