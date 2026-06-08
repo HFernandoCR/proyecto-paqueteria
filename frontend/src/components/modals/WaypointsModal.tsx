@@ -77,7 +77,7 @@ export function WaypointsModal({ isOpen, onClose, onSave, waypoints: initialWayp
     : [17.0732, -96.7266]
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-background/80 backdrop-blur-sm"
@@ -85,12 +85,12 @@ export function WaypointsModal({ isOpen, onClose, onSave, waypoints: initialWayp
       />
       
       {/* Modal */}
-      <div className="relative w-full max-w-5xl rounded-xl border border-border bg-card p-6 shadow-2xl max-h-full overflow-hidden flex flex-col">
+      <div className="relative flex max-h-[calc(100dvh-1.5rem)] w-full max-w-5xl flex-col overflow-hidden rounded-xl border border-border bg-card p-4 shadow-2xl sm:max-h-[calc(100dvh-2rem)] sm:p-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6 shrink-0">
-          <div>
+        <div className="mb-4 flex shrink-0 items-center justify-between gap-3 sm:mb-6">
+          <div className="min-w-0">
             <h2 className="text-xl font-semibold text-foreground">Puntos</h2>
-            <p className="text-sm text-muted-foreground">{rutaNombre}</p>
+            <p className="truncate text-sm text-muted-foreground">{rutaNombre}</p>
           </div>
           <button
             onClick={onClose}
@@ -100,12 +100,12 @@ export function WaypointsModal({ isOpen, onClose, onSave, waypoints: initialWayp
           </button>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-6 flex-1 min-h-0 overflow-hidden mb-6">
+        <div className="mb-4 flex flex-1 flex-col gap-4 overflow-y-auto lg:mb-6 lg:min-h-0 lg:flex-row lg:gap-6 lg:overflow-hidden">
           {/* Formulario y Lista */}
-          <div className="w-full lg:w-80 flex flex-col flex-shrink-0">
+          <div className="flex w-full flex-shrink-0 flex-col lg:w-80">
             <div className="mb-4 p-4 rounded-lg bg-secondary/30 border border-border shrink-0">
               <p className="text-sm font-medium text-foreground mb-3">Agregar manualmente</p>
-              <div className="flex items-end gap-2">
+              <div className="flex flex-col gap-2 min-[520px]:flex-row min-[520px]:items-end">
                 <div className="flex-1 flex flex-col gap-1.5">
                   <label className="text-xs font-medium text-muted-foreground ml-1">Latitud</label>
                   <input
@@ -140,7 +140,7 @@ export function WaypointsModal({ isOpen, onClose, onSave, waypoints: initialWayp
             </div>
 
             {/* Waypoints list */}
-            <div className="flex-1 overflow-auto bg-card rounded-lg border border-border">
+            <div className="min-h-44 flex-1 overflow-auto rounded-lg border border-border bg-card lg:min-h-0">
               {waypoints.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full p-6 text-center">
                   <MapPin className="h-10 w-10 text-muted-foreground/50 mb-3" />
@@ -154,11 +154,11 @@ export function WaypointsModal({ isOpen, onClose, onSave, waypoints: initialWayp
                       key={index}
                       className="flex items-center justify-between rounded-lg border border-border bg-secondary/20 px-3 py-2"
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex min-w-0 items-center gap-3">
                         <div className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground shadow-sm shrink-0">
                           {index + 1}
                         </div>
-                        <div className="font-mono text-xs">
+                        <div className="min-w-0 truncate font-mono text-xs">
                           <span className="text-foreground">{wp.lat.toFixed(5)}</span>
                           <span className="text-muted-foreground mx-1">,</span>
                           <span className="text-foreground">{wp.lng.toFixed(5)}</span>
@@ -178,7 +178,7 @@ export function WaypointsModal({ isOpen, onClose, onSave, waypoints: initialWayp
           </div>
 
           {/* Mapa Interactivo */}
-          <div className="flex-1 rounded-xl overflow-hidden border border-border relative min-h-[300px] bg-secondary/10">
+          <div className="relative min-h-[320px] flex-1 overflow-hidden rounded-xl border border-border bg-secondary/10 lg:min-h-0">
             <LeafletMap 
               center={mapCenter} 
               zoom={13} 
@@ -207,15 +207,15 @@ export function WaypointsModal({ isOpen, onClose, onSave, waypoints: initialWayp
             </LeafletMap>
             
             {/* Overlay hint */}
-            <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] bg-background/90 backdrop-blur px-4 py-2 rounded-full shadow-lg border border-border flex items-center gap-2 pointer-events-none">
+            <div className="pointer-events-none absolute left-1/2 top-4 z-[1000] flex max-w-[calc(100%-2rem)] -translate-x-1/2 items-center gap-2 rounded-full border border-border bg-background/90 px-4 py-2 shadow-lg backdrop-blur">
               <MapPin className="h-4 w-4 text-primary" />
-              <span className="text-sm font-medium">Haz clic en el mapa para agregar puntos</span>
+              <span className="truncate text-sm font-medium">Haz clic en el mapa para agregar puntos</span>
             </div>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="flex gap-3 pt-4 border-t border-border shrink-0">
+        <div className="flex shrink-0 flex-col gap-3 border-t border-border pt-4 sm:flex-row">
           <button
             type="button"
             onClick={onClose}

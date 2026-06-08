@@ -125,13 +125,112 @@
 
 /* ── Estilos de impresión ────────────────────────────────────────── */
 @media print {
+  @page {
+    size: A4;
+    margin: 12mm;
+  }
+
+  :root,
+  .light {
+    --background: #ffffff;
+    --foreground: #111827;
+    --card: #ffffff;
+    --tertiary: #ffffff;
+    --popover: #ffffff;
+    --primary: #0f766e;
+    --primary-foreground: #ffffff;
+    --success: #047857;
+    --warning: #92400e;
+    --danger: #b91c1c;
+    --info: #1f5f85;
+    --teal: #0f766e;
+    --secondary: #f3f4f6;
+    --secondary-foreground: #374151;
+    --muted: #e5e7eb;
+    --muted-foreground: #4b5563;
+    --accent: #f3f4f6;
+    --border: #d1d5db;
+    --input: #d1d5db;
+  }
+
   aside,
   header,
   .no-print {
     display: none !important;
   }
+
+  html,
   body {
     background: white !important;
     color: black !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  main {
+    overflow: visible !important;
+    padding: 0 !important;
+  }
+
+  .analisis-print {
+    margin: 0 !important;
+    min-height: auto !important;
+    background: white !important;
+    padding: 0 !important;
+  }
+
+  .analisis-print > div {
+    display: block !important;
+  }
+
+  .analisis-print section,
+  .analisis-print article,
+  .analisis-print .rounded-xl {
+    break-inside: avoid;
+    page-break-inside: avoid;
+    background: white !important;
+    border-color: #d1d5db !important;
+    box-shadow: none !important;
+  }
+
+  .analisis-print section {
+    margin-bottom: 12px !important;
+  }
+
+  .analisis-print h2 {
+    font-size: 22px !important;
+  }
+
+  .analisis-print h3,
+  .analisis-print h4 {
+    color: #111827 !important;
+  }
+
+  .analisis-print p,
+  .analisis-print span,
+  .analisis-print td,
+  .analisis-print th {
+    color: inherit;
+  }
+
+  .analisis-print svg {
+    max-width: 100% !important;
+  }
+
+  .analisis-print table {
+    border-collapse: collapse !important;
+  }
+
+  .analisis-print thead {
+    display: table-header-group;
+  }
+
+  .analisis-print tr {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+
+  .analisis-print .grid {
+    gap: 12px !important;
   }
 }

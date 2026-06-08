@@ -32,21 +32,21 @@ export function Dashboard() {
   }, [])
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
       {/* Page header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-foreground">Dashboard Principal</h2>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="min-w-0">
+          <h2 className="truncate text-2xl font-bold text-foreground">Dashboard Principal</h2>
           <p className="text-muted-foreground">Operaciones en tiempo real</p>
         </div>
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+        <div className="flex shrink-0 items-center gap-2 text-sm text-muted-foreground">
           <span className="flex h-2 w-2 rounded-full bg-primary animate-pulse" />
           Actualizado: {lastUpdated}
         </div>
       </div>
       
       {/* KPI Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <KpiCard
           title="Vehículos Activos"
           value={stats ? String(stats.vehiculosActivos) : '...'}
@@ -72,7 +72,7 @@ export function Dashboard() {
       </div>
       
       {/* Main content grid */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-5 lg:grid-cols-3 lg:gap-6">
         {/* Map container - takes 2 columns */}
         <div className="lg:col-span-2">
           <MapContainer />

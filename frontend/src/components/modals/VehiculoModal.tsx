@@ -54,7 +54,7 @@ export function VehiculoModal({ isOpen, onClose, onSave, vehiculo }: VehiculoMod
         })
         .catch(err => console.error("Error loading operators:", err))
 
-      axios.get('/api/rutas/rutas')
+      axios.get('/api/rutas')
         .then(res => setRutas(res.data))
         .catch(err => console.error("Error loading routes:", err))
     }
@@ -93,7 +93,7 @@ export function VehiculoModal({ isOpen, onClose, onSave, vehiculo }: VehiculoMod
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-background/80 backdrop-blur-sm"
@@ -101,7 +101,7 @@ export function VehiculoModal({ isOpen, onClose, onSave, vehiculo }: VehiculoMod
       />
       
       {/* Modal */}
-      <div className="relative w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-2xl mx-4">
+      <div className="relative max-h-[calc(100dvh-1.5rem)] w-full max-w-lg overflow-y-auto rounded-xl border border-border bg-card p-4 shadow-2xl sm:max-h-[calc(100dvh-2rem)] sm:p-6">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-foreground">
@@ -199,7 +199,7 @@ export function VehiculoModal({ isOpen, onClose, onSave, vehiculo }: VehiculoMod
             <label className="block text-sm font-medium text-foreground mb-2">
               Estado
             </label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 gap-2 min-[420px]:grid-cols-2 sm:grid-cols-3">
               {estadoConfig.map((config) => (
                 <button
                   key={config.value}
@@ -219,7 +219,7 @@ export function VehiculoModal({ isOpen, onClose, onSave, vehiculo }: VehiculoMod
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-2">
+          <div className="flex flex-col gap-3 pt-2 sm:flex-row">
             <button
               type="button"
               onClick={onClose}

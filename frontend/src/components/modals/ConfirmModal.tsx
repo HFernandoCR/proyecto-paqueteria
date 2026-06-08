@@ -12,7 +12,7 @@ export function ConfirmModal({ isOpen, onClose, onConfirm, title, message }: Con
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-background/80 backdrop-blur-sm"
@@ -20,13 +20,13 @@ export function ConfirmModal({ isOpen, onClose, onConfirm, title, message }: Con
       />
       
       {/* Modal */}
-      <div className="relative w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-2xl mx-4">
+      <div className="relative max-h-[calc(100dvh-1.5rem)] w-full max-w-md overflow-y-auto rounded-xl border border-border bg-card p-4 shadow-2xl sm:max-h-[calc(100dvh-2rem)] sm:p-6">
         {/* Header */}
-        <div className="flex items-start gap-4 mb-4">
-          <div className="rounded-full bg-destructive/10 p-3">
+        <div className="mb-4 flex items-start gap-3 sm:gap-4">
+          <div className="shrink-0 rounded-full bg-destructive/10 p-3">
             <AlertTriangle className="h-6 w-6 text-destructive" />
           </div>
-          <div className="flex-1">
+          <div className="min-w-0 flex-1">
             <h2 className="text-lg font-semibold text-foreground">{title}</h2>
             <p className="mt-2 text-sm text-muted-foreground">{message}</p>
           </div>
@@ -39,7 +39,7 @@ export function ConfirmModal({ isOpen, onClose, onConfirm, title, message }: Con
         </div>
 
         {/* Actions */}
-        <div className="flex gap-3 mt-6">
+        <div className="mt-6 flex flex-col gap-3 sm:flex-row">
           <button
             onClick={onClose}
             className="flex-1 rounded-lg border border-border bg-secondary px-4 py-2.5 text-sm font-medium text-foreground hover:bg-secondary/80 transition-colors"
