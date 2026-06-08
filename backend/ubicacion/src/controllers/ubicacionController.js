@@ -1,6 +1,7 @@
 const HistorialUbicacion = require('../models/HistorialUbicacion');
 const mongoose = require('mongoose');
 
+const DEFAULT_HISTORIAL_LIMIT = 500;
 const MAX_LIMIT = 1000;
 
 function parsePositiveInt(value, fallback = 0) {
@@ -48,7 +49,7 @@ exports.getActual = async (req, res) => {
 exports.getHistorial = async (req, res) => {
   try {
     const { vehiculoId } = req.params;
-    const limit = parsePositiveInt(req.query.limit);
+    const limit = parsePositiveInt(req.query.limit, DEFAULT_HISTORIAL_LIMIT);
     const projection = buildProjection(req.query.fields);
 
     let query = HistorialUbicacion.find(
