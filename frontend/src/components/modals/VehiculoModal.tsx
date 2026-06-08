@@ -54,7 +54,7 @@ export function VehiculoModal({ isOpen, onClose, onSave, vehiculo }: VehiculoMod
         })
         .catch(err => console.error("Error loading operators:", err))
 
-      axios.get('/api/rutas/rutas')
+      axios.get('/api/rutas')
         .then(res => setRutas(res.data))
         .catch(err => console.error("Error loading routes:", err))
     }

@@ -23,7 +23,7 @@ function handleError(res, err) {
 async function fetchRutaInfo(rutaAsignadaId) {
   if (!rutaAsignadaId) return null;
   try {
-    const response = await fetch(`${process.env.RUTAS_SERVICE_URL}/rutas/${rutaAsignadaId}`, {
+    const response = await fetch(`${process.env.RUTAS_SERVICE_URL}/${rutaAsignadaId}`, {
       signal: AbortSignal.timeout(2000)
     });
     if (!response.ok) return null;
