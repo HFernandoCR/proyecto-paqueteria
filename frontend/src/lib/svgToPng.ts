@@ -63,7 +63,19 @@ export async function svgToPng(svg: SVGSVGElement, scale = 2): Promise<RasterIma
   if (!clone.getAttribute('viewBox')) {
     clone.setAttribute('viewBox', `0 0 ${width} ${height}`)
   }
-  inlineComputedStyles(svg, clone)
+
+  // El PDF tiene fondo blanco; forzamos el tema claro mientras leemos los
+  // estilos computados para que ejes y textos salgan en tonos oscuros legibles
+  // aunque la app esté en tema oscuro. El cambio es síncrono (sin repintado
+  // intermedio), así que no produce parpadeo visible.
+  const root = document.documentElement
+  const hadLight = root.classList.contains('light')
+  root.classList.add('light')
+  try {
+    inlineComputedStyles(svg, clone)
+  } finally {
+    if (!hadLight) root.classList.remove('light')
+  }
 
   const serialized = new XMLSerializer().serializeToString(clone)
   const svgUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(serialized)}`
