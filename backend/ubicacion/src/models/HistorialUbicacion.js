@@ -25,7 +25,7 @@ const historialUbicacionSchema = new mongoose.Schema({
   timestamp: {
     type: Date,
     default: Date.now,
-    index: true
+    index: { expireAfterSeconds: 604800 }
   }
 });
 
